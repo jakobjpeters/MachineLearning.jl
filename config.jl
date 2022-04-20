@@ -14,7 +14,7 @@ config = (
         batch_size = 10,
         precision = Float64,
         shuffle = true,
-        weight_init_func = default_weight_init
+        weight_init_func = xavier
     ),
 
     layer_hparams = (

@@ -15,7 +15,7 @@ function relu(xs)
 end
 
 function deriv(f::typeof(relu), xs)
-    return @. ifelse(xs > 0, 1, 0)
+    return [x > 0 ? 1 : 0 for x in xs]
 end
 
 function tanh(xs)
@@ -80,7 +80,19 @@ function demean(xs)
     return xs .- mean(xs)
 end
 
-# Weight initialization functions
-function default_weight_init(output_size)
-    return Distributions.Normal(0, output_size^(-0.5))
+# Initialization functions
+function zero()
+
+end
+
+function uniform()
+
+end
+
+function xavier(input_size)
+    return Distributions.Normal(0, sqrt(1 / input_size))
+end
+
+function he(input_size)
+    return Distributions.Normal(0, sqrt(2 / input_size))
 end

@@ -83,7 +83,7 @@ function FFN(model_hparams, layer_hparams)
         [zeros(model_hparams.precision, size) for size in sizes],
         [zeros(model_hparams.precision, size) for size in sizes],
         # TODO: make readable
-        [convert(Matrix{model_hparams.precision}, rand(model_hparams.weight_init_func(output_size), output_size, input_size)) for (input_size, output_size) in zip(sizes[begin:end - 1], sizes[begin + 1:end])],
+        [convert(Matrix{model_hparams.precision}, rand(model_hparams.weight_init_func(input_size), output_size, input_size)) for (input_size, output_size) in zip(sizes[begin:end - 1], sizes[begin + 1:end])],
         [use_bias ? zeros(model_hparams.precision, size) : nothing for (use_bias, size) in zip(layer_hparams.use_biases, layer_hparams.sizes)]
     )
 end
