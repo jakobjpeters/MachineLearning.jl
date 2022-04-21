@@ -88,29 +88,6 @@ function FFN(model_hparams, layer_hparams)
     )
 end
 
-# function Base.show(hparams::Hyperparameters)
-#     print(hparams)
-# end
-
-# function Base.show(hparams::Vector{Hyperparameters})
-#     for hparam in hparams
-#         print(hparam)
-#     end
-# end
-
-# function Base.show(nn::NeuralNetwork)
-#     print(nn.hparams)
-#     print(nn.layers)
-# end
-
-# struct Data{T<:Real}
-#     data::NamedTuple{Symbol, Union{Nothing, Matrix{T}}}
-# end
-
-# function Data(shuffle::bool=true)
-
-# end
-
 # TODO: parameterize ffn
 struct GAN <: NeuralNetwork
     generator::FFN

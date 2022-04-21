@@ -31,17 +31,6 @@ function assess!(nn, inputs, labels)
     for (input, label) in zip(inputs, labels)
         predict!(nn, input)
 
-        # for i in 2:length(nn.layer_hparams.sizes) + 1
-        #     println()
-        #     println(nn.activations[i])
-        #     println("mean: ", mean(nn.activations[i]))
-        #     println("min: ", minimum(nn.activations[i]))
-        #     println("max: ", maximum(nn.activations[i]))
-        # end
-        # println("guess: ", findall(x -> x > 0.5, nn.activations[end]))
-        # println("label: $label")
-        # println()
-
         if issetequal(findall(x -> x > 0.5, nn.activations[end]), label)
             correct += 1
         end
@@ -70,11 +59,6 @@ function backpropagate!(nn, inputs, labels)
                 nn.biases[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * dc_db
             end
 
-            # for i in 2:length(nn.layer_hparams.sizes)
-            #     println(nn.weights[i])
-            # end
-            # println(label)
-            # println()
         end
 
     end

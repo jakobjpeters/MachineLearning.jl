@@ -5,8 +5,6 @@ end
 
 function print_info(dataset, ffn)
     println("Dataset: ", dataset)
-    # TODO: pretty print
-    # println(model)
 
     println()
     println("Input size: ", ffn.model_hparams.input_size)
@@ -31,13 +29,12 @@ function terminal(dataset, model_hparams, layer_hparams)
     train_inputs = read_images(dir * dataset * "_train_images.bin", 16)
     train_labels = read_labels(dir * dataset * "_train_labels.bin", 8, 10)
 
-    # TODO: parameterize model choice
     ffn = FFN(ModelHyperparameters(model_hparams), LayerHyperparameters(layer_hparams))
 
     # print_inputs()
     print_info(dataset, ffn)
 
-    # print_assess(ffn, 0, train_inputs, train_labels, test_inputs, test_labels)
+    print_assess(ffn, 0, train_inputs, train_labels, test_inputs, test_labels)
 
     # train neural net
     for epoch in 1:ffn.model_hparams.epochs
