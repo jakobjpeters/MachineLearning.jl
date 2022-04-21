@@ -3,7 +3,8 @@ abstract type Model end
 abstract type NeuralNetwork <: Model end
 abstract type Hyperparameters end
 
-struct LayerHyperparameters{T<:Function, S<:Function, R<:AbstractFloat} <: Hyperparameters
+struct LayerHyperparameters{T<:Function, S<:Function, R<:AbstractFloat, Q<:Function} <: Hyperparameters
+    weight_init_funcs::Vector{Q}
     norm_funcs::Vector{T}
     activ_funcs::Vector{S}
     # fix? holy traits?
@@ -19,6 +20,7 @@ function LayerHyperparameters(layer_hparams)
         throw(ErrorException("Invalid layer size. Must be greater than 0."))
     else
         LayerHyperparameters(
+            layer_hparams.weight_init_funcs,
             layer_hparams.norm_funcs,
             layer_hparams.activ_funcs,
             layer_hparams.learn_rates,
@@ -28,14 +30,13 @@ function LayerHyperparameters(layer_hparams)
     end
 end
 
-struct ModelHyperparameters{T<:Function, S<:Integer, R<:Function} <: Hyperparameters
+struct ModelHyperparameters{T<:Function, S<:Integer} <: Hyperparameters
     cost_func::T
     epochs::S
     input_size::S
     batch_size::S
     precision::DataType # TODO: make precision a layer parameter?
     shuffle::Bool
-    weight_init_func::R
     # optimizer::Function
     # regularizer::Function
 end
@@ -57,7 +58,6 @@ function ModelHyperparameters(model_hparams)
             model_hparams.batch_size,
             model_hparams.precision,
             model_hparams.shuffle,
-            model_hparams.weight_init_func
         )
     end
 end
@@ -83,7 +83,9 @@ function FFN(model_hparams, layer_hparams)
         [zeros(model_hparams.precision, size) for size in sizes],
         [zeros(model_hparams.precision, size) for size in sizes],
         # TODO: make readable
-        [convert(Matrix{model_hparams.precision}, rand(model_hparams.weight_init_func(input_size), output_size, input_size)) for (input_size, output_size) in zip(sizes[begin:end - 1], sizes[begin + 1:end])],
+        [convert(Matrix{model_hparams.precision},
+            rand(weight_init_func(input_size), output_size, input_size))
+                for (weight_init_func, input_size, output_size) in zip(layer_hparams.weight_init_funcs, sizes[begin:end - 1], sizes[begin + 1:end])],
         [use_bias ? zeros(model_hparams.precision, size) : nothing for (use_bias, size) in zip(layer_hparams.use_biases, layer_hparams.sizes)]
     )
 end

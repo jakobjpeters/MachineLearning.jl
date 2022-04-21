@@ -19,6 +19,7 @@ function print_info(dataset, ffn)
     println("Use biases: ", ffn.layer_hparams.use_biases)
     println("Activation functions: ", ffn.layer_hparams.activ_funcs)
     println("Normalization functions: ", ffn.layer_hparams.norm_funcs)
+    println("Weight Initialization functions: ", ffn.layer_hparams.weight_init_funcs)
 end
 
 function terminal(dataset, model_hparams, layer_hparams)
