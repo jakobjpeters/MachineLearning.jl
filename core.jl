@@ -44,19 +44,19 @@ function backpropagate!(nn, inputs, labels)
     for (input, label) in zip(inputs, labels)
         predict!(nn, input)
 
-        dc_da = deriv(nn.model_hparams.cost_func, nn.activations[end], label)
+        δl_δa = deriv(nn.model_hparams.cost_func, nn.activations[end], label)
 
         for layer_n in length(nn.layer_hparams.sizes):-1:1
-            dc_db = dc_da .* deriv(nn.layer_hparams.activ_funcs[layer_n], nn.weighted_input[layer_n])
+            δl_δb = δl_δa .* deriv(nn.layer_hparams.activ_funcs[layer_n], nn.weighted_input[layer_n])
 
             # faster, but makes breaks the batching -> implement temp gradient allocation
-            nn.weights[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * dc_db * transpose(nn.activations[layer_n])
+            nn.weights[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * δl_δb * transpose(nn.activations[layer_n])
             if nn.layer_hparams.use_biases[layer_n]
-                nn.biases[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * dc_db
+                nn.biases[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * δl_δb
             end
 
             if layer_n != 1
-                dc_da = transpose(nn.weights[layer_n]) * dc_db
+                δl_δa = transpose(nn.weights[layer_n]) * δl_δb
             end
 
         end
