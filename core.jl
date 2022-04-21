@@ -14,12 +14,11 @@ function predict!(nn, input)
     for layer_n in 1:length(nn.layer_hparams.sizes)
         nn.activations[layer_n] = nn.layer_hparams.norm_funcs[layer_n](nn.activations[layer_n])
 
+        nn.weighted_input[layer_n] = nn.weights[layer_n] * nn.activations[layer_n]
         if nn.layer_hparams.use_biases[layer_n]
-            nn.weighted_input[layer_n] = nn.weights[layer_n] * nn.activations[layer_n] + nn.biases[layer_n]
-            nn.activations[layer_n + 1] = nn.layer_hparams.activ_funcs[layer_n](nn.weighted_input[layer_n])
-        else
-            nn.weighted_input[layer_n] = nn.weights[layer_n] * nn.activations[layer_n]
-            nn.activations[layer_n + 1] = nn.layer_hparams.activ_funcs[layer_n](nn.weighted_input[layer_n])
+            nn.weighted_input[layer_n] += nn.biases[layer_n]
+
+        nn.activations[layer_n + 1] = nn.layer_hparams.activ_funcs[layer_n](nn.weighted_input[layer_n])
         end
     end
 end
@@ -49,14 +48,15 @@ function backpropagate!(nn, inputs, labels)
 
         for layer_n in length(nn.layer_hparams.sizes):-1:1
             dc_db = dc_da .* deriv(nn.layer_hparams.activ_funcs[layer_n], nn.weighted_input[layer_n])
-            if layer_n != 1
-                dc_da = transpose(nn.weights[layer_n]) * dc_db
-            end
 
             # faster, but makes breaks the batching -> implement temp gradient allocation
             nn.weights[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * dc_db * transpose(nn.activations[layer_n])
             if nn.layer_hparams.use_biases[layer_n]
                 nn.biases[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * dc_db
+            end
+
+            if layer_n != 1
+                dc_da = transpose(nn.weights[layer_n]) * dc_db
             end
 
         end
