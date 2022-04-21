@@ -91,9 +91,9 @@ function uniform()
 end
 
 function xavier(input_size)
-    return Distributions.Normal(0, sqrt(1 / input_size))
+    return Distributions.Normal(0, input_size ^ -0.5)
 end
 
 function he(input_size)
-    return Distributions.Normal(0, sqrt(2 / input_size))
+    return 2 ^ 0.5 * xavier(input_size)
 end
