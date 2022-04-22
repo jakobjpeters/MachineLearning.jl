@@ -1,5 +1,5 @@
 
-# Helper Functions
+# Math Functions
 
 function error(prediction, label)
     error = deepcopy(prediction)
@@ -77,7 +77,7 @@ function demean(xs)
     return xs .- mean(xs)
 end
 
-# Initialization functions
+# Initialization Functions
 
 function zero()
 
@@ -93,4 +93,13 @@ end
 
 function he(input_size)
     return 2 ^ 0.5 * xavier(input_size)
+end
+
+# Utility
+
+# make shuffle in place
+function shuffle_data(inputs, labels)
+    data = collect(zip(inputs, labels))
+    Random.shuffle!(data)
+    return getindex.(data, 1), getindex.(data, 2)
 end

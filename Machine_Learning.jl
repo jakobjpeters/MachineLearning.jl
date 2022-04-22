@@ -24,6 +24,7 @@ include("types.jl")
 include("core.jl")
 include("interface.jl")
 include("config.jl")
+include("print.jl")
 
 # fix
 __init__()

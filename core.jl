@@ -1,12 +1,4 @@
 
-# too many allocations - try pre-allocation? try reassigning inputs and labels and return those
-# type signature is iffy?
-function shuffle_data(inputs, labels)
-    data = collect(zip(inputs, labels))
-    Random.shuffle!(data)
-    return getindex.(data, 1), getindex.(data, 2)
-end
-
 function predict!(nn, input)
     nn.preallocs.as[begin] = input
 
@@ -69,16 +61,6 @@ function backpropagate!(nn, inputs, labels)
             fill!(nn.preallocs.δl_δb[layer_n], 0.0)
         end
     end
-end
-
-function print_assess(model, epoch, train_inputs, train_labels, test_inputs, test_labels)
-    println("\nEpoch: ", epoch)
-    # mse not type stable
-    accuracy, mse = assess!(model, train_inputs, train_labels)
-    println("    Train\tAccuracy: ", round(accuracy, digits = 4), "\t\tMSE: ", round(mse, digits = 8))
-    # mse not type stable
-    accuracy, mse = assess!(model, test_inputs, test_labels)
-    println("    Test\tAccuracy: ", round(accuracy, digits = 4), "\t\tMSE: ", round(mse, digits = 8), "\n")
 end
 
 function train_epoch(nn, train_inputs, train_labels)
