@@ -41,12 +41,12 @@ function deriv(f::typeof(tanh), xs)
 end
 
 function softmax(xs)
-    exs = exp.(xs)
-    return exs ./ sum(exs)
+    # esp_xs = exp.(xs)
+    # return esp_xs ./ sum(esp_xs)
 end
 
 function deriv(f::typeof(softmax), xs)
-    return Diagonal(xs) .- (xs * xs')
+
 end
 
 function identity(x)
