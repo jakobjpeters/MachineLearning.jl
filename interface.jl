@@ -30,7 +30,7 @@ function terminal(dataset, model_hparams, layer_hparams)
     train_inputs = read_images(dir * dataset * "_train_images.bin", 16)
     train_labels = read_labels(dir * dataset * "_train_labels.bin", 8, 10)
 
-    ffn = FFN(ModelHyperparameters(model_hparams), LayerHyperparameters(layer_hparams))
+    ffn = FFN(model_hparams, layer_hparams)
 
     # print_inputs()
     print_info(dataset, ffn)
