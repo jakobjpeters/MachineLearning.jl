@@ -62,14 +62,24 @@ function ModelHyperparameters(model_hparams)
     end
 end
 
+struct Parameters{T<:AbstractFloat}
+    ws::Vector{Matrix{T}}
+    bs::Union{Nothing, Vector{Vector{T}}}
+end
+
+struct Preallocations{T<:AbstractFloat}
+    δw::Vector{Matrix{T}}
+    δb::Union{Nothing, Vector{Vector{T}}}
+    as::Vector{Vector{T}}
+    zs::Vector{Vector{T}}
+end
+
 # neural network
-struct FFN{T<:AbstractFloat} <: NeuralNetwork
+struct FFN <: NeuralNetwork
     model_hparams::ModelHyperparameters
     layer_hparams::LayerHyperparameters
-    weighted_input::Vector{Vector{T}}
-    activations::Vector{Vector{T}}
-    weights::Vector{Matrix{T}}
-    biases::Union{Nothing, Vector{Vector{T}}}
+    params::Parameters
+    preallocs::Preallocations
 end
 
 # TODO: fix precision parameter - use holy traits?
@@ -77,16 +87,24 @@ end
 function FFN(model_hparams, layer_hparams)
     sizes = model_hparams.input_size, layer_hparams.sizes...
 
+    ws = [convert(Matrix{model_hparams.precision},
+        rand(weight_init_func(input_size), output_size, input_size))
+            for (weight_init_func, input_size, output_size) in zip(layer_hparams.weight_init_funcs, sizes[begin:end - 1], sizes[begin + 1:end])]
+    bias_init = [use_bias ? zeros(model_hparams.precision, size) : nothing for (use_bias, size) in zip(layer_hparams.use_biases, layer_hparams.sizes)]
+
     FFN(
         model_hparams,
         layer_hparams,
-        [zeros(model_hparams.precision, size) for size in sizes],
-        [zeros(model_hparams.precision, size) for size in sizes],
-        # TODO: make readable
-        [convert(Matrix{model_hparams.precision},
-            rand(weight_init_func(input_size), output_size, input_size))
-                for (weight_init_func, input_size, output_size) in zip(layer_hparams.weight_init_funcs, sizes[begin:end - 1], sizes[begin + 1:end])],
-        [use_bias ? zeros(model_hparams.precision, size) : nothing for (use_bias, size) in zip(layer_hparams.use_biases, layer_hparams.sizes)]
+        Parameters(
+            ws,
+            bias_init
+        ),
+        Preallocations(
+            similar(ws),
+            similar(bias_init),
+            [zeros(model_hparams.precision, size) for size in sizes],
+            [zeros(model_hparams.precision, size) for size in sizes]
+        )
     )
 end
 
