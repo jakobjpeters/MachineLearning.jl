@@ -1,4 +1,16 @@
 
+# Helper Functions
+
+function error(prediction, label)
+    error = deepcopy(prediction)
+
+    for i in label
+        error[i] -= 1
+    end
+
+    return error
+end
+
 # Activation Functions And Derivatives
 
 function sigmoid(xs)
@@ -34,40 +46,25 @@ function softmax(xs)
 end
 
 function deriv(f::typeof(softmax), xs)
-    # TODO: fix
-    return LinearAlgebra.Diagonal(xs) .- (xs * xs')
+    return Diagonal(xs) .- (xs * xs')
 end
 
 function identity(x)
-    return x
+    return deepcopy(x)
 end
 
-function deriv(f::typeof(identity), x::T) where T<:AbstractArray
-    return fill!(x, 1)
+function deriv(f::typeof(identity), x)
+    return ones(size(x))
 end
 
 # Error Functions And Derivatives
 
-# TODO: make it change var, not allocate
 function squared_error(prediction, label)
-    error = copy(prediction)
-
-    for i in label
-        error[i] -= 1
-    end
-
-    return error.^2
+    return error(prediction, label).^2
 end
 
-# TODO: make it change var, not allocate
 function deriv(f::typeof(squared_error), prediction, label)
-    error = copy(prediction)
-
-    for i in label
-        error[i] -= 1
-    end
-
-    return 2 * error
+    return 2 * error(prediction, label)
 end
 
 # Normalization functions
