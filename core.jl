@@ -49,18 +49,25 @@ function backpropagate!(nn, inputs, labels)
         for layer_n in length(nn.layer_hparams.sizes):-1:1
             δl_δb = δl_δa .* deriv(nn.layer_hparams.activ_funcs[layer_n], nn.preallocs.zs[layer_n])
 
-            # faster, but makes breaks the batching -> implement temp gradient allocation
-            nn.params.ws[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * δl_δb * transpose(nn.preallocs.as[layer_n])
+            nn.preallocs.δl_δw[layer_n] -= δl_δb * transpose(nn.preallocs.as[layer_n])
             if nn.layer_hparams.use_biases[layer_n]
-                nn.params.bs[layer_n] -= nn.layer_hparams.learn_rates[layer_n] * δl_δb
+                nn.preallocs.δl_δb[layer_n] -= δl_δb
             end
 
             if layer_n != 1
                 δl_δa = transpose(nn.params.ws[layer_n]) * δl_δb
             end
-
         end
+    end
 
+    for layer_n in length(nn.layer_hparams.sizes):-1:1
+        nn.params.ws[layer_n] += nn.layer_hparams.learn_rates[layer_n] * nn.preallocs.δl_δw[layer_n]
+        fill!(nn.preallocs.δl_δw[layer_n], 0.0)
+
+        if nn.layer_hparams.use_biases[layer_n]
+            nn.params.bs[layer_n] += nn.layer_hparams.learn_rates[layer_n] * nn.preallocs.δl_δb[layer_n]
+            fill!(nn.preallocs.δl_δb[layer_n], 0.0)
+        end
     end
 end
 

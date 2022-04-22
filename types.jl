@@ -68,8 +68,8 @@ struct Parameters{T<:AbstractFloat}
 end
 
 struct Preallocations{T<:AbstractFloat}
-    δw::Vector{Matrix{T}}
-    δb::Union{Nothing, Vector{Vector{T}}}
+    δl_δw::Vector{Matrix{T}}
+    δl_δb::Union{Nothing, Vector{Vector{T}}}
     as::Vector{Vector{T}}
     zs::Vector{Vector{T}}
 end
@@ -100,8 +100,10 @@ function FFN(model_hparams, layer_hparams)
             bias_init
         ),
         Preallocations(
-            similar(ws),
-            similar(bias_init),
+            [convert(Matrix{model_hparams.precision},
+                rand(weight_init_func(input_size), output_size, input_size))
+                for (weight_init_func, input_size, output_size) in zip(layer_hparams.weight_init_funcs, sizes[begin:end - 1], sizes[begin + 1:end])],
+            deepcopy(bias_init),
             [zeros(model_hparams.precision, size) for size in sizes],
             [zeros(model_hparams.precision, size) for size in sizes]
         )
