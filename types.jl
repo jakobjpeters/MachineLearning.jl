@@ -1,4 +1,71 @@
 
+struct Data{T, S<:Integer}
+    inputs::T
+    labels::T
+    length::S
+end
+
+function split_dataset(inputs, labels, splits)
+    if sum(splits) != 100
+        throw(ErrorException("Splits must add to 100 (percent)"))
+    end
+    if length(inputs) != length(labels)
+        throw(ErrorException("inputs and labels must be the same length"))
+    end
+
+    starts = Vector{Int64}()
+    i = 0
+    for split in splits
+        if i < 100
+            append!(starts, i)
+        end
+        i += split
+    end
+    stops = append!(starts[begin + 1:end], length(inputs))
+
+    return [Data(view(inputs, start + 1:stop), view(labels, start + 1:stop), stop - start) for (start, stop) in zip(starts, stops)]
+end
+
+
+# struct Epoch
+#     batch_size
+#     shuffle
+# end
+
+# function (epoch::Epoch)(model, inputs, labels)
+#     if epoch.shuffle && epoch.batch_size != model.input_size
+#         inputs, labels = shuffle_data(train_inputs, train_labels)
+#     end
+
+#     model(inputs, labels)
+# end
+
+# struct Layer{T<:AbstractFloat, S<:Function, R<:Integer}
+#     weight_init_func::S
+#     # bias_init_func::S
+#     norm_func::S
+#     activ_func::S
+#     size::R
+#     use_biases::Bool
+#     learn_rate::T
+#     weights::Vector{Matrix{T}}
+#     biases::Union{Nothing, Vector{Vector{T}}}
+#     δl_δw::Vector{Matrix{T}}
+#     δl_δb::Union{Nothing, Vector{Vector{T}}}
+#     activations::Vector{Vector{T}}
+#     zs::Vector{Vector{T}}
+# end
+
+# struct Neural_Network
+#     layers::Vector{Layers}
+#     cost_func
+#     input_size
+#     precision
+# end
+
+# function (neural_net::Neural_Network)(inputs) end
+
+
 abstract type Model end
 abstract type NeuralNetwork <: Model end
 abstract type Hyperparameters end
