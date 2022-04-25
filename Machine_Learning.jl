@@ -1,23 +1,25 @@
     
 module Machine_Learning
 
-# testing
+# Testing
 using InteractiveUtils
 using BenchmarkTools
 
-# external
+# External
+
+# Emnist
 import GZip
 import ZipFile
-import Distributions
-import Statistics
-import StatsBase
-import Random
-import LinearAlgebra
+
+# Math
+import Distributions: Normal
+import Statistics: mean, std
+import Random: shuffle!, seed!
 
 # GUI
 
 
-# internal
+# Internal
 include("functions.jl")
 include("emnist.jl")
 include("types.jl")
@@ -29,7 +31,7 @@ include("print.jl")
 # fix
 __init__()
 
-Random.seed!(config.seed)
+seed!(config.seed)
 config.display(config.dataset, config.model_hparams, config.layer_hparams)
 
 end

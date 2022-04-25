@@ -26,7 +26,7 @@ function assess!(nn, inputs, labels)
             correct += 1
         end
 
-        error += Statistics.mean(nn.model_hparams.cost_func(nn.preallocs.as[end], label))
+        error += mean(nn.model_hparams.cost_func(nn.preallocs.as[end], label))
     end
 
     return correct / length(labels), error / length(labels)

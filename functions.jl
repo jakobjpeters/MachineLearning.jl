@@ -70,7 +70,7 @@ end
 # Normalization functions
 
 function z_score(xs)
-    return (xs .- mean(xs)) / Statistics.std(xs)
+    return (xs .- mean(xs)) / std(xs)
 end
 
 function demean(xs)
@@ -88,7 +88,7 @@ function uniform()
 end
 
 function xavier(input_size)
-    return Distributions.Normal(0, input_size ^ -0.5)
+    return Normal(0, input_size ^ -0.5)
 end
 
 function he(input_size)
@@ -100,6 +100,6 @@ end
 # make shuffle in place
 function shuffle_data(inputs, labels)
     data = collect(zip(inputs, labels))
-    Random.shuffle!(data)
+    shuffle!(data)
     return getindex.(data, 1), getindex.(data, 2)
 end

@@ -89,7 +89,7 @@ function print_image(image::Array{T, 1}, label::Char = ' ') where T <: Real
     # display(image)
     image = reshape(image, 28, 28)
     min = minimum(image)
-    mean = Statistics.mean(image)
+    mean = mean(image)
 
     for row in 1:28
         for pixel in image[row, :]
