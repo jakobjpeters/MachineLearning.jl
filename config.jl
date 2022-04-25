@@ -1,13 +1,10 @@
-# TODO: make it so a single variable is used across the array
-# 'letters' labels are wrong
 
-# this file must be a valid nested named-tuple
-config = (
-    display = terminal,
-    dataset = "mnist",
-    seed = 1,
+const display = terminal
+dataset = "mnist"
+seed!(1)
 
-    model_hparams = ModelHyperparameters((
+model = FFN(
+    ModelHyperparameters((
         cost_func = squared_error,
         epochs = 100,
         input_size = 784,
@@ -15,8 +12,7 @@ config = (
         precision = Float64,
         shuffle = true,
     )),
-
-    layer_hparams = LayerHyperparameters((
+    LayerHyperparameters((
         weight_init_funcs = [xavier, xavier],
         learn_rates = [0.01, 0.01],
         norm_funcs = [z_score, identity],

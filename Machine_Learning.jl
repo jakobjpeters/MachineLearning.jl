@@ -21,17 +21,15 @@ import Random: shuffle!, seed!
 
 # Internal
 include("functions.jl")
-include("emnist.jl")
 include("types.jl")
 include("core.jl")
+include("emnist.jl")
+include("print.jl")
 include("interface.jl")
 include("config.jl")
-include("print.jl")
 
-# fix
 init_emnist()
 
-seed!(config.seed)
-config.display(config.dataset, config.model_hparams, config.layer_hparams)
+display(dataset, model)
 
 end
