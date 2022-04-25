@@ -54,7 +54,7 @@ Planned Features:
     Error and value checking
 
 Bugs:
-    EMNIST letters dataset labels are incorrect.
+    EMNIST letters dataset labels are incorrect
     RELU doesn't work
 
 Other TODOs:
@@ -71,3 +71,7 @@ Other TODOs:
         types.jl
             Better parametric typing
             Some lines are too long
+        emnist.jl
+            My first Julia code -> needs overhaul
+            Eliminate redundant data
+                Delete zip and gzip or delete zip and load gzip dataset on the fly

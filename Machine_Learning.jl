@@ -29,7 +29,7 @@ include("config.jl")
 include("print.jl")
 
 # fix
-__init__()
+init_emnist()
 
 seed!(config.seed)
 config.display(config.dataset, config.model_hparams, config.layer_hparams)

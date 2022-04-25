@@ -106,9 +106,7 @@ function print_image(image::Array{T, 1}, label::Char = ' ') where T <: Real
     println(label, "\n")
 end
 
-# does it get called when Models.jl is run? test by deleting emnist data
-# only runs correct when in correct working directory
-function __init__()
+function init_emnist()
 
     if !isdir("emnist/decompressed")
         mkpath("emnist/decompressed")
