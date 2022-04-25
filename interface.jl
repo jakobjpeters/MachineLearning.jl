@@ -16,7 +16,7 @@ function terminal(dataset, model_hparams, layer_hparams)
 
     # train neural net
     for epoch in 1:ffn.model_hparams.epochs
-        @time train_epoch(ffn, train_inputs, train_labels)
+        @time train_epoch!(ffn, train_inputs, train_labels)
         @time print_assess(ffn, epoch, train_inputs, train_labels, test_inputs, test_labels)
     end
 end
