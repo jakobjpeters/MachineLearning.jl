@@ -26,6 +26,7 @@ Current Features:
 
 Planned Features:
     Graphical user interface
+        Use plotting library
         Display inputs
         User created inputs
     More
