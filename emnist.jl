@@ -41,7 +41,7 @@ function mapping(dataset::String)
     for line in mapping
         map[parse(UInt8, split(line, " ")[1]) + 1] = Char(parse(UInt8, split(line, " ")[2]))
     end
-
+    println(map)
     return map
 end
 
@@ -88,14 +88,12 @@ end
 function print_image(image::Array{T, 1}, label::Char = ' ') where T <: Real
     # display(image)
     image = reshape(image, 28, 28)
-    min = minimum(image)
-    mean = mean(image)
 
     for row in 1:28
         for pixel in image[row, :]
-            if pixel == min
+            if pixel == minimum(image)
                 print("_")
-            elseif pixel > mean
+            elseif pixel > mean(image)
                 print("O")
             else
                 print("o")
@@ -104,6 +102,17 @@ function print_image(image::Array{T, 1}, label::Char = ' ') where T <: Real
         println()
     end
     println(label, "\n")
+end
+
+function load_dataset(dataset_name)
+    dir = pwd() * "/emnist/decompressed/"
+
+    inputs = read_images(dir * dataset_name * "_train_images.bin", 16)
+    append!(inputs, read_images(dir * dataset_name * "_test_images.bin", 16))
+    labels = read_labels(dir * dataset_name * "_train_labels.bin", 8, 10)
+    append!(labels, read_labels(dir * dataset_name * "_test_labels.bin", 8, 10))
+
+    return Data(inputs, labels)
 end
 
 function init_emnist()

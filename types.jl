@@ -5,25 +5,34 @@ struct Data{T, S<:Integer}
     length::S
 end
 
-function split_dataset(inputs, labels, splits)
-    if sum(splits) != 100
-        throw(ErrorException("Splits must add to 100 (percent)"))
-    end
+function Data(inputs, labels)
     if length(inputs) != length(labels)
         throw(ErrorException("inputs and labels must be the same length"))
+    end
+
+    Data(inputs, labels, length(inputs))
+end
+
+function split_data(inputs, labels, splits)
+    if sum(splits) != 100
+        throw(ErrorException("Splits must add to 100 (percent)"))
     end
 
     starts = Vector{Int64}()
     i = 0
     for split in splits
         if i < 100
-            append!(starts, i)
+            append!(starts, div(i * length(inputs), 100))
         end
         i += split
     end
     stops = append!(starts[begin + 1:end], length(inputs))
 
-    return [Data(view(inputs, start + 1:stop), view(labels, start + 1:stop), stop - start) for (start, stop) in zip(starts, stops)]
+    return [Data(view(inputs, start + 1:stop), view(labels, start + 1:stop)) for (start, stop) in zip(starts, stops)]
+end
+
+function split_data(data, splits)
+    return split_data(data.inputs, data.labels, splits)
 end
 
 

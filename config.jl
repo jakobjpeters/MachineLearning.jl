@@ -1,6 +1,7 @@
 
 const display = terminal
-dataset = "mnist"
+dataset_name = "mnist"
+splits = [80, 20]
 seed!(1)
 
 model = FFN(

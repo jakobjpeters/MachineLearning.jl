@@ -1,15 +1,6 @@
 
-function print_assess(model, epoch, train_inputs, train_labels, test_inputs, test_labels)
-    println("\nEpoch: ", epoch)
-    # mse not type stable
-    accuracy, mse = assess!(model, train_inputs, train_labels)
-    println("    Train\tAccuracy: ", round(accuracy, digits = 4), "\t\tMSE: ", round(mse, digits = 8))
-    accuracy, mse = assess!(model, test_inputs, test_labels)
-    println("    Test\tAccuracy: ", round(accuracy, digits = 4), "\t\tMSE: ", round(mse, digits = 8), "\n")
-end
-
-function print_inputs()
-    print_images(test_inputs, test_labels, map, [rand(1:length(test_labels)) for i in 1:10])
+function print_data(data, dataset_name)
+    print_images(data.inputs, data.labels, mapping(dataset_name), [rand(1:data.length) for i in 1:10])
 end
 
 function print_info(dataset, ffn)
@@ -28,4 +19,14 @@ function print_info(dataset, ffn)
     println("Activation functions: ", ffn.layer_hparams.activ_funcs)
     println("Normalization functions: ", ffn.layer_hparams.norm_funcs)
     println("Weight Initialization functions: ", ffn.layer_hparams.weight_init_funcs)
+end
+
+function print_assess(model, epoch, data_splits)
+    println("\nEpoch: ", epoch)
+    # mse not type stable
+    for data in data_splits
+        accuracy, loss = assess!(model, data.inputs, data.labels)
+        println("    Split\tAccuracy: ", round(accuracy, digits = 4), "\t\tLoss: ", round(loss, digits = 8))
+    end
+    println()
 end

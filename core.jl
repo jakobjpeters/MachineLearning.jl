@@ -63,12 +63,12 @@ function backpropagate!(nn, inputs, labels)
     end
 end
 
-function train_epoch!(nn, train_inputs, train_labels)
+function train_epoch!(nn, inputs, labels)
     if nn.model_hparams.shuffle && nn.model_hparams.batch_size != nn.model_hparams.input_size
-        train_inputs, train_labels = shuffle_data(train_inputs, train_labels)
+        inputs, labels = shuffle_data(inputs, labels)
     end
 
-    for j in 1:nn.model_hparams.batch_size:length(train_labels) - nn.model_hparams.batch_size
-        backpropagate!(nn, train_inputs[j:j + nn.model_hparams.batch_size - 1], train_labels[j:j + nn.model_hparams.batch_size - 1])
+    for j in 1:nn.model_hparams.batch_size:length(labels) - nn.model_hparams.batch_size
+        backpropagate!(nn, inputs[j:j + nn.model_hparams.batch_size - 1], labels[j:j + nn.model_hparams.batch_size - 1])
     end
 end
