@@ -57,6 +57,7 @@ Planned Features:
 Bugs:
     EMNIST letters dataset labels are incorrect
     RELU doesn't work
+    Loss calculation is incorrect
 
 Other TODOs:
     More
