@@ -39,7 +39,7 @@ struct Epoch # {T<:Integer}
     batch_size # ::T
     shuffle::Bool
 
-    Epoch(; batch_size= 1, shuffle = true) = new(batch_size, shuffle)
+    Epoch(; batch_size = 1, shuffle = true) = new(batch_size, shuffle)
 end
 
 function (epoch::Epoch)(model, inputs, labels)
@@ -52,30 +52,47 @@ function (epoch::Epoch)(model, inputs, labels)
     end
 end
 
-# struct Layer{T<:AbstractFloat, S<:Function, R<:Integer}
-#     weight_init_func::S
-#     # bias_init_func::S
-#     norm_func::S
-#     activ_func::S
-#     size::R
-#     use_biases::Bool
-#     learn_rate::T
-#     weights::Vector{Matrix{T}}
-#     biases::Union{Nothing, Vector{Vector{T}}}
-#     δl_δw::Vector{Matrix{T}}
-#     δl_δb::Union{Nothing, Vector{Vector{T}}}
-#     activations::Vector{Vector{T}}
-#     zs::Vector{Vector{T}}
-# end
+struct Layer{T<:AbstractFloat, S<:Function, R<:Integer}
+    weight_init_func::S
+    # bias_init_func::S
+    norm_func::S
+    activ_func::S
+    input_size::R
+    output_size::R
+    use_biases::Bool
+    learn_rate::T
+    weights::Vector{Matrix{T}}
+    δl_δw::Vector{Matrix{T}}
+    biases::Union{Nothing, Vector{Vector{T}}}
+    δl_δb::Union{Nothing, Vector{Vector{T}}}
+    activations::Vector{Vector{T}}
+    Zs::Vector{Vector{T}}
 
-# struct Neural_Network
-#     layers::Vector{Layers}
-#     cost_func
-#     input_size
-#     precision
-# end
+    Layer(; kwargs...) = new{T, S, R}(
+        kwargs.weight_init_func,
+        kwargs.norm_func,
+        kwargs.activ_func,
+        kwargs.input_size,
+        kwargs.output_size,
+        kwargs.use_biases,
+        kwargs.learn_rate,
+        rand(weight_init_func(input_size), output_size, input_size), # weights
+        zeros(output_size, input_size), # δl_δw
+        kwargs.use_bias ? zeros(model_hparams.precision, output_size) : nothing, # biases
+        kwargs.use_bias ? zeros(model_hparams.precision, output_size) : nothing, # δl_δb
+        zeros(output_size), # activations
+        zeros(output_size) # Zs
+    )
+end
 
-# function (neural_net::Neural_Network)(inputs) end
+struct Neural_Network{T<:Function, S<:AbstractFloat, R<:Integer}
+    cost_func::T
+    precision::S
+    input_size::R
+    layers::Vector{Layer}
+end
+
+function (neural_net::Neural_Network)(inputs) end
 
 
 abstract type Model end
