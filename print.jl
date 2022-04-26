@@ -24,9 +24,9 @@ end
 function print_assess(model, epoch, data_splits)
     println("\nEpoch: ", epoch)
     # mse not type stable
-    for data in data_splits
+    for (i, data) in enumerate(data_splits)
         accuracy, loss = assess!(model, data.inputs, data.labels)
-        println("    Split\tAccuracy: ", round(accuracy, digits = 4), "\t\tLoss: ", round(loss, digits = 8))
+        println("    Split ", i, "\tAccuracy: ", round(accuracy, digits = 4), "\t\tLoss: ", round(loss, digits = 8))
     end
     println()
 end
