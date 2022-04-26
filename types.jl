@@ -35,19 +35,22 @@ function split_data(data, splits)
     return split_data(data.inputs, data.labels, splits)
 end
 
+struct Epoch # {T<:Integer}
+    batch_size # ::T
+    shuffle::Bool
 
-# struct Epoch
-#     batch_size
-#     shuffle
-# end
+    Epoch(; batch_size= 1, shuffle = true) = new(batch_size, shuffle)
+end
 
-# function (epoch::Epoch)(model, inputs, labels)
-#     if epoch.shuffle && epoch.batch_size != model.input_size
-#         inputs, labels = shuffle_data(train_inputs, train_labels)
-#     end
+function (epoch::Epoch)(model, inputs, labels)
+    if epoch.shuffle && epoch.batch_size != model.model_hparams.input_size
+        inputs, labels = shuffle_data(inputs, labels)
+    end
 
-#     model(inputs, labels)
-# end
+    for i in 1:epoch.batch_size:length(inputs) - epoch.batch_size
+        backpropagate!(model, view(inputs, i:i + epoch.batch_size - 1), view(labels, i:i + epoch.batch_size - 1))
+    end
+end
 
 # struct Layer{T<:AbstractFloat, S<:Function, R<:Integer}
 #     weight_init_func::S
@@ -108,13 +111,8 @@ end
 
 struct ModelHyperparameters{T<:Function, S<:Integer} <: Hyperparameters
     cost_func::T
-    epochs::S
     input_size::S
-    batch_size::S
     precision::DataType # TODO: make precision a layer parameter?
-    shuffle::Bool
-    # optimizer::Function
-    # regularizer::Function
 end
 
 function ModelHyperparameters(model_hparams)
@@ -122,20 +120,13 @@ function ModelHyperparameters(model_hparams)
     # TODO: include erroneous value
     if !(model_hparams.precision <: AbstractFloat)
         throw(ErrorException("Invalid precision. Valid values are Float16, Float32, and Float64."))
-    elseif model_hparams.epochs < 1
-        throw(ErrorException("Invalid epochs. Must be greater than 0."))
-    elseif model_hparams.batch_size < 1
-        throw(ErrorException("Invalid batch size. Must be greater than 0."))
-    else
-        ModelHyperparameters(
-            model_hparams.cost_func,
-            model_hparams.epochs,
-            model_hparams.input_size,
-            model_hparams.batch_size,
-            model_hparams.precision,
-            model_hparams.shuffle,
-        )
     end
+
+    ModelHyperparameters(
+        model_hparams.cost_func,
+        model_hparams.input_size,
+        model_hparams.precision
+    )
 end
 
 struct Parameters{T<:AbstractFloat}

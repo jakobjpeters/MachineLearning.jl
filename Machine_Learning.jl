@@ -30,6 +30,6 @@ include("config.jl")
 
 init_emnist()
 
-display(dataset_name, splits, model)
+display(dataset_name, splits, model, epochs)
 
 end

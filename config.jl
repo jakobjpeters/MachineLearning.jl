@@ -4,14 +4,17 @@ dataset_name = "mnist"
 splits = [80, 20]
 seed!(1)
 
+epochs = [
+    Epoch(
+        batch_size = 10,
+        shuffle = true)
+    for i in 1:100]
+
 model = FFN(
     ModelHyperparameters((
         cost_func = squared_error,
-        epochs = 100,
         input_size = 784,
-        batch_size = 10,
-        precision = Float64,
-        shuffle = true,
+        precision = Float64
     )),
     LayerHyperparameters((
         weight_init_funcs = [xavier, xavier],
