@@ -85,7 +85,9 @@ struct Layer{T<:AbstractFloat, S<:Function, R<:Integer}
     )
 end
 
-struct Neural_Network{T<:Function, S<:AbstractFloat, R<:Integer}
+abstract type Model end
+
+struct Neural_Network{T<:Function, S<:AbstractFloat, R<:Integer} <: Model
     cost_func::T
     precision::S
     input_size::R
@@ -94,20 +96,7 @@ end
 
 function (neural_net::Neural_Network)(inputs) end
 
-
-abstract type Model end
-abstract type NeuralNetwork <: Model end
-abstract type Hyperparameters end
-
-struct Preallocations{T<:AbstractFloat}
-    δl_δw::Vector{Matrix{T}}
-    δl_δb::Union{Nothing, Vector{Vector{T}}}
-    as::Vector{Vector{T}}
-    zs::Vector{Vector{T}}
-end
-
-# neural network
-struct FFN <: NeuralNetwork
+struct FFN
     cost_func
     input_size
     precision
@@ -119,7 +108,10 @@ struct FFN <: NeuralNetwork
     use_biases::Vector{Bool}
     weights
     biases
-    preallocs::Preallocations
+    δl_δw
+    δl_δb
+    activations
+    Zs
 end
 
 # TODO: fix precision parameter - use holy traits?
@@ -144,18 +136,16 @@ function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, ac
         use_biases,
         weights,
         biases,
-        Preallocations(
-            [convert(Matrix{precision},
-                rand(weight_init_func(input_size), output_size, input_size))
-                for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])],
-            deepcopy(biases),
-            [zeros(precision, size) for size in tmp_sizes],
-            [zeros(precision, size) for size in tmp_sizes]
-        )
+        [convert(Matrix{precision},
+            rand(weight_init_func(input_size), output_size, input_size))
+            for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])],
+        deepcopy(biases),
+        [zeros(precision, size) for size in tmp_sizes],
+        [zeros(precision, size) for size in tmp_sizes]
     )
 end
 
-struct GAN <: NeuralNetwork
-    generator::FFN
-    discriminator::FFN
+struct GAN <: Model
+    generator
+    discriminator
 end
