@@ -5,9 +5,9 @@ function predict!(nn, input)
     for layer_n in 1:length(nn.sizes)
         nn.preallocs.as[layer_n] = nn.norm_funcs[layer_n](nn.preallocs.as[layer_n])
 
-        nn.preallocs.zs[layer_n] = nn.params.ws[layer_n] * nn.preallocs.as[layer_n]
+        nn.preallocs.zs[layer_n] = nn.weights[layer_n] * nn.preallocs.as[layer_n]
         if nn.use_biases[layer_n]
-            nn.preallocs.zs[layer_n] += nn.params.bs[layer_n]
+            nn.preallocs.zs[layer_n] += nn.biases[layer_n]
 
         nn.preallocs.as[layer_n + 1] = nn.activ_funcs[layer_n](nn.preallocs.zs[layer_n])
         end
@@ -46,17 +46,17 @@ function backpropagate!(nn, inputs, labels)
             end
 
             if layer_n != 1
-                δl_δa = transpose(nn.params.ws[layer_n]) * δl_δb
+                δl_δa = transpose(nn.weights[layer_n]) * δl_δb
             end
         end
     end
 
     for layer_n in 1:length(nn.sizes)
-        nn.params.ws[layer_n] += nn.learn_rates[layer_n] * nn.preallocs.δl_δw[layer_n]
+        nn.weights[layer_n] += nn.learn_rates[layer_n] * nn.preallocs.δl_δw[layer_n]
         fill!(nn.preallocs.δl_δw[layer_n], 0.0)
 
         if nn.use_biases[layer_n]
-            nn.params.bs[layer_n] += nn.learn_rates[layer_n] * nn.preallocs.δl_δb[layer_n]
+            nn.biases[layer_n] += nn.learn_rates[layer_n] * nn.preallocs.δl_δb[layer_n]
             fill!(nn.preallocs.δl_δb[layer_n], 0.0)
         end
     end

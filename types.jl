@@ -99,11 +99,6 @@ abstract type Model end
 abstract type NeuralNetwork <: Model end
 abstract type Hyperparameters end
 
-struct Parameters{T<:AbstractFloat}
-    ws::Vector{Matrix{T}}
-    bs::Union{Nothing, Vector{Vector{T}}}
-end
-
 struct Preallocations{T<:AbstractFloat}
     δl_δw::Vector{Matrix{T}}
     δl_δb::Union{Nothing, Vector{Vector{T}}}
@@ -122,7 +117,8 @@ struct FFN <: NeuralNetwork
     learn_rates
     sizes
     use_biases::Vector{Bool}
-    params::Parameters
+    weights
+    biases
     preallocs::Preallocations
 end
 
@@ -131,10 +127,10 @@ end
 function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
     tmp_sizes = input_size, sizes...
 
-    ws = [convert(Matrix{precision},
+    weights = [convert(Matrix{precision},
         rand(weight_init_func(input_size), output_size, input_size))
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
-    bias_init = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
+    biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
     FFN(
         cost_func,
@@ -146,15 +142,13 @@ function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, ac
         learn_rates,
         sizes,
         use_biases,
-        Parameters(
-            ws,
-            bias_init
-        ),
+        weights,
+        biases,
         Preallocations(
             [convert(Matrix{precision},
                 rand(weight_init_func(input_size), output_size, input_size))
                 for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])],
-            deepcopy(bias_init),
+            deepcopy(biases),
             [zeros(precision, size) for size in tmp_sizes],
             [zeros(precision, size) for size in tmp_sizes]
         )
