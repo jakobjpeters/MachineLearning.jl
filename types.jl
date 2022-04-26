@@ -58,7 +58,7 @@ end
 
 abstract type Model end
 
-struct FFN
+struct Neural_Network
     cost_func
     input_size
     precision
@@ -76,7 +76,7 @@ struct FFN
     Zs
 end
 
-function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
+function Neural_Network(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
     tmp_sizes = input_size, sizes...
 
     weights = [convert(Matrix{precision},
@@ -84,7 +84,7 @@ function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, ac
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
-    FFN(
+    Neural_Network(
         cost_func,
         input_size,
         precision,
@@ -105,7 +105,7 @@ function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, ac
     )
 end
 
-function (model::FFN)(input)
+function (model::Neural_Network)(input)
     model.activations[begin] = input
 
     for layer_n in 1:length(model.sizes)

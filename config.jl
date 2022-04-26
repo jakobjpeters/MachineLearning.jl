@@ -17,7 +17,7 @@ epochs = [
         shuffle = true)
     for i in 1:100]
 
-model = FFN(
+model = Neural_Network(
     squared_error,
     784,
 
