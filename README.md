@@ -55,9 +55,10 @@ Planned Features:
     Error and value checking
 
 Bugs:
-    EMNIST letters dataset labels are incorrect
-    RELU doesn't work
+    EMNIST 'letters' dataset labels are incorrect
+    'relu' doesn't work
     Loss calculation is incorrect
+    'print_data' doesn't work
 
 Other TODOs:
     More
