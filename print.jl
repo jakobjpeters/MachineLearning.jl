@@ -16,9 +16,9 @@ function print_info(dataset, neural_net, epochs)
     println("Layer sizes: ", neural_net.sizes)
     println("Learning rate: ", neural_net.learn_rates)
     println("Use biases: ", neural_net.use_biases)
-    println("Activation functions: ", neural_net.activ_funcs)
-    println("Normalization functions: ", neural_net.norm_funcs)
-    println("Weight Initialization functions: ", neural_net.weight_init_funcs)
+    println("Activation functions: ", [layer.activ_func for layer in neural_net.layers])
+    println("Normalization functions: ", [layer.norm_func for layer in neural_net.layers])
+    println("Weight Initialization functions: ", [layer.weight_init_func for layer in neural_net.layers])
 end
 
 function print_assess(model, epoch, data_splits)

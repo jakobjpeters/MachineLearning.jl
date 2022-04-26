@@ -53,18 +53,18 @@ function (epoch::Epoch)(model, inputs, labels)
 end
 
 struct Layer
-
+    weight_init_func
+    norm_func
+    activ_func
 end
 
 abstract type Model end
 
 struct Neural_Network
+    layers::Vector{Layer}
     cost_func
     input_size
     precision
-    weight_init_funcs
-    norm_funcs
-    activ_funcs
     learn_rates
     sizes
     use_biases::Vector{Bool}
@@ -84,13 +84,13 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
+    layers = [Layer(weight_init_func, norm_func, activ_func) for (weight_init_func, norm_func, activ_func) in zip(weight_init_funcs, norm_funcs, activ_funcs)]
+
     Neural_Network(
+        layers,
         cost_func,
         input_size,
         precision,
-        weight_init_funcs,
-        norm_funcs,
-        activ_funcs,
         learn_rates,
         sizes,
         use_biases,
@@ -108,14 +108,14 @@ end
 function (model::Neural_Network)(input)
     model.activations[begin] = input
 
-    for layer_n in 1:length(model.sizes)
-        model.activations[layer_n] = model.norm_funcs[layer_n](model.activations[layer_n])
+    for i in 1:length(model.sizes)
+        model.activations[i] = model.layers[i].norm_func(model.activations[i])
 
-        model.Zs[layer_n] = model.weights[layer_n] * model.activations[layer_n]
-        if model.use_biases[layer_n]
-            model.Zs[layer_n] += model.biases[layer_n]
+        model.Zs[i] = model.weights[i] * model.activations[i]
+        if model.use_biases[i]
+            model.Zs[i] += model.biases[i]
 
-        model.activations[layer_n + 1] = model.activ_funcs[layer_n](model.Zs[layer_n])
+        model.activations[i + 1] = model.layers[i].activ_func(model.Zs[i])
         end
     end
 end

@@ -22,27 +22,27 @@ function backpropagate!(model, inputs, labels)
 
         δl_δa = deriv(model.cost_func, model.activations[end], label)
 
-        for layer_n in reverse(1:length(model.sizes))
-            δl_δb = δl_δa .* deriv(model.activ_funcs[layer_n], model.Zs[layer_n])
+        for i in reverse(1:length(model.sizes))
+            δl_δb = δl_δa .* deriv(model.layers[i].activ_func, model.Zs[i])
 
-            model.δl_δw[layer_n] -= δl_δb * transpose(model.activations[layer_n])
-            if model.use_biases[layer_n]
-                model.δl_δb[layer_n] -= δl_δb
+            model.δl_δw[i] -= δl_δb * transpose(model.activations[i])
+            if model.use_biases[i]
+                model.δl_δb[i] -= δl_δb
             end
 
-            if layer_n != 1
-                δl_δa = transpose(model.weights[layer_n]) * δl_δb
+            if i != 1
+                δl_δa = transpose(model.weights[i]) * δl_δb
             end
         end
     end
 
-    for layer_n in 1:length(model.sizes)
-        model.weights[layer_n] += model.learn_rates[layer_n] * model.δl_δw[layer_n]
-        fill!(model.δl_δw[layer_n], 0.0)
+    for i in 1:length(model.sizes)
+        model.weights[i] += model.learn_rates[i] * model.δl_δw[i]
+        fill!(model.δl_δw[i], 0.0)
 
-        if model.use_biases[layer_n]
-            model.biases[layer_n] += model.learn_rates[layer_n] * model.δl_δb[layer_n]
-            fill!(model.δl_δb[layer_n], 0.0)
+        if model.use_biases[i]
+            model.biases[i] += model.learn_rates[i] * model.δl_δb[i]
+            fill!(model.δl_δb[i], 0.0)
         end
     end
 end
