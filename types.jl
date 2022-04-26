@@ -145,6 +145,21 @@ function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, ac
     )
 end
 
+function (model::FFN)(input)
+    model.activations[begin] = input
+
+    for layer_n in 1:length(model.sizes)
+        model.activations[layer_n] = model.norm_funcs[layer_n](model.activations[layer_n])
+
+        model.Zs[layer_n] = model.weights[layer_n] * model.activations[layer_n]
+        if model.use_biases[layer_n]
+            model.Zs[layer_n] += model.biases[layer_n]
+
+        model.activations[layer_n + 1] = model.activ_funcs[layer_n](model.Zs[layer_n])
+        end
+    end
+end
+
 struct GAN <: Model
     generator
     discriminator
