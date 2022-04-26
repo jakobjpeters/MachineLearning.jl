@@ -2,7 +2,6 @@
 function predict!(nn, input)
     nn.preallocs.as[begin] = input
 
-    # use zip?
     for layer_n in 1:length(nn.layer_hparams.sizes)
         nn.preallocs.as[layer_n] = nn.layer_hparams.norm_funcs[layer_n](nn.preallocs.as[layer_n])
 
@@ -38,7 +37,7 @@ function backpropagate!(nn, inputs, labels)
 
         δl_δa = deriv(nn.model_hparams.cost_func, nn.preallocs.as[end], label)
 
-        for layer_n in length(nn.layer_hparams.sizes):-1:1
+        for layer_n in reverse(1:length(nn.layer_hparams.sizes))
             δl_δb = δl_δa .* deriv(nn.layer_hparams.activ_funcs[layer_n], nn.preallocs.zs[layer_n])
 
             nn.preallocs.δl_δw[layer_n] -= δl_δb * transpose(nn.preallocs.as[layer_n])
@@ -52,7 +51,7 @@ function backpropagate!(nn, inputs, labels)
         end
     end
 
-    for layer_n in length(nn.layer_hparams.sizes):-1:1
+    for layer_n in 1:length(nn.layer_hparams.sizes)
         nn.params.ws[layer_n] += nn.layer_hparams.learn_rates[layer_n] * nn.preallocs.δl_δw[layer_n]
         fill!(nn.preallocs.δl_δw[layer_n], 0.0)
 

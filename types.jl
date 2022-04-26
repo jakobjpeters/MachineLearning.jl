@@ -47,7 +47,7 @@ function (epoch::Epoch)(model, inputs, labels)
         inputs, labels = shuffle_data(inputs, labels)
     end
 
-    for i in 1:epoch.batch_size:length(inputs) - epoch.batch_size
+    for i in 1:epoch.batch_size:length(inputs)
         backpropagate!(model, view(inputs, i:i + epoch.batch_size - 1), view(labels, i:i + epoch.batch_size - 1))
     end
 end
@@ -194,7 +194,6 @@ function FFN(model_hparams, layer_hparams)
     )
 end
 
-# TODO: parameterize ffn
 struct GAN <: NeuralNetwork
     generator::FFN
     discriminator::FFN
