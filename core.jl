@@ -25,7 +25,7 @@ function assess!(nn, inputs, labels)
             correct += 1
         end
 
-        error += mean(nn.model_hparams.cost_func(nn.preallocs.as[end], label))
+        error += mean(nn.cost_func(nn.preallocs.as[end], label))
     end
 
     return correct / length(labels), error / length(labels)
@@ -35,7 +35,7 @@ function backpropagate!(nn, inputs, labels)
     for (input, label) in zip(inputs, labels)
         predict!(nn, input)
 
-        δl_δa = deriv(nn.model_hparams.cost_func, nn.preallocs.as[end], label)
+        δl_δa = deriv(nn.cost_func, nn.preallocs.as[end], label)
 
         for layer_n in reverse(1:length(nn.layer_hparams.sizes))
             δl_δb = δl_δa .* deriv(nn.layer_hparams.activ_funcs[layer_n], nn.preallocs.zs[layer_n])

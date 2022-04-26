@@ -18,13 +18,11 @@ epochs = [
     for i in 1:100]
 
 model = FFN(
-    ModelHyperparameters((
-        cost_func = squared_error,
-        input_size = 784,
+    squared_error,
+    784,
 
-        # not implemented yet
-        precision = Float64
-    )),
+    # not implemented yet
+    Float64,
     LayerHyperparameters((
         # [xavier, he]
         weight_init_funcs = [xavier, xavier],
