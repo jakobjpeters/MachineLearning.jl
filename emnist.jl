@@ -41,7 +41,6 @@ function mapping(dataset::String)
     for line in mapping
         map[parse(UInt8, split(line, " ")[1]) + 1] = Char(parse(UInt8, split(line, " ")[2]))
     end
-    println(map)
     return map
 end
 
