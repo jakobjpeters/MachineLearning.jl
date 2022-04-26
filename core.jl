@@ -69,6 +69,6 @@ function train_epoch!(nn, inputs, labels)
     end
 
     for j in 1:nn.model_hparams.batch_size:length(labels) - nn.model_hparams.batch_size
-        backpropagate!(nn, inputs[j:j + nn.model_hparams.batch_size - 1], labels[j:j + nn.model_hparams.batch_size - 1])
+        backpropagate!(nn, view(inputs, j:j + nn.model_hparams.batch_size - 1), view(labels, j:j + nn.model_hparams.batch_size - 1))
     end
 end
