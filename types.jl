@@ -99,33 +99,6 @@ abstract type Model end
 abstract type NeuralNetwork <: Model end
 abstract type Hyperparameters end
 
-struct LayerHyperparameters{T<:Function, S<:Function, R<:AbstractFloat, Q<:Function} <: Hyperparameters
-    weight_init_funcs::Vector{Q}
-    norm_funcs::Vector{T}
-    activ_funcs::Vector{S}
-    # fix? holy traits?
-    learn_rates::Vector{R}
-    sizes::Vector{Int64}
-    use_biases::Vector{Bool}
-end
-
-function LayerHyperparameters(layer_hparams)
-    # TODO: improve
-    # TODO: include erroneous value
-    if any(x -> x < 1, layer_hparams.sizes)
-        throw(ErrorException("Invalid layer size. Must be greater than 0."))
-    else
-        LayerHyperparameters(
-            layer_hparams.weight_init_funcs,
-            layer_hparams.norm_funcs,
-            layer_hparams.activ_funcs,
-            layer_hparams.learn_rates,
-            layer_hparams.sizes,
-            layer_hparams.use_biases
-        )
-    end
-end
-
 struct Parameters{T<:AbstractFloat}
     ws::Vector{Matrix{T}}
     bs::Union{Nothing, Vector{Vector{T}}}
@@ -143,26 +116,36 @@ struct FFN <: NeuralNetwork
     cost_func
     input_size
     precision
-    layer_hparams::LayerHyperparameters
+    weight_init_funcs
+    norm_funcs
+    activ_funcs
+    learn_rates
+    sizes
+    use_biases::Vector{Bool}
     params::Parameters
     preallocs::Preallocations
 end
 
 # TODO: fix precision parameter - use holy traits?
 # TODO: make sure layers match with hyperparams
-function FFN(cost_func, input_size, precision, layer_hparams)
-    sizes = input_size, layer_hparams.sizes...
+function FFN(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
+    tmp_sizes = input_size, sizes...
 
     ws = [convert(Matrix{precision},
         rand(weight_init_func(input_size), output_size, input_size))
-            for (weight_init_func, input_size, output_size) in zip(layer_hparams.weight_init_funcs, sizes[begin:end - 1], sizes[begin + 1:end])]
-    bias_init = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(layer_hparams.use_biases, layer_hparams.sizes)]
+            for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
+    bias_init = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
     FFN(
         cost_func,
         input_size,
         precision,
-        layer_hparams,
+        weight_init_funcs,
+        norm_funcs,
+        activ_funcs,
+        learn_rates,
+        sizes,
+        use_biases,
         Parameters(
             ws,
             bias_init
@@ -170,10 +153,10 @@ function FFN(cost_func, input_size, precision, layer_hparams)
         Preallocations(
             [convert(Matrix{precision},
                 rand(weight_init_func(input_size), output_size, input_size))
-                for (weight_init_func, input_size, output_size) in zip(layer_hparams.weight_init_funcs, sizes[begin:end - 1], sizes[begin + 1:end])],
+                for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])],
             deepcopy(bias_init),
-            [zeros(precision, size) for size in sizes],
-            [zeros(precision, size) for size in sizes]
+            [zeros(precision, size) for size in tmp_sizes],
+            [zeros(precision, size) for size in tmp_sizes]
         )
     )
 end

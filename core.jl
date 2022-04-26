@@ -2,14 +2,14 @@
 function predict!(nn, input)
     nn.preallocs.as[begin] = input
 
-    for layer_n in 1:length(nn.layer_hparams.sizes)
-        nn.preallocs.as[layer_n] = nn.layer_hparams.norm_funcs[layer_n](nn.preallocs.as[layer_n])
+    for layer_n in 1:length(nn.sizes)
+        nn.preallocs.as[layer_n] = nn.norm_funcs[layer_n](nn.preallocs.as[layer_n])
 
         nn.preallocs.zs[layer_n] = nn.params.ws[layer_n] * nn.preallocs.as[layer_n]
-        if nn.layer_hparams.use_biases[layer_n]
+        if nn.use_biases[layer_n]
             nn.preallocs.zs[layer_n] += nn.params.bs[layer_n]
 
-        nn.preallocs.as[layer_n + 1] = nn.layer_hparams.activ_funcs[layer_n](nn.preallocs.zs[layer_n])
+        nn.preallocs.as[layer_n + 1] = nn.activ_funcs[layer_n](nn.preallocs.zs[layer_n])
         end
     end
 end
@@ -37,11 +37,11 @@ function backpropagate!(nn, inputs, labels)
 
         δl_δa = deriv(nn.cost_func, nn.preallocs.as[end], label)
 
-        for layer_n in reverse(1:length(nn.layer_hparams.sizes))
-            δl_δb = δl_δa .* deriv(nn.layer_hparams.activ_funcs[layer_n], nn.preallocs.zs[layer_n])
+        for layer_n in reverse(1:length(nn.sizes))
+            δl_δb = δl_δa .* deriv(nn.activ_funcs[layer_n], nn.preallocs.zs[layer_n])
 
             nn.preallocs.δl_δw[layer_n] -= δl_δb * transpose(nn.preallocs.as[layer_n])
-            if nn.layer_hparams.use_biases[layer_n]
+            if nn.use_biases[layer_n]
                 nn.preallocs.δl_δb[layer_n] -= δl_δb
             end
 
@@ -51,12 +51,12 @@ function backpropagate!(nn, inputs, labels)
         end
     end
 
-    for layer_n in 1:length(nn.layer_hparams.sizes)
-        nn.params.ws[layer_n] += nn.layer_hparams.learn_rates[layer_n] * nn.preallocs.δl_δw[layer_n]
+    for layer_n in 1:length(nn.sizes)
+        nn.params.ws[layer_n] += nn.learn_rates[layer_n] * nn.preallocs.δl_δw[layer_n]
         fill!(nn.preallocs.δl_δw[layer_n], 0.0)
 
-        if nn.layer_hparams.use_biases[layer_n]
-            nn.params.bs[layer_n] += nn.layer_hparams.learn_rates[layer_n] * nn.preallocs.δl_δb[layer_n]
+        if nn.use_biases[layer_n]
+            nn.params.bs[layer_n] += nn.learn_rates[layer_n] * nn.preallocs.δl_δb[layer_n]
             fill!(nn.preallocs.δl_δb[layer_n], 0.0)
         end
     end

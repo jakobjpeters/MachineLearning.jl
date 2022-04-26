@@ -23,21 +23,20 @@ model = FFN(
 
     # not implemented yet
     Float64,
-    LayerHyperparameters((
-        # [xavier, he]
-        weight_init_funcs = [xavier, xavier],
 
-        learn_rates = [0.01, 0.01],
+    # [xavier, he]
+    [xavier, xavier],
 
-        # [z_score, demean, identity]
-        norm_funcs = [z_score, identity],
+    # [z_score, demean, identity]
+    [z_score, identity],
 
-        # [sigmoid, tanh]
-        # relu does not work yet
-        activ_funcs = [sigmoid, sigmoid],
+    # [sigmoid, tanh]
+    # relu does not work yet
+    [sigmoid, sigmoid],
 
-        use_biases = [true, true],
+    [0.01, 0.01],
 
-        sizes = [28, length(mapping(dataset_name))]
-    ))
+    [28, length(mapping(dataset_name))],
+
+    [true, true]
 )
