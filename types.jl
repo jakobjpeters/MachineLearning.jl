@@ -67,7 +67,6 @@ struct Neural_Network
     precision
     learn_rates
     sizes
-    use_biases::Vector{Bool}
     weights
     biases
     δl_δw
@@ -94,7 +93,6 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
         precision,
         learn_rates,
         sizes,
-        use_biases,
         weights,
         biases,
         [convert(Matrix{precision},
@@ -106,17 +104,17 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
     )
 end
 
-function (model::Neural_Network)(input)
-    model.activations[begin] = input
+function (neural_net::Neural_Network)(input)
+    neural_net.activations[begin] = input
 
-    for i in 1:length(model.sizes)
-        model.activations[i] = model.layers[i].norm_func(model.activations[i])
+    for i in 1:length(neural_net.layers)
+        neural_net.activations[i] = neural_net.layers[i].norm_func(neural_net.activations[i])
 
-        model.Zs[i] = model.weights[i] * model.activations[i]
-        if model.use_biases[i]
-            model.Zs[i] += model.biases[i]
+        neural_net.Zs[i] = neural_net.weights[i] * neural_net.activations[i]
+        if !isnothing(neural_net.biases[i])
+            neural_net.Zs[i] += neural_net.biases[i]
 
-        model.activations[i + 1] = model.layers[i].activ_func(model.Zs[i])
+        neural_net.activations[i + 1] = neural_net.layers[i].activ_func(neural_net.Zs[i])
         end
     end
 end
