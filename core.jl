@@ -6,7 +6,7 @@ function assess!(model, inputs, labels)
     for (input, label) in zip(inputs, labels)
         model(input)
 
-        if issetequal(findall(x -> x > 0.5, model.activations[end]), label)
+        if argmax(model.activations[end]) == label[1]
             correct += 1
         end
 
