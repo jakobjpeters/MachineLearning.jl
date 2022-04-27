@@ -52,10 +52,12 @@ function (epoch::Epoch)(model, inputs, labels)
     end
 end
 
-struct Layer
+mutable struct Layer
     weight_init_func
     norm_func
     activ_func
+    weights
+    biases
 end
 
 abstract type Model end
@@ -67,8 +69,6 @@ struct Neural_Network
     precision
     learn_rates
     sizes
-    weights
-    biases
     δl_δw
     δl_δb
     activations
@@ -83,7 +83,7 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
-    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs)
+    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases)
     layers = [Layer(layer_args...) for layer_args in layers_args]
 
     Neural_Network(
@@ -93,8 +93,6 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
         precision,
         learn_rates,
         sizes,
-        weights,
-        biases,
         [convert(Matrix{precision},
             rand(weight_init_func(input_size), output_size, input_size))
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])],
@@ -110,9 +108,9 @@ function (neural_net::Neural_Network)(input)
     for i in 1:length(neural_net.layers)
         neural_net.activations[i] = neural_net.layers[i].norm_func(neural_net.activations[i])
 
-        neural_net.Zs[i] = neural_net.weights[i] * neural_net.activations[i]
-        if !isnothing(neural_net.biases[i])
-            neural_net.Zs[i] += neural_net.biases[i]
+        neural_net.Zs[i] = neural_net.layers[i].weights * neural_net.activations[i]
+        if !isnothing(neural_net.layers[i].biases)
+            neural_net.Zs[i] += neural_net.layers[i].biases
 
         neural_net.activations[i + 1] = neural_net.layers[i].activ_func(neural_net.Zs[i])
         end
