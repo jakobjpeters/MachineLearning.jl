@@ -60,6 +60,7 @@ mutable struct Layer
     biases
     δl_δw
     δl_δb
+    Zs
 end
 
 abstract type Model end
@@ -72,7 +73,6 @@ struct Neural_Network
     learn_rates
     sizes
     activations
-    Zs
 end
 
 function Neural_Network(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
@@ -87,8 +87,9 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
         rand(weight_init_func(input_size), output_size, input_size))
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     δl_δb = deepcopy(biases)
+    Zs = [zeros(precision, size) for size in sizes]
 
-    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb)
+    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb, Zs)
     layers = [Layer(layer_args...) for layer_args in layers_args]
 
     Neural_Network(
@@ -98,7 +99,6 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
         precision,
         learn_rates,
         sizes,
-        [zeros(precision, size) for size in tmp_sizes],
         [zeros(precision, size) for size in tmp_sizes]
     )
 end
@@ -109,11 +109,11 @@ function (neural_net::Neural_Network)(input)
     for i in 1:length(neural_net.layers)
         neural_net.activations[i] = neural_net.layers[i].norm_func(neural_net.activations[i])
 
-        neural_net.Zs[i] = neural_net.layers[i].weights * neural_net.activations[i]
+        neural_net.layers[i].Zs = neural_net.layers[i].weights * neural_net.activations[i]
         if !isnothing(neural_net.layers[i].biases)
-            neural_net.Zs[i] += neural_net.layers[i].biases
+            neural_net.layers[i].Zs += neural_net.layers[i].biases
 
-        neural_net.activations[i + 1] = neural_net.layers[i].activ_func(neural_net.Zs[i])
+        neural_net.activations[i + 1] = neural_net.layers[i].activ_func(neural_net.layers[i].Zs)
         end
     end
 end
