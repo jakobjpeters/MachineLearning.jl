@@ -32,7 +32,7 @@ end
 
 function tanh(xs)
     exs = exp.(xs)
-    e_xs = xs.^-1
+    e_xs = exs.^-1
     return (exs .- e_xs) ./ (exs .+ e_xs)
 end
 
