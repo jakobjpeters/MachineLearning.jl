@@ -106,14 +106,14 @@ end
 function (neural_net::Neural_Network)(input)
     neural_net.activations[begin] = input
 
-    for i in 1:length(neural_net.layers)
-        neural_net.activations[i] = neural_net.layers[i].norm_func(neural_net.activations[i])
+    for (i, layer) in enumerate(neural_net.layers)
+        neural_net.activations[i] = layer.norm_func(neural_net.activations[i])
 
-        neural_net.layers[i].Zs = neural_net.layers[i].weights * neural_net.activations[i]
-        if !isnothing(neural_net.layers[i].biases)
-            neural_net.layers[i].Zs += neural_net.layers[i].biases
+        layer.Zs = layer.weights * neural_net.activations[i]
+        if !isnothing(layer.biases)
+            layer.Zs += layer.biases
 
-        neural_net.activations[i + 1] = neural_net.layers[i].activ_func(neural_net.layers[i].Zs)
+        neural_net.activations[i + 1] = layer.activ_func(layer.Zs)
         end
     end
 end
