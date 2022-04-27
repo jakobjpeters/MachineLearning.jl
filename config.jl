@@ -47,17 +47,20 @@ model = Neural_Network(
 
     # weight initialization functions
     # [xavier, he]
+    # he is untested
     [xavier, xavier],
 
-    # normalization functions
+    # layer normalization functions
     # [z_score, demean, identity]
-    [z_score, z_score],
+    # not useful with current data and architecture
+    # not currently "plugged in"
+    [identity, identity],
 
     # activation functions
-    # [sigmoid, tanh, identity]
+    # [tanh, sigmoid, identity]
     # identity is untested
     # relu does not work yet
-    [sigmoid, sigmoid],
+    [tanh, tanh],
 
     # learn rates
     [0.01, 0.01],
