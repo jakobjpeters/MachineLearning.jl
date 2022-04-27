@@ -84,7 +84,8 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
-    layers = [Layer(weight_init_func, norm_func, activ_func) for (weight_init_func, norm_func, activ_func) in zip(weight_init_funcs, norm_funcs, activ_funcs)]
+    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs)
+    layers = [Layer(layer_args...) for layer_args in layers_args]
 
     Neural_Network(
         layers,
