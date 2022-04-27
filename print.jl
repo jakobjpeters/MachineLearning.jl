@@ -3,7 +3,7 @@ function print_data(data, dataset_name)
     print_images(data.inputs, data.labels, mapping(dataset_name), [rand(1:data.length) for i in 1:10])
 end
 
-function print_info(dataset, model, epochs)
+function print_info(dataset, epochs, model)
     println("Dataset: ", dataset)
     println()
     println("Input size: ", model.input_size)
@@ -21,10 +21,10 @@ function print_info(dataset, model, epochs)
     println("Weight Initialization functions: ", [layer.weight_init_func for layer in model.layers])
 end
 
-function print_assess(model, epoch, data_splits)
+function print_assess(dataset, epoch, model)
     println("\nEpoch: ", epoch)
     # mse not type stable
-    for (i, data) in enumerate(data_splits)
+    for (i, data) in enumerate(dataset)
         accuracy, loss = assess!(model, data.inputs, data.labels)
         println("    Split ", i, "\tAccuracy: ", round(accuracy, digits = 4), "\t\tLoss: ", round(loss, digits = 8))
     end

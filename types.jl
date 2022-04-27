@@ -31,15 +31,14 @@ function split_data(inputs, labels, splits)
     return [Data(view(inputs, start + 1:stop), view(labels, start + 1:stop)) for (start, stop) in zip(starts, stops)]
 end
 
-function split_data(data, splits)
-    return split_data(data.inputs, data.labels, splits)
+function load_dataset(name::AbstractString, splits)
+    dataset = load_emnist(name)
+    return split_data(dataset.inputs, dataset.labels, splits)
 end
 
-struct Epoch # {T<:Integer}
-    batch_size # ::T
+struct Epoch{T<:Integer}
+    batch_size::T
     shuffle::Bool
-
-    Epoch(; batch_size = 1, shuffle = true) = new(batch_size, shuffle)
 end
 
 function (epoch::Epoch)(model, inputs, labels)

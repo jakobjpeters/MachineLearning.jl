@@ -103,13 +103,13 @@ function print_image(image::Array{T, 1}, label::Char = ' ') where T <: Real
     println(label, "\n")
 end
 
-function load_dataset(dataset_name)
+function load_emnist(name)
     dir = pwd() * "/emnist/decompressed/"
 
-    inputs = read_images(dir * dataset_name * "_train_images.bin", 16)
-    append!(inputs, read_images(dir * dataset_name * "_test_images.bin", 16))
-    labels = read_labels(dir * dataset_name * "_train_labels.bin", 8, 10)
-    append!(labels, read_labels(dir * dataset_name * "_test_labels.bin", 8, 10))
+    inputs = read_images(dir * name * "_train_images.bin", 16)
+    append!(inputs, read_images(dir * name * "_test_images.bin", 16))
+    labels = read_labels(dir * name * "_train_labels.bin", 8, 10)
+    append!(labels, read_labels(dir * name * "_test_labels.bin", 8, 10))
 
     return Data(inputs, labels)
 end
