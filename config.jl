@@ -28,10 +28,11 @@ model = Neural_Network(
     [xavier, xavier],
 
     # [z_score, demean, identity]
-    [z_score, identity],
+    [z_score, z_score],
 
-    # [sigmoid, tanh]
+    # [sigmoid, tanh, identity]
     # relu does not work yet
+    # identity is untested
     [sigmoid, sigmoid],
 
     [0.01, 0.01],

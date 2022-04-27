@@ -49,6 +49,7 @@ function deriv(f::typeof(softmax), xs)
 
 end
 
+# also for "normalization"
 function identity(x)
     return deepcopy(x)
 end
