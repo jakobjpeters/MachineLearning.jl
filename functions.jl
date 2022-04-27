@@ -26,18 +26,18 @@ function relu(xs)
     return max.(0, xs)
 end
 
-function deriv(f::typeof(relu), xs)
-    return [x > 0 ? 1 : 0 for x in xs]
+function deriv(::typeof(relu), xs)
+    return map(x -> x > 0 ? 1 : 0, xs)
 end
 
 function tanh(xs)
     exs = exp.(xs)
-    e_xs = exp.(-xs)
+    e_xs = xs.^-1
     return (exs .- e_xs) ./ (exs .+ e_xs)
 end
 
 function deriv(f::typeof(tanh), xs)
-    return 1 .- f(xs).^2
+    return 1 .- f(xs) .^ 2
 end
 
 function softmax(xs)
@@ -45,7 +45,7 @@ function softmax(xs)
     # return esp_xs ./ sum(esp_xs)
 end
 
-function deriv(f::typeof(softmax), xs)
+function deriv(::typeof(softmax), xs)
 
 end
 
@@ -61,7 +61,7 @@ end
 # Error Functions And Derivatives
 
 function squared_error(prediction, label)
-    return error(prediction, label).^2
+    return error(prediction, label) .^ 2
 end
 
 function deriv(f::typeof(squared_error), prediction, label)

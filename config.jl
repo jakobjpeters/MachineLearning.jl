@@ -23,13 +23,13 @@ const dataset = load_dataset(
     [80, 20]
 )
 
-const epochs = [Epoch(
+const epochs = map(i -> Epoch(
     # batch size
     10,
     
     # shuffle data
-    true)
-for i in 1:100]
+    true
+), 1:100)
 
 model = Neural_Network(
 

@@ -111,9 +111,9 @@ function (neural_net::Neural_Network)(input)
         layer.Zs = layer.weights * neural_net.activations[i]
         if !isnothing(layer.biases)
             layer.Zs += layer.biases
-
-        neural_net.activations[i + 1] = layer.activ_func(layer.Zs)
         end
+        
+        neural_net.activations[i + 1] = layer.activ_func(layer.Zs)
     end
 end
 
