@@ -103,17 +103,14 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
 end
 
 function (neural_net::Neural_Network)(input)
-    neural_net.activations[begin] = input
-
     for (i, layer) in enumerate(neural_net.layers)
-        neural_net.activations[i] = layer.norm_func(neural_net.activations[i])
-
-        layer.Zs = layer.weights * neural_net.activations[i]
+        prev_activations = layer === neural_net.layers[begin] ? input : neural_net.activations[i]
+        layer.Zs = layer.weights * prev_activations
         if !isnothing(layer.biases)
             layer.Zs += layer.biases
+
+        neural_net.activations[i + 1] = layer.Zs |> layer.activ_func # |> layer.norm_func
         end
-        
-        neural_net.activations[i + 1] = layer.activ_func(layer.Zs)
     end
 end
 

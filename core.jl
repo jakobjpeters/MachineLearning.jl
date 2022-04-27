@@ -25,6 +25,10 @@ function backpropagate!(model, inputs, labels)
         for (layer, activations) in zip(reverse(model.layers), reverse(model.activations[begin:end - 1]))
             δl_δb = δl_δa .* deriv(layer.activ_func, layer.Zs)
 
+            if layer === model.layers[begin]
+                activations = input
+            end
+
             layer.δl_δw -= δl_δb * transpose(activations)
             if !isnothing(layer.biases)
                 layer.δl_δb -= δl_δb
