@@ -25,9 +25,9 @@ function backpropagate!(model, inputs, labels)
         for i in reverse(1:length(model.layers))
             δl_δb = δl_δa .* deriv(model.layers[i].activ_func, model.Zs[i])
 
-            model.δl_δw[i] -= δl_δb * transpose(model.activations[i])
+            model.layers[i].δl_δw -= δl_δb * transpose(model.activations[i])
             if !isnothing(model.layers[i].biases)
-                model.δl_δb[i] -= δl_δb
+                model.layers[i].δl_δb -= δl_δb
             end
 
             if i == 1
@@ -39,12 +39,12 @@ function backpropagate!(model, inputs, labels)
     end
 
     for i in 1:length(model.layers)
-        model.layers[i].weights += model.learn_rates[i] * model.δl_δw[i]
-        fill!(model.δl_δw[i], 0.0)
+        model.layers[i].weights += model.learn_rates[i] * model.layers[i].δl_δw
+        fill!(model.layers[i].δl_δw, 0.0)
 
         if !isnothing(model.layers[i].biases)
-            model.layers[i].biases += model.learn_rates[i] * model.δl_δb[i]
-            fill!(model.δl_δb[i], 0.0)
+            model.layers[i].biases += model.learn_rates[i] * model.layers[i].δl_δb
+            fill!(model.layers[i].δl_δb, 0.0)
         end
     end
 end
