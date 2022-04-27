@@ -7,13 +7,16 @@ seed!(1)
 # GUI not implemented yet
 const display = terminal
 
-# dataset name
+# EMNIST dataset name
 # ["mnist", "balanced", "digits", "bymerge", "byclass"]
 # 'letters' is broken
 const dataset_name = "mnist"
 
 const dataset = load_dataset(
     dataset_name,
+
+    # preprocessing function
+    z_score,
 
     # dataset split percentages
     # must add to 100

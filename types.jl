@@ -1,8 +1,8 @@
 
-struct Data{T, S<:Integer}
+struct Data{T, S, R<:Integer}
     inputs::T
-    labels::T
-    length::S
+    labels::S
+    length::R
 end
 
 function Data(inputs, labels)
@@ -31,9 +31,10 @@ function split_data(inputs, labels, splits)
     return [Data(view(inputs, start + 1:stop), view(labels, start + 1:stop)) for (start, stop) in zip(starts, stops)]
 end
 
-function load_dataset(name::AbstractString, splits)
+function load_dataset(name, preprocess, splits)
     dataset = load_emnist(name)
-    return split_data(dataset.inputs, dataset.labels, splits)
+    prep_inputs = map(preprocess, dataset.inputs)
+    return split_data(prep_inputs, dataset.labels, splits)
 end
 
 struct Epoch{T<:Integer}
