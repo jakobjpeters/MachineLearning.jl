@@ -39,11 +39,11 @@ function backpropagate!(model, inputs, labels)
     end
 
     for (i, layer) in enumerate(model.layers)
-        layer.weights += model.learn_rates[i] * layer.δl_δw
-        fill!(model.layers[i].δl_δw, 0.0)
+        layer.weights += layer.learn_rate * layer.δl_δw
+        fill!(layer.δl_δw, 0.0)
 
         if !isnothing(layer.biases)
-            layer.biases += model.learn_rates[i] * layer.δl_δb
+            layer.biases += layer.learn_rate * layer.δl_δb
             fill!(layer.δl_δb, 0.0)
         end
     end

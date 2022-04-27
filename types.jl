@@ -61,6 +61,7 @@ mutable struct Layer
     δl_δw
     δl_δb
     Zs
+    learn_rate
 end
 
 abstract type Model end
@@ -70,7 +71,6 @@ struct Neural_Network
     cost_func
     input_size
     precision
-    learn_rates
     sizes
     activations
 end
@@ -89,7 +89,7 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
     δl_δb = deepcopy(biases)
     Zs = [zeros(precision, size) for size in sizes]
 
-    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb, Zs)
+    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb, Zs, learn_rates)
     layers = [Layer(layer_args...) for layer_args in layers_args]
 
     Neural_Network(
@@ -97,7 +97,6 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
         cost_func,
         input_size,
         precision,
-        learn_rates,
         sizes,
         [zeros(precision, size) for size in tmp_sizes]
     )
