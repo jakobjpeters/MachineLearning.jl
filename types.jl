@@ -84,8 +84,8 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
     biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
     δl_δw = [convert(Matrix{precision},
-        rand(weight_init_func(input_size), output_size, input_size))
-            for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
+        zeros(output_size, input_size))
+            for (input_size, output_size) in zip(tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     δl_δb = deepcopy(biases)
     Zs = [zeros(precision, size) for size in sizes]
 
