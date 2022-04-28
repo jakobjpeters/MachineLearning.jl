@@ -60,6 +60,7 @@ mutable struct Layer
     biases
     δl_δw
     δl_δb
+    activations
     Zs
     learn_rate
 end
@@ -72,7 +73,6 @@ struct Neural_Network
     input_size
     precision
     sizes
-    activations
 end
 
 function Neural_Network(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
@@ -87,9 +87,10 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
         zeros(output_size, input_size))
             for (input_size, output_size) in zip(tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     δl_δb = deepcopy(biases)
+    activations = [zeros(precision, size) for size in sizes]
     Zs = [zeros(precision, size) for size in sizes]
 
-    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb, Zs, learn_rates)
+    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb, activations, Zs, learn_rates)
     layers = [Layer(layer_args...) for layer_args in layers_args]
 
     Neural_Network(
@@ -97,19 +98,18 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
         cost_func,
         input_size,
         precision,
-        sizes,
-        [zeros(precision, size) for size in tmp_sizes]
+        sizes
     )
 end
 
 function (neural_net::Neural_Network)(input)
     for (i, layer) in enumerate(neural_net.layers)
-        prev_activations = layer === neural_net.layers[begin] ? input : neural_net.activations[i]
+        prev_activations = layer === neural_net.layers[begin] ? input : neural_net.layers[i - 1].activations
         layer.Zs = layer.weights * prev_activations
         if !isnothing(layer.biases)
             layer.Zs += layer.biases
 
-        neural_net.activations[i + 1] = layer.Zs |> layer.activ_func # |> layer.norm_func
+        layer.activations = layer.Zs |> layer.activ_func # |> layer.norm_func
         end
     end
 end

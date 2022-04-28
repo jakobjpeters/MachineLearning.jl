@@ -6,11 +6,11 @@ function assess!(model, inputs, labels)
     for (input, label) in zip(inputs, labels)
         model(input)
 
-        if argmax(model.activations[end]) == label[1]
+        if argmax(model.layers[end].activations) == label[1]
             correct += 1
         end
 
-        error += mean(model.cost_func(model.activations[end], label))
+        error += mean(model.cost_func(model.layers[end].activations, label))
     end
 
     return correct / length(labels), error / length(labels)
@@ -19,17 +19,15 @@ end
 function backpropagate!(model, inputs, labels)
     for (input, label) in zip(inputs, labels)
         model(input)
+        activations = deepcopy([layer.activations for layer in model.layers[begin:end - 1]])
+        prev_activations = push!(reverse(activations), input)
 
-        δl_δa = deriv(model.cost_func, model.activations[end], label)
+        δl_δa = deriv(model.cost_func, model.layers[end].activations, label)
 
-        for (layer, activations) in zip(reverse(model.layers), reverse(model.activations[begin:end - 1]))
+        for (layer, prev_activation) in zip(reverse(model.layers), prev_activations)
             δl_δb = δl_δa .* deriv(layer.activ_func, layer.Zs)
 
-            if layer === model.layers[begin]
-                activations = input
-            end
-
-            layer.δl_δw -= δl_δb * transpose(activations)
+            layer.δl_δw -= δl_δb * transpose(prev_activation)
             if !isnothing(layer.biases)
                 layer.δl_δb -= δl_δb
             end
@@ -42,7 +40,7 @@ function backpropagate!(model, inputs, labels)
         end
     end
 
-    for (i, layer) in enumerate(model.layers)
+    for layer in model.layers
         layer.weights += layer.learn_rate * layer.δl_δw
         fill!(layer.δl_δw, 0.0)
 
