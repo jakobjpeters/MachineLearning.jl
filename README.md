@@ -24,6 +24,7 @@ Current Features
         Activation functions
             sigmoid
             tanh
+            relu
             identity (untested)
         Use biases
         Sizes
@@ -60,7 +61,6 @@ Planned Features:
 
 Bugs:
     EMNIST 'letters' dataset labels are incorrect
-    'relu' doesn't work
     'print_data' doesn't work
 
 Other TODOs:

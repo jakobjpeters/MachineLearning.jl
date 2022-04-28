@@ -60,7 +60,6 @@ model = Neural_Network(
     # layer activation functions
     # [tanh, sigmoid, identity]
     # identity is untested
-    # relu does not work yet
     [tanh, tanh],
 
     # layer learn rates

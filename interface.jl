@@ -8,7 +8,7 @@ function terminal(dataset_name, dataset, epochs, model)
     # train neural net
     for (i, epoch) in enumerate(epochs)
         @time epoch(model, dataset[1].inputs, dataset[1].labels)
-        @time print_assess(dataset, i, model)
+        print_assess(dataset, i, model)
     end
 end
 
