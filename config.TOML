@@ -1,0 +1,138 @@
+
+# for random seed, use 'missing'
+seed = 1
+
+# ["terminal", "gui"]
+# "gui" not implemented yet
+display = "terminal"
+
+
+[data]
+
+# EMNIST
+# ["mnist", "balanced", "digits", "bymerge", "byclass", "letters"]
+# "letters" is broken
+name = "mnist"
+
+# ["z_score", "demean", "identity"]
+preprocessing_function = "z_score"
+
+# must add to 100
+split_percentages = [80, 20]
+
+
+[epochs]
+n = 100
+batch_size = 10
+shuffle_data = "true"
+
+
+[model]
+
+# ["squared_error"]
+cost_function = "squared_error"
+
+# ["Float16", "Float32", "Float64"]
+# not implemented yet
+precision = "Float64"
+
+
+[layers]
+
+# [xavier, he]
+# he is untested
+weight_initialization_functions = ["xavier", "xavier"]
+
+use_biases = [true, true]
+
+# [tanh, sigmoid, identity]
+# identity is untested
+activation_functions = ["tanh", "tanh"]
+
+# the last layer size ("missing") is retrieved automatically
+sizes = [28, "missing"]
+
+learn_rates = [0.01, 0.01]
+
+# [z_score, demean, identity]
+# not currently "plugged in"
+normalization_functions = ["identity", "identity"]
+
+
+
+
+
+
+
+# # random seed
+# seed!(1)
+
+# # display
+# # [terminal]
+# # GUI not implemented yet
+# const display = terminal
+
+# # EMNIST dataset name
+# # ["mnist", "balanced", "digits", "bymerge", "byclass"]
+# # 'letters' is broken
+# const dataset_name = "mnist"
+# const output_size = length(mapping(dataset_name))
+
+# const dataset = load_dataset(
+#     dataset_name,
+
+#     # preprocessing function
+#     z_score,
+
+#     # split percentages
+#     # must add to 100
+#     [80, 20]
+# )
+
+# const epochs = map(i -> Epoch(
+#     # batch size
+#     10,
+    
+#     # shuffle data
+#     true
+# ), 1:100)
+
+# model = Neural_Network(
+
+#     # model cost function
+#     squared_error,
+
+#     # model input size
+#     # cannot be changed
+#     # TODO: make automatic
+#     784,
+
+#     # model precision
+#     # not implemented yet
+#     Float64,
+
+#     # layer weight initialization functions
+#     # [xavier, he]
+#     # he is untested
+#     [xavier, xavier],
+
+#     # layer normalization functions
+#     # [z_score, demean, identity]
+#     # not currently "plugged in"
+#     [identity, identity],
+
+#     # layer activation functions
+#     # [tanh, sigmoid, identity]
+#     # identity is untested
+#     [tanh, tanh],
+
+#     # layer learn rates
+#     [0.01, 0.01],
+
+#     # layer sizes
+#     # output_size cannot be changed
+#     [28, output_size],
+
+#     # use biases
+#     [true, true]
+# )
