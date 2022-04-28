@@ -1,7 +1,6 @@
 
 function terminal(dataset_name, dataset, epochs, model)
 
-    # print_data(dataset, dataset.name)
     print_info(dataset_name, epochs, model)
 
     print_assess(dataset, 0, model)
