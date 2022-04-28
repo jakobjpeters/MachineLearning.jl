@@ -19,15 +19,15 @@ end
 function backpropagate!(model, inputs, labels)
     for (input, label) in zip(inputs, labels)
         model(input)
-        activations = deepcopy([layer.activations for layer in model.layers[begin:end - 1]])
-        prev_activations = push!(reverse(activations), input)
 
         δl_δa = deriv(model.cost_func, model.layers[end].activations, label)
 
-        for (layer, prev_activation) in zip(reverse(model.layers), prev_activations)
+        for (i, layer) in enumerate(reverse(model.layers))
             δl_δb = δl_δa .* deriv(layer.activ_func, layer.Zs)
 
-            layer.δl_δw -= δl_δb * transpose(prev_activation)
+            prev_activations = layer === model.layers[begin] ? input : model.layers[end - i].activations
+
+            layer.δl_δw -= δl_δb * transpose(prev_activations)
             if !isnothing(layer.biases)
                 layer.δl_δb -= δl_δb
             end
