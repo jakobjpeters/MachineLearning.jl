@@ -9,6 +9,9 @@ Current Features
         Splitting into train, validate, holdout, etc sets
     Epochs
         Batch size
+            stochastic = 1
+            mini-batch = 1 < x < length(inputs)
+            batch = length(inputs)
         Data shuffle
     Model
         Cost function
