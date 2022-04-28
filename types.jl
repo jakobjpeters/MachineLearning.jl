@@ -7,9 +7,7 @@ struct Data
 end
 
 function split_data(inputs, labels, splits)
-    if sum(splits) != 100
-        throw(ErrorException("Splits must add to 100 (percent)"))
-    end
+    sum(splits) != 100 && error("Splits must add to 100 (percent)")
 
     starts = Vector{Int64}()
     i = 0

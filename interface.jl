@@ -13,5 +13,5 @@ function terminal(dataset_name, dataset, epochs, model)
 end
 
 function gui(dataset, epochs, model)
-    throw(ErrorException("GUI not implemented yet."))
+    error("GUI not implemented yet.")
 end
