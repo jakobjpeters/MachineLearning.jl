@@ -40,7 +40,7 @@ end
 
 function tanh(xs)
     exs = exp.(xs)
-    e_xs = exs.^-1
+    e_xs = inv.(exs)
     return (exs .- e_xs) ./ (exs .+ e_xs)
 end
 
