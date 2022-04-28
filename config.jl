@@ -53,7 +53,6 @@ model = Neural_Network(
 
     # layer normalization functions
     # [z_score, demean, identity]
-    # not useful with current data and architecture
     # not currently "plugged in"
     [identity, identity],
 

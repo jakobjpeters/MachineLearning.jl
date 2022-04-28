@@ -1,16 +1,9 @@
 
-struct Data{T, S, R<:Integer}
-    inputs::T
-    labels::S
-    length::R
-end
+struct Data
+    inputs
+    labels
 
-function Data(inputs, labels)
-    if length(inputs) != length(labels)
-        throw(ErrorException("inputs and labels must be the same length"))
-    end
-
-    Data(inputs, labels, length(inputs))
+    Data(inputs, labels) = length(inputs) == length(labels) ? new(inputs, labels) : error("Inputs and labels must be the same length")
 end
 
 function split_data(inputs, labels, splits)
@@ -50,7 +43,7 @@ struct Epoch{T<:Integer}
 end
 
 function (epoch::Epoch)(model, inputs, labels)
-    if epoch.shuffle && epoch.batch_size != model.input_size
+    if epoch.shuffle && epoch.batch_size < length(inputs)
         inputs, labels = shuffle_data(inputs, labels)
     end
 
@@ -61,17 +54,17 @@ function (epoch::Epoch)(model, inputs, labels)
     end
 end
 
-mutable struct Layer
-    weight_init_func
-    norm_func
-    activ_func
-    weights
-    biases
-    δl_δw
-    δl_δb
-    activations
-    Zs
-    learn_rate
+# mutable struct Layer{T<:Function, S<:Function, R<:Function, Q<:AbstractFloat, P::AbstractFloat}
+mutable struct Layer{T<:Function, S<:Function, R<:AbstractFloat, Q<:AbstractFloat}
+    norm_func::T
+    activ_func::S
+    weights::Matrix{R}
+    biases::Vector{R}
+    δl_δw::Matrix{R}
+    δl_δb::Vector{R}
+    activations::Vector{R}
+    Zs::Vector{R}
+    learn_rate::Q
 end
 
 abstract type Model end
@@ -79,9 +72,7 @@ abstract type Model end
 struct Neural_Network
     layers::Vector{Layer}
     cost_func
-    input_size
     precision
-    sizes
 end
 
 function Neural_Network(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
@@ -99,15 +90,13 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
     activations = [zeros(precision, size) for size in sizes]
     Zs = [zeros(precision, size) for size in sizes]
 
-    layers_args = zip(weight_init_funcs, norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb, activations, Zs, learn_rates)
+    layers_args = zip(norm_funcs, activ_funcs, weights, biases, δl_δw, δl_δb, activations, Zs, learn_rates)
     layers = [Layer(layer_args...) for layer_args in layers_args]
 
     Neural_Network(
         layers,
         cost_func,
-        input_size,
         precision,
-        sizes
     )
 end
 
