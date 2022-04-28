@@ -27,22 +27,12 @@ include("core.jl")
 include("emnist.jl")
 include("interface.jl")
 
-function main()
-    config = TOML.parsefile("config.TOML")
 
-    # use metaprogramming?
-    seed = config["seed"]
-    display = config["display"]
-    data = config["data"]
-    epochs = config["epochs"]
-    model = config["model"]
-    layers = config["layers"]
-
+function unpack(seed, display, data, epochs, model, layers)
     string_to_func = string -> getfield(@__MODULE__, Symbol(string))
     strings_to_funcs = strings -> map(string_to_func, strings)
     float = Dict("Float16" => Float16, "Float32" => Float32, "Float64" => Float64)
 
-    ismissing(seed) ? seed!() : seed!(seed)
     layers["sizes"][end] = length(mapping(data["name"]))
     display = string_to_func(display)
 
@@ -60,6 +50,15 @@ function main()
         layers["use_biases"]
     )
 
+    return seed, display, dataset, epochs, model
+end
+
+function main()
+    config = TOML.parsefile("config.TOML")
+    seed, display, dataset, epochs, model = unpack(config["seed"], config["display"], config["data"], config["epochs"], config["model"], config["layers"])
+
+    ismissing(seed) ? seed!() : seed!(seed)
+
     display(config)
     display(dataset, 0, model)
 
@@ -69,6 +68,7 @@ function main()
         display(dataset, i, model)
     end
 
+    return config, model
 end
 
 main()
