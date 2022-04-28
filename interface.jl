@@ -1,15 +1,21 @@
 
-function terminal(dataset_name, dataset, epochs, model)
-
-    print_info(dataset_name, epochs, model)
-
-    print_assess(dataset, 0, model)
-
-    # train neural net
-    for (i, epoch) in enumerate(epochs)
-        @time epoch(model, dataset[1].inputs, dataset[1].labels)
-        print_assess(dataset, i, model)
+function terminal(config)
+    println()
+    for key in keys(config)
+        println(key, ":")
+        println(config[key])
+        println()
     end
+end
+
+function terminal(dataset, epoch, model)
+    println("\nEpoch: ", epoch)
+    # mse not type stable
+    for (i, data) in enumerate(dataset)
+        accuracy, loss = assess!(model, data.inputs, data.labels)
+        println("    Split ", i, "\tAccuracy: ", round(accuracy, digits = 4), "\t\tLoss: ", round(loss, digits = 8))
+    end
+    println()
 end
 
 function gui(dataset, epochs, model)

@@ -25,7 +25,6 @@ include("functions.jl")
 include("types.jl")
 include("core.jl")
 include("emnist.jl")
-include("print.jl")
 include("interface.jl")
 
 function main()
@@ -44,12 +43,10 @@ function main()
     float = Dict("Float16" => Float16, "Float32" => Float32, "Float64" => Float64)
 
     ismissing(seed) ? seed!() : seed!(seed)
+    layers["sizes"][end] = length(mapping(data["name"]))
     display = string_to_func(display)
 
-    preprocess = string_to_func(data["preprocessing_function"])
-    layer_sizes = vcat(layers["sizes"][begin:end - 1], length(mapping(data["name"])))
-
-    dataset = load_dataset(data["name"], preprocess, data["split_percentages"])
+    dataset = load_dataset(data["name"], string_to_func(data["preprocessing_function"]), data["split_percentages"])
     epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"])), 1:epochs["n"])
     model = Neural_Network(
         string_to_func(model["cost_function"]),
@@ -59,11 +56,18 @@ function main()
         strings_to_funcs(layers["normalization_functions"]),
         strings_to_funcs(layers["activation_functions"]),
         layers["learn_rates"],
-        layer_sizes,
+        layers["sizes"],
         layers["use_biases"]
     )
 
-    display(data["name"], dataset, epochs, model)
+    display(config)
+    display(dataset, 0, model)
+
+    # train neural net
+    for (i, epoch) in enumerate(epochs)
+        @time epoch(model, dataset[1].inputs, dataset[1].labels)
+        display(dataset, i, model)
+    end
 
 end
 
