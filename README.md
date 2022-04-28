@@ -70,6 +70,7 @@ Other TODOs:
     Optimize
         Type stability
         Runtime & space complexity
+            Vectorize feed-forward and backpropagation
         types.jl
             Better parametric typing
             Some lines are too long
