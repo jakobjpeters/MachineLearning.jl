@@ -16,6 +16,7 @@ import TOML
 import Distributions: Normal
 import Statistics: mean, std
 import Random: shuffle!, seed!
+import Printf: @printf
 
 # GUI
 

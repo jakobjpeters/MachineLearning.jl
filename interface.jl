@@ -13,11 +13,15 @@ function terminal(dataset, epoch, model)
     # mse not type stable
     for (i, data) in enumerate(dataset)
         accuracy, loss = assess!(model, data.inputs, data.labels)
-        println("    Split ", i, "\tAccuracy: ", round(accuracy, digits = 4), "\t\tLoss: ", round(loss, digits = 8))
+        @printf("\tSplit: %s\tAccuracy: %.4f\tLoss: %.4f\n", i, accuracy, loss)
     end
     println()
 end
 
-function gui(dataset, epochs, model)
-    error("GUI not implemented yet.")
+function gui(config)
+    return error("GUI not implemented yet.")
+end
+
+function gui(dataset, epoch, model)
+    return error("GUI not implemented yet.")
 end
