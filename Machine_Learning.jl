@@ -28,8 +28,6 @@ include("print.jl")
 include("interface.jl")
 include("config.jl")
 
-init_emnist()
-
 display(dataset_name, dataset, epochs, model)
 
 end

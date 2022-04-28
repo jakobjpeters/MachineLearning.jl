@@ -114,7 +114,7 @@ function load_emnist(name)
     return Data(inputs, labels)
 end
 
-function init_emnist()
+function init()
 
     if !isdir("emnist/decompressed")
         mkpath("emnist/decompressed")
@@ -180,3 +180,5 @@ function init_emnist()
         end
     end
 end
+
+init()
