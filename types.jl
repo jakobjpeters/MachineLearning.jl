@@ -52,6 +52,8 @@ function (epoch::Epoch)(model, inputs, labels)
         backpropagate!(model, view(inputs, first:last), view(labels, first:last))
         apply_gradient!(model.layers, epoch.batch_size)
     end
+
+    return nothing
 end
 
 # mutable struct Layer{T<:Function, S<:Function, R<:Function, Q<:AbstractFloat, P::AbstractFloat}
@@ -110,6 +112,8 @@ function (neural_net::Neural_Network)(input)
         layer.activations = layer.Zs |> layer.activ_func # |> layer.norm_func
         end
     end
+
+    return nothing
 end
 
 struct GAN <: Model

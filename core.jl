@@ -39,6 +39,8 @@ function backpropagate!(model, inputs, labels)
             δl_δa = transpose(layer.weights) * δl_δb
         end
     end
+
+    return nothing
 end
 
 function apply_gradient!(layers, batch_size)
@@ -52,4 +54,6 @@ function apply_gradient!(layers, batch_size)
             fill!(layer.δl_δb, 0.0)
         end
     end
+
+    return nothing
 end
