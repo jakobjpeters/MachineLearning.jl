@@ -1,7 +1,7 @@
 
 # Math Functions
 
-function error(prediction, label)
+function _error(prediction, label)
     error = deepcopy(prediction)
 
     for i in label
@@ -9,6 +9,14 @@ function error(prediction, label)
     end
 
     return error
+end
+
+function identity(x)
+    return deepcopy(x)
+end
+
+function deriv(f::typeof(identity), x)
+    return ones(size(x))
 end
 
 # Activation Functions And Derivatives
@@ -49,23 +57,14 @@ function deriv(::typeof(softmax), xs)
 
 end
 
-# also for "normalization"
-function identity(x)
-    return deepcopy(x)
-end
-
-function deriv(f::typeof(identity), x)
-    return ones(size(x))
-end
-
 # Error Functions And Derivatives
 
 function squared_error(prediction, label)
-    return error(prediction, label) .^ 2
+    return _error(prediction, label) .^ 2
 end
 
 function deriv(f::typeof(squared_error), prediction, label)
-    return 2 * error(prediction, label)
+    return 2 * _error(prediction, label)
 end
 
 # Normalization functions
