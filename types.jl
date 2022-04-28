@@ -37,6 +37,13 @@ function load_dataset(name, preprocess, splits)
     return split_data(prep_inputs, dataset.labels, splits)
 end
 
+# make shuffle in place
+function shuffle_data(inputs, labels)
+    data = collect(zip(inputs, labels))
+    shuffle!(data)
+    return getindex.(data, 1), getindex.(data, 2)
+end
+
 struct Epoch{T<:Integer}
     batch_size::T
     shuffle::Bool
