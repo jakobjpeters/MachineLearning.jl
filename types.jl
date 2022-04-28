@@ -54,8 +54,10 @@ function (epoch::Epoch)(model, inputs, labels)
         inputs, labels = shuffle_data(inputs, labels)
     end
 
-    for i in 1:epoch.batch_size:length(inputs)
-        backpropagate!(model, view(inputs, i:i + epoch.batch_size - 1), view(labels, i:i + epoch.batch_size - 1))
+    for first in 1:epoch.batch_size:length(inputs)
+        last = min(length(inputs), first + epoch.batch_size - 1)
+        backpropagate!(model, view(inputs, first:last), view(labels, first:last))
+        apply_gradient!(model.layers, epoch.batch_size)
     end
 end
 

@@ -39,13 +39,16 @@ function backpropagate!(model, inputs, labels)
             δl_δa = transpose(layer.weights) * δl_δb
         end
     end
+end
 
-    for layer in model.layers
-        layer.weights += layer.learn_rate * layer.δl_δw
+function apply_gradient!(layers, batch_size)
+    for layer in layers
+        scale = layer.learn_rate / batch_size
+
+        layer.weights += layer.δl_δw * scale 
         fill!(layer.δl_δw, 0.0)
-
         if !isnothing(layer.biases)
-            layer.biases += layer.learn_rate * layer.δl_δb
+            layer.biases += layer.δl_δb * scale
             fill!(layer.δl_δb, 0.0)
         end
     end
