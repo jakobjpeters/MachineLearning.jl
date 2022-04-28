@@ -11,6 +11,7 @@ const display = terminal
 # ["mnist", "balanced", "digits", "bymerge", "byclass"]
 # 'letters' is broken
 const dataset_name = "mnist"
+const output_size = length(mapping(dataset_name))
 
 const dataset = load_dataset(
     dataset_name,
@@ -18,7 +19,7 @@ const dataset = load_dataset(
     # preprocessing function
     z_score,
 
-    # dataset split percentages
+    # split percentages
     # must add to 100
     [80, 20]
 )
@@ -33,19 +34,19 @@ const epochs = map(i -> Epoch(
 
 model = Neural_Network(
 
-    # cost function
+    # model cost function
     squared_error,
 
-    # input size
+    # model input size
     # cannot be changed
     # TODO: make automatic
     784,
 
-    # precision
+    # model precision
     # not implemented yet
     Float64,
 
-    # weight initialization functions
+    # layer weight initialization functions
     # [xavier, he]
     # he is untested
     [xavier, xavier],
@@ -56,18 +57,18 @@ model = Neural_Network(
     # not currently "plugged in"
     [identity, identity],
 
-    # activation functions
+    # layer activation functions
     # [tanh, sigmoid, identity]
     # identity is untested
     # relu does not work yet
     [tanh, tanh],
 
-    # learn rates
+    # layer learn rates
     [0.01, 0.01],
 
     # layer sizes
-    # last layer cannot be changed
-    [28, length(mapping(dataset_name))],
+    # output_size cannot be changed
+    [28, output_size],
 
     # use biases
     [true, true]
