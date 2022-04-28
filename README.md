@@ -1,53 +1,54 @@
 
-Current Features:
-    Parametric configuration and hyperparameters
-        EMNIST datasets - https://www.nist.gov/itl/products-and-services/emnist-dataset
-            mnist, balanced, digits, bymerge, byclass
-        Random seed choice
-        Model
-            Epochs
-            Shuffle inputs
-            Batch size
-            Cost functions
-                squared_error
-        Layers
-            Learning rates
-            Weight initialization functions
-                xavier
-                he
-            Normalization functions
-                z_score
-                demean
-            Activation functions
-                sigmoid
-                tanh
-            Use biases
-            Sizes
+Current Features
+    Random seed
+    Data
+        Dataset loading
+            EMNIST - https://www.nist.gov/itl/products-and-services/emnist-dataset
+                mnist, balanced, digits, bymerge, byclass
+        Preprocessing
+        Splitting into train, validate, holdout, etc sets
+    Epochs
+        Batch size
+        Data shuffle
+    Model
+        Cost function
+            squared_error
+    Layers
+        Learning rates
+        Weight initialization functions
+            xavier
+            he (untested)
+        Activation functions
+            sigmoid
+            tanh
+            identity (untested)
+        Use biases
+        Sizes
 
 Planned Features:
     Graphical user interface
         Use plotting library
         Display inputs
         User created inputs
-    More
-        Machine learning models
-            Generative adversarial network
-            Regression
-        Datasets
+    Machine learning models
+        Generative adversarial network
+        Regression
+    Datasets
+    Functions
         Cost functions
         Activation functions
         Weight initialization functions
-    Parameterized floating point precision
-    Parameterized prediction function
-        Max value
-        Max n values
-        Cutoff values
-            ROC analysis?
+        Prediction
+            Max value
+            Max n values
+            Cutoff values
+                ROC analysis?
+    Floating point precision
     Visualizations
     Optimizers
     Regulizers
     Save & load models
-    Parallel processing
+    Parallel processing/threading
     Automatic differentiation?
     Documentation
     Pretty printing
@@ -57,7 +58,6 @@ Planned Features:
 Bugs:
     EMNIST 'letters' dataset labels are incorrect
     'relu' doesn't work
-    Loss calculation is incorrect
     'print_data' doesn't work
 
 Other TODOs:
@@ -67,10 +67,6 @@ Other TODOs:
     Optimize
         Type stability
         Runtime & space complexity
-        core.jl
-            Functions currently pass around and access fields of massive struct
-                Hard to read
-                Potentially need better design
         types.jl
             Better parametric typing
             Some lines are too long
