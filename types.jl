@@ -72,7 +72,6 @@ abstract type Model end
 struct Neural_Network
     layers::Vector{Layer}
     cost_func
-    precision
 end
 
 function Neural_Network(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
@@ -95,8 +94,7 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
 
     Neural_Network(
         layers,
-        cost_func,
-        precision,
+        cost_func
     )
 end
 
