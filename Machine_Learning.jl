@@ -29,12 +29,21 @@ include("emnist.jl")
 include("interface.jl")
 
 
-function unpack(seed, display, data, epochs, model, layers)
+function load_config()
+    config = TOML.parsefile("config.TOML")
+    seed = config["seed"]
+    display = config["display"]
+    data = config["data"]
+    epochs = config["epochs"]
+    model = config["model"]
+    layers = config["layers"]
+
     string_to_func = string -> getfield(@__MODULE__, Symbol(string))
     strings_to_funcs = strings -> map(string_to_func, strings)
     float = Dict("Float16" => Float16, "Float32" => Float32, "Float64" => Float64)
 
     layers["sizes"][end] = length(mapping(data["name"]))
+    seed = seed == "missing" ? missing : seed
     display = string_to_func(display)
 
     dataset = load_dataset(data["name"], string_to_func(data["preprocessing_function"]), data["split_percentages"])
@@ -51,19 +60,17 @@ function unpack(seed, display, data, epochs, model, layers)
         layers["use_biases"]
     )
 
-    return seed, display, dataset, epochs, model
+    return config, seed, display, dataset, epochs, model
 end
 
 function main()
-    config = TOML.parsefile("config.TOML")
-    seed, display, dataset, epochs, model = unpack(config["seed"], config["display"], config["data"], config["epochs"], config["model"], config["layers"])
+    config, seed, display, dataset, epochs, model = load_config()
 
-    ismissing(seed) ? seed!() : seed!(seed)
+    ismissing(seed) || seed!(seed)
 
     display(config)
     display(dataset, 0, model)
 
-    # train neural net
     for (i, epoch) in enumerate(epochs)
         @time epoch(model, dataset[1].inputs, dataset[1].labels)
         display(dataset, i, model)
