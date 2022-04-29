@@ -1,5 +1,5 @@
 
-# Math Functions
+# Math
 
 function _error(prediction, label)
     error = deepcopy(prediction)
@@ -19,7 +19,7 @@ function deriv(f::typeof(identity), x)
     return ones(size(x))
 end
 
-# Activation Functions And Derivatives
+# Activation And Derivatives
 
 function sigmoid(xs)
     return 1 ./ (1 .+ exp.(-xs))
@@ -57,7 +57,7 @@ function deriv(::typeof(softmax), xs)
 
 end
 
-# Error Functions And Derivatives
+# Error And Derivatives
 
 function squared_error(prediction, label)
     return _error(prediction, label) .^ 2
@@ -67,7 +67,7 @@ function deriv(f::typeof(squared_error), prediction, label)
     return 2 * _error(prediction, label)
 end
 
-# Normalization functions
+# Normalization
 
 function z_score(xs)
     return (xs .- mean(xs)) / std(xs)
@@ -77,7 +77,7 @@ function demean(xs)
     return xs .- mean(xs)
 end
 
-# Initialization Functions
+# Initialization
 
 function zero()
 
