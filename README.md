@@ -58,6 +58,7 @@ Planned Features:
     Pretty printing
     Batch normalization
     Error and value checking
+    Caching
 
 Bugs:
     EMNIST 'letters' dataset labels are incorrect
