@@ -23,9 +23,10 @@ import Printf: @printf
 
 # Internal
 include("functions.jl")
+include("emnist.jl")
+include("utilities.jl")
 include("types.jl")
 include("core.jl")
-include("emnist.jl")
 include("interface.jl")
 
 

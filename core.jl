@@ -1,19 +1,23 @@
 
-function assess!(model, inputs, labels)
-    correct = 0
-    error = 0.0
-
-    for (input, label) in zip(inputs, labels)
-        output = model(input)
-
-        if argmax(output) == label[1]
-            correct += 1
-        end
-
-        error += mean(model.cost_func(output, label))
+function (layer::Layer)(h_params, input)
+    layer.Zs = layer.weights * input
+    if !isnothing(layer.biases)
+        layer.Zs += layer.biases
     end
 
-    return correct / length(labels), error / length(labels)
+    return layer.Zs |> h_params.activ_func # |> layer.norm_func
+end
+
+function (neural_net::Neural_Network)(input, cache=false)
+    for (layer, h_param) in zip(neural_net.layers, neural_net.h_params)
+        input = layer(h_param, input)
+
+        if layer === neural_net.layers[end] || cache
+            layer.activations = input
+        end
+    end
+
+    return neural_net.layers[end].activations
 end
 
 function backpropagate!(model, inputs, labels)
@@ -51,6 +55,37 @@ function apply_gradient!(layers, learn_rates, batch_size)
             layer.biases += layer.δl_δb * scale
             fill!(layer.δl_δb, 0.0)
         end
+    end
+
+    return nothing
+end
+
+function assess!(model, inputs, labels)
+    correct = 0
+    error = 0.0
+
+    for (input, label) in zip(inputs, labels)
+        output = model(input)
+
+        if argmax(output) == label[1]
+            correct += 1
+        end
+
+        error += mean(model.cost_func(output, label))
+    end
+
+    return correct / length(labels), error / length(labels)
+end
+
+function (epoch::Epoch)(model, inputs, labels)
+    if epoch.shuffle && epoch.batch_size < length(inputs)
+        inputs, labels = shuffle_data(inputs, labels)
+    end
+
+    for first in 1:epoch.batch_size:length(inputs)
+        last = min(length(inputs), first + epoch.batch_size - 1)
+        backpropagate!(model, view(inputs, first:last), view(labels, first:last))
+        apply_gradient!(model.layers, map(h_params -> h_params.learn_rate, model.h_params), epoch.batch_size)
     end
 
     return nothing

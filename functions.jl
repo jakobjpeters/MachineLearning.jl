@@ -1,5 +1,5 @@
 
-# Math
+# General
 
 function _error(prediction, label)
     error = deepcopy(prediction)
