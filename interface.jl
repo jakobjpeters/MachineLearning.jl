@@ -6,6 +6,8 @@ function terminal(config)
         println(config[key])
         println()
     end
+
+    return nothing
 end
 
 function terminal(dataset, epoch, model)
@@ -16,6 +18,8 @@ function terminal(dataset, epoch, model)
         @printf("\tSplit: %s\tAccuracy: %.4f\tLoss: %.4f\n", i, accuracy, loss)
     end
     println()
+
+    return nothing
 end
 
 function gui(config)

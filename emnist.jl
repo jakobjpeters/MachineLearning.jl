@@ -2,13 +2,15 @@
 const datasets = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
 const dir = pwd() * "/emnist/"
 
-function decompress(in_name::String, out_name::String)
+function decompress(in_name, out_name)
     f = GZip.open(in_name)
     write(out_name, read(f))
     close(f)
+
+    return nothing
 end
 
-function read_uint8(f_name::String, offset::Integer)
+function read_uint8(f_name, offset)
     f = open(f_name)
     data::Array{UInt8, 1} = deleteat!(read(f), 1:offset)
     close(f)
@@ -16,31 +18,32 @@ function read_uint8(f_name::String, offset::Integer)
     return convert.(Int64, data)
 end
 
-function read_string(f_name::String)
+function read_string(f_name)
     f = open(f_name)
     data::Array{String, 1} = readlines(f)
     close(f)
     return data
 end
 
-function read_images(f_name::String, offset::Integer)
+function read_images(f_name, offset)
     data = read_uint8(f_name, offset)
     # change to only use reshape? mapslices()?
     images = reshape(data, (28 ^ 2, :))
     return [images[:, i] for i in 1:size(images)[end]]
 end
 
-function read_labels(f_name::String, offset::Integer, output_size) # output size?
+function read_labels(f_name, offset)
     return [[label + 1] for label in read_uint8(f_name, offset)]
 end
 
-function mapping(dataset::String)
+function mapping(dataset)
     mapping = read_string(dir * "decompressed/" * dataset * "_mapping.txt")
     map::Dict{UInt8, Char} = Dict()
 
     for line in mapping
         map[parse(UInt8, split(line, " ")[1]) + 1] = Char(parse(UInt8, split(line, " ")[2]))
     end
+
     return map
 end
 
@@ -59,6 +62,8 @@ function fix_letters_map()
         write(f, string(key_val[1]) * " " * string(key_val[2]) * "\n")
     end
     close(f)
+
+    return nothing
 end
 
 # broken
@@ -68,39 +73,8 @@ function fix_letters_labels(key)
     f = open(path, "w")
     write(f, labels .- 1)
     close(f)
-end
 
-# depreciate
-function print_images(images, labels, map, ids::Array{T, 1}) where T <: Integer
-    for id in ids
-        print_image(images[id], map[labels[id]])
-    end
-end
-
-function print_images(images, labels)
-    for (image, label) in zip(images, labels)
-        print_image(image, label)
-    end
-end
-
-# depreciate
-function print_image(image::Array{T, 1}, label::Char = ' ') where T <: Real
-    # display(image)
-    image = reshape(image, 28, 28)
-
-    for row in 1:28
-        for pixel in image[row, :]
-            if pixel == minimum(image)
-                print("_")
-            elseif pixel > mean(image)
-                print("O")
-            else
-                print("o")
-            end
-        end
-        println()
-    end
-    println(label, "\n")
+    return nothing
 end
 
 function load_emnist(name)
@@ -108,8 +82,8 @@ function load_emnist(name)
 
     inputs = read_images(dir * name * "_train_images.bin", 16)
     append!(inputs, read_images(dir * name * "_test_images.bin", 16))
-    labels = read_labels(dir * name * "_train_labels.bin", 8, 10)
-    append!(labels, read_labels(dir * name * "_test_labels.bin", 8, 10))
+    labels = read_labels(dir * name * "_train_labels.bin", 8)
+    append!(labels, read_labels(dir * name * "_test_labels.bin", 8))
 
     return Data(inputs, labels)
 end
@@ -141,11 +115,13 @@ function init()
     for dataset in datasets
         if !isfile(dir * "decompressed/" * dataset * "_train_images.bin")
             decompress(dir * "gzip/emnist-" * dataset * "-train-images-idx3-ubyte.gz", dir * "decompressed/" * dataset * "_train_images.bin")
+
             # println(dataset * " train images decompressed")
         end
 
         if !isfile(dir * "decompressed" * dataset * "_test_images.bin")
             decompress(dir * "gzip/emnist-" * dataset * "-test-images-idx3-ubyte.gz", dir * "decompressed/" * dataset * "_test_images.bin")
+
             # println(dataset * " test images decompressed\n")
         end
 
@@ -162,9 +138,9 @@ function init()
         if !isfile(dir * "decompressed/" * dataset * "_test_labels.bin")
             decompress(dir * "gzip/emnist-" * dataset * "-test-labels-idx1-ubyte.gz", dir * "decompressed/" * dataset * "_test_labels.bin")
 
-            if dataset == "letters"
+            # if dataset == "letters"
                 # fix_letters_labels("test")
-            end
+            # end
 
             # println(dataset * " test_labels decompressed\n")
         end
@@ -179,6 +155,8 @@ function init()
             # println(dataset * " mapping decompressed\n")
         end
     end
+
+    return nothing
 end
 
 init()
