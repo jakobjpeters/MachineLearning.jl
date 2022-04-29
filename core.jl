@@ -4,13 +4,13 @@ function assess!(model, inputs, labels)
     error = 0.0
 
     for (input, label) in zip(inputs, labels)
-        model(input)
+        output = model(input)
 
-        if argmax(model.layers[end].activations) == label[1]
+        if argmax(output) == label[1]
             correct += 1
         end
 
-        error += mean(model.cost_func(model.layers[end].activations, label))
+        error += mean(model.cost_func(output, label))
     end
 
     return correct / length(labels), error / length(labels)
@@ -18,23 +18,21 @@ end
 
 function backpropagate!(model, inputs, labels)
     for (input, label) in zip(inputs, labels)
-        model(input)
+        model(input, true)
 
         δl_δa = deriv(model.cost_func, model.layers[end].activations, label)
+        prev_activations = input, map(layer -> layer.activations, model.layers[begin:end - 1])...
+        activ_funcs = map(h_param -> h_param.activ_func, model.h_params)
+        
+        for (layer, activ_func, prev_activation) in zip(reverse(model.layers), reverse(activ_funcs), reverse(prev_activations))
+            δl_δb = δl_δa .* deriv(activ_func, layer.Zs)
 
-        for (i, layer) in enumerate(reverse(model.layers))
-            δl_δb = δl_δa .* deriv(layer.activ_func, layer.Zs)
-
-            prev_activations = layer === model.layers[begin] ? input : model.layers[end - i].activations
-
-            layer.δl_δw -= δl_δb * transpose(prev_activations)
-            if !isnothing(layer.biases)
+            layer.δl_δw -= δl_δb * transpose(prev_activation)
+            if layer.biases !== nothing
                 layer.δl_δb -= δl_δb
             end
 
-            if layer === model.layers[begin]
-                break
-            end
+            layer === model.layers[begin] && break
 
             δl_δa = transpose(layer.weights) * δl_δb
         end
@@ -43,13 +41,13 @@ function backpropagate!(model, inputs, labels)
     return nothing
 end
 
-function apply_gradient!(layers, batch_size)
-    for layer in layers
-        scale = layer.learn_rate / batch_size
+function apply_gradient!(layers, learn_rates, batch_size)
+    scales = learn_rates / batch_size
 
+    for (layer, scale) in zip(layers, scales)
         layer.weights += layer.δl_δw * scale 
         fill!(layer.δl_δw, 0.0)
-        if !isnothing(layer.biases)
+        if layer.biases !== nothing
             layer.biases += layer.δl_δb * scale
             fill!(layer.δl_δb, 0.0)
         end
