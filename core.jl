@@ -1,39 +1,40 @@
 
-function (layer::Layer)(h_params, input)
-    layer.Zs = layer.weights * input
+function (layer::Layer)(h_params, cache, input)
+    cache.Zs = layer.weights * input
     if !isnothing(layer.biases)
-        layer.Zs += layer.biases
+        cache.Zs += layer.biases
     end
 
-    return layer.Zs |> h_params.activ_func # |> layer.norm_func
+    cache.activations = cache.Zs |> h_params.activ_func # |> layer.norm_func
+
+    # should 'return nothing'
+    return cache.activations
 end
 
-function (neural_net::Neural_Network)(input, cache=false)
-    for (layer, h_param) in zip(neural_net.layers, neural_net.h_params)
-        input = layer(h_param, input)
-
-        if layer === neural_net.layers[end] || cache
-            layer.activations = input
-        end
+function (neural_net::Neural_Network)(input)
+    for (layer, cache, h_param) in zip(neural_net.layers, neural_net.caches, neural_net.h_params)
+        # fix: allocating
+        input = layer(h_param, cache, input)
     end
 
-    return neural_net.layers[end].activations
+    return nothing
 end
 
 function backpropagate!(model, inputs, labels)
     for (input, label) in zip(inputs, labels)
-        model(input, true)
+        model(input)
 
-        δl_δa = deriv(model.cost_func, model.layers[end].activations, label)
-        prev_activations = input, map(layer -> layer.activations, model.layers[begin:end - 1])...
+        δl_δa = deriv(model.cost_func, model.caches[end].activations, label)
+        prev_activations = input, map(cache -> cache.activations, model.caches[begin:end - 1])...
         activ_funcs = map(h_param -> h_param.activ_func, model.h_params)
         
-        for (layer, activ_func, prev_activation) in zip(reverse(model.layers), reverse(activ_funcs), reverse(prev_activations))
-            δl_δb = δl_δa .* deriv(activ_func, layer.Zs)
+        # fields = zip(map(field -> reverse(field), [model.layers, model.caches, activ_funcs, prev_activations]))
+        for (layer, cache, activ_func, prev_activation) in zip(reverse(model.layers), reverse(model.caches), reverse(activ_funcs), reverse(prev_activations))
+            δl_δb = δl_δa .* deriv(activ_func, cache.Zs)
 
-            layer.δl_δw -= δl_δb * transpose(prev_activation)
+            cache.δl_δw -= δl_δb * transpose(prev_activation)
             if layer.biases !== nothing
-                layer.δl_δb -= δl_δb
+                cache.δl_δb -= δl_δb
             end
 
             layer === model.layers[begin] && break
@@ -45,15 +46,15 @@ function backpropagate!(model, inputs, labels)
     return nothing
 end
 
-function apply_gradient!(layers, learn_rates, batch_size)
+function apply_gradient!(layers, caches, learn_rates, batch_size)
     scales = learn_rates / batch_size
 
-    for (layer, scale) in zip(layers, scales)
-        layer.weights += layer.δl_δw * scale 
-        fill!(layer.δl_δw, 0.0)
+    for (layer, cache, scale) in zip(layers, caches, scales)
+        layer.weights += cache.δl_δw * scale 
+        fill!(cache.δl_δw, 0.0)
         if layer.biases !== nothing
-            layer.biases += layer.δl_δb * scale
-            fill!(layer.δl_δb, 0.0)
+            layer.biases += cache.δl_δb * scale
+            fill!(cache.δl_δb, 0.0)
         end
     end
 
@@ -65,13 +66,13 @@ function assess!(model, inputs, labels)
     error = 0.0
 
     for (input, label) in zip(inputs, labels)
-        output = model(input)
+        model(input)
 
-        if argmax(output) == label[1]
+        if argmax(model.caches[end].activations) == label[1]
             correct += 1
         end
 
-        error += mean(model.cost_func(output, label))
+        error += mean(model.cost_func(model.caches[end].activations, label))
     end
 
     return correct / length(labels), error / length(labels)
@@ -85,7 +86,7 @@ function (epoch::Epoch)(model, inputs, labels)
     for first in 1:epoch.batch_size:length(inputs)
         last = min(length(inputs), first + epoch.batch_size - 1)
         backpropagate!(model, view(inputs, first:last), view(labels, first:last))
-        apply_gradient!(model.layers, map(h_params -> h_params.learn_rate, model.h_params), epoch.batch_size)
+        apply_gradient!(model.layers, model.caches, map(h_params -> h_params.learn_rate, model.h_params), epoch.batch_size)
     end
 
     return nothing

@@ -28,6 +28,7 @@ Current Features
             identity (untested)
         Use biases
         Sizes
+    Cached intermediate arrays (not working yet)
 
 Planned Features:
     Graphical user interface

@@ -14,6 +14,9 @@ end
 mutable struct Layer{T<:AbstractFloat}
     weights::Matrix{T}
     biases::Union{Vector{T}, Nothing}
+end
+
+mutable struct Cache{T<:AbstractFloat}
     δl_δw::Matrix{T}
     δl_δb::Union{Vector{T}, Nothing}
     activations::Vector{T}
@@ -28,10 +31,11 @@ end
 
 abstract type Model end
 
-struct Neural_Network{T<:Layer, S<:Hyperparameters, R<:Function} <: Model
+struct Neural_Network{T<:Layer, S<:Cache, R<:Hyperparameters, Q<:Function} <: Model
     layers::Vector{T}
-    h_params::Vector{S}
-    cost_func::R
+    caches::Vector{S}
+    h_params::Vector{R}
+    cost_func::Q
 end
 
 function Neural_Network(cost_func, input_size, precision, weight_init_funcs, norm_funcs, activ_funcs, learn_rates, sizes, use_biases)
@@ -49,14 +53,15 @@ function Neural_Network(cost_func, input_size, precision, weight_init_funcs, nor
     activations = [zeros(precision, size) for size in sizes]
     Zs = [zeros(precision, size) for size in sizes]
 
-    layers_args = zip(weights, biases, δl_δw, δl_δb, activations, Zs)
-    layers = [Layer(layer_args...) for layer_args in layers_args]
+    layers = [Layer(args...) for args in zip(weights, biases)]
+    caches = [Cache(args...) for args in zip(δl_δw, δl_δb, activations, Zs)]
 
     h_params_args = zip(norm_funcs, activ_funcs, learn_rates)
     h_params = [Hyperparameters(h_param_args...) for h_param_args in h_params_args]
 
     Neural_Network(
         layers,
+        caches,
         h_params,
         cost_func
     )
