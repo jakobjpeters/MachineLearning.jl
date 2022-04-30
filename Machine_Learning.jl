@@ -47,34 +47,38 @@ function load_config()
     seed = seed == "missing" ? missing : seed
     display = string_to_func(display)
 
+    cost_func = string_to_func(model["cost_function"])
     dataset = load_dataset(data["name"], string_to_func(data["preprocessing_function"]), data["split_percentages"])
     epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"])), 1:epochs["n"])
     model = Neural_Network(
-        string_to_func(model["cost_function"]),
         784, # make dynamic
         float[model["precision"]],
         strings_to_funcs(layers["weight_initialization_functions"]),
-        strings_to_funcs(layers["normalization_functions"]),
-        strings_to_funcs(layers["activation_functions"]),
-        layers["learn_rates"],
         layers["sizes"],
         layers["use_biases"]
     )
+    caches = get_caches(model)
+    h_params_args = zip(
+        strings_to_funcs(layers["normalization_functions"]),
+        strings_to_funcs(layers["activation_functions"]),
+        layers["learn_rates"]
+    )
+    h_params = map(args -> Hyperparameters(args...), h_params_args)
 
-    return config, seed, display, dataset, epochs, model
+    return config, seed, display, dataset, epochs, model, cost_func, caches, h_params
 end
 
 function main()
-    config, seed, display, dataset, epochs, model = load_config()
+    config, seed, display, dataset, epochs, model, cost_func, caches, h_params = load_config()
 
     ismissing(seed) || seed!(seed)
 
     display(config)
-    display(dataset, 0, model)
+    display(dataset, 0, model, cost_func, h_params, caches)
 
     for (i, epoch) in enumerate(epochs)
-        @time epoch(model, dataset[1].inputs, dataset[1].labels)
-        display(dataset, i, model)
+        @time epoch(model, cost_func, h_params, caches, dataset[1].inputs, dataset[1].labels)
+        display(dataset, i, model, cost_func, h_params, caches)
     end
 
     return config, model
