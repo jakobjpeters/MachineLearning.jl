@@ -85,7 +85,7 @@
 # Bugs
 
 - EMNIST 'letters' dataset labels are incorrect
-'- print_data' doesn't work
+- print_data' doesn't work
 
 
 # To Do
