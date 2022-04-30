@@ -79,14 +79,14 @@ function assess!(model, cost_func, h_params, caches, inputs, labels)
     return correct / length(labels), error / length(labels)
 end
 
-function (epoch::Epoch)(model, cost_func, h_params, caches, inputs, labels)
+function (epoch::Epoch)(model, h_params, caches, inputs, labels)
     if epoch.shuffle && epoch.batch_size < length(inputs)
         inputs, labels = shuffle_data(inputs, labels)
     end
 
     for first in 1:epoch.batch_size:length(inputs)
         last = min(length(inputs), first + epoch.batch_size - 1)
-        backpropagate!(model, cost_func, h_params, caches, view(inputs, first:last), view(labels, first:last))
+        backpropagate!(model, epoch.cost_func, h_params, caches, view(inputs, first:last), view(labels, first:last))
         apply_gradient!(model.layers, map(h_params -> h_params.learn_rate, h_params), caches, epoch.batch_size)
     end
 

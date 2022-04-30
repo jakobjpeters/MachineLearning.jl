@@ -6,9 +6,10 @@ struct Data
     Data(inputs, labels) = length(inputs) == length(labels) ? new(inputs, labels) : error("Inputs and labels must be the same length")
 end
 
-struct Epoch{T<:Integer}
+struct Epoch{T<:Integer, S<:Function}
     batch_size::T
     shuffle::Bool
+    cost_func::S
 end
 
 mutable struct Layer{T<:AbstractFloat}

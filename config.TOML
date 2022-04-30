@@ -22,6 +22,10 @@ split_percentages = [80, 20]
 
 
 [epochs]
+
+# ["squared_error"]
+cost_function = "squared_error"
+
 n = 100
 batch_size = 10
 shuffle_data = "true"
@@ -29,15 +33,11 @@ shuffle_data = "true"
 
 [model]
 
-# ["squared_error"]
-cost_function = "squared_error"
+# ["Neural_Network"]
+name = "Neural_Network"
 
-# ["Float16", "Float32", "Float64"]
-# not implemented yet
-precision = "Float64"
-
-
-[layers]
+# the last layer size ("missing") is determined by the dataset
+sizes = [28, "missing"]
 
 # [xavier, he]
 # he is untested
@@ -45,12 +45,16 @@ weight_initialization_functions = ["xavier", "xavier"]
 
 use_biases = [true, true]
 
+# ["Float16", "Float32", "Float64"]
+# not implemented yet
+precision = "Float64"
+
+
+[hyperparameters]
+
 # [tanh, sigmoid, identity]
 # identity is untested
 activation_functions = ["tanh", "tanh"]
-
-# the last layer size ("missing") is determined by the dataset
-sizes = [28, "missing"]
 
 learn_rates = [0.01, 0.01]
 

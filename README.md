@@ -60,6 +60,7 @@ Planned Features:
     Batch normalization
     Error and value checking
     Caching
+    Easier to customize 'Epoch' and 'Hyperparameters'
 
 Bugs:
     EMNIST 'letters' dataset labels are incorrect
