@@ -29,8 +29,8 @@ function backpropagate!(model, cost_func, h_params, caches, inputs, labels)
         prev_activations = input, map(cache -> cache.activations, caches[begin:end - 1])...
         activ_funcs = map(h_param -> h_param.activ_func, h_params)
         
-        # fields = zip(map(field -> reverse(field), [model.layers, model.caches, activ_funcs, prev_activations]))
-        for (layer, cache, activ_func, prev_activation) in zip(reverse(model.layers), reverse(caches), reverse(activ_funcs), reverse(prev_activations))
+        fields = zip(map(field -> reverse(field), [model.layers, caches, activ_funcs, prev_activations])...)
+        for (layer, cache, activ_func, prev_activation) in fields
             δl_δz = δl_δa .* deriv(activ_func, cache.Zs)
 
             cache.δl_δw += δl_δz * transpose(prev_activation)
