@@ -1,11 +1,11 @@
 
-function (layer::Layer)(h_params, cache, input)
+function (layer::Layer)(activ_func, cache, input)
     cache.Zs = layer.weights * input
     if !isnothing(layer.biases)
         cache.Zs += layer.biases
     end
 
-    cache.activations = cache.Zs |> h_params.activ_func # |> layer.norm_func
+    cache.activations = cache.Zs |> activ_func # |> layer.norm_func
 
     # should 'return nothing'
     return cache.activations
@@ -14,7 +14,7 @@ end
 function (neural_net::Neural_Network)(input, h_params, caches)
     for (layer, cache, h_param) in zip(neural_net.layers, caches, h_params)
         # fix: allocating
-        input = layer(h_param, cache, input)
+        input = layer(h_param.activ_func, cache, input)
     end
 
     return nothing
