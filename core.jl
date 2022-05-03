@@ -33,9 +33,9 @@ function backpropagate!(model, cost_func, h_params, caches, inputs, labels)
         for (layer, cache, activ_func, prev_activation) in zip(reverse(model.layers), reverse(caches), reverse(activ_funcs), reverse(prev_activations))
             δl_δz = δl_δa .* deriv(activ_func, cache.Zs)
 
-            cache.δl_δw -= δl_δz * transpose(prev_activation)
+            cache.δl_δw += δl_δz * transpose(prev_activation)
             if layer.biases !== nothing
-                cache.δl_δb -= δl_δz
+                cache.δl_δb += δl_δz
             end
 
             layer === model.layers[begin] && break

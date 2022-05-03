@@ -2,10 +2,10 @@
 # General
 
 function _error(prediction, label)
-    error = deepcopy(prediction)
+    error = -1 * prediction
 
     for i in label
-        error[i] -= 1
+        error[i] += 1
     end
 
     return error
