@@ -49,7 +49,7 @@ function load_config()
     display = string_to_func(display)
 
     dataset = load_dataset(data["name"], string_to_func(data["preprocessing_function"]), data["split_percentages"])
-    epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"]), string_to_func(epochs["cost_function"])), 1:epochs["n"])
+    epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"]), string_to_func(epochs["cost_function"])), 1:epochs["iterations"])
     model = string_to_func(model["name"])(
         784, # make dynamic
         float[model["precision"]],
