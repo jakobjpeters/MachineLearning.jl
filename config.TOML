@@ -18,6 +18,7 @@ name = "mnist"
 preprocessing_function = "z_score"
 
 # must add to 100
+# first split is used for training
 split_percentages = [80, 20]
 
 

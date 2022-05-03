@@ -1,4 +1,7 @@
 
+# TODO: clean up
+# TODO: improve memory usage for datasets
+
 const datasets = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
 const dir = pwd() * "/emnist/"
 
@@ -27,7 +30,6 @@ end
 
 function read_images(f_name, offset)
     data = read_uint8(f_name, offset)
-    # change to only use reshape? mapslices()?
     images = reshape(data, (28 ^ 2, :))
     return [images[:, i] for i in 1:size(images)[end]]
 end

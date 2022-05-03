@@ -10,6 +10,7 @@ function terminal(config)
     return nothing
 end
 
+# prints model assessment for each data split
 function terminal(dataset, epoch, model, cost_func, h_params, caches)
     println("\nEpoch: ", epoch)
     # mse not type stable

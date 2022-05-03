@@ -19,7 +19,7 @@ function deriv(f::typeof(identity), x)
     return ones(size(x))
 end
 
-# Activation And Derivatives
+# Activation And Derivative
 
 function sigmoid(xs)
     return 1 ./ (1 .+ exp.(-xs))
@@ -57,7 +57,7 @@ function deriv(::typeof(softmax), xs)
 
 end
 
-# Error And Derivatives
+# Error And Derivative
 
 function squared_error(prediction, label)
     return _error(prediction, label) .^ 2

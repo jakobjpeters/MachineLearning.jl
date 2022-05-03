@@ -95,7 +95,7 @@
     - Generic
 - Optimize
     - Type stability
-    - Runtime & space complexity
+    - Time & space complexity
         - Vectorize feed-forward and backpropagation
     - types.jl
         - Better parametric typing
@@ -112,4 +112,3 @@
 Bezanson, J., Edelman, A., Karpinski, S., & Shah, V. B. (2017). Julia: A fresh approach to numerical computing. SIAM Review, 59(1), 65–98. https://doi.org/10.1137/141000671
 
 Cohen, G., Afshar, S., Tapson, J., & van Schaik, A. (2017). EMNIST: an extension of MNIST to handwritten letters. Retrieved from http://arxiv.org/abs/1702.05373
-
