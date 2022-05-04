@@ -1,7 +1,7 @@
 
 # 'Layer' functor
 # given input, calculate and cache 'Zs' and 'activations'
-function (layer::Layer)(activ_func, cache, input)
+function (layer::Layer)(input, activ_func, cache)
     cache.Zs = layer.weights * input
     if !isnothing(layer.biases)
         cache.Zs .+= layer.biases
@@ -16,26 +16,23 @@ end
 # 'Neural_Network' functor
 # call each layer with its correct parameters
 function (neural_net::Neural_Network)(input, h_params, caches)
-    for (layer, cache, h_param) in zip(neural_net.layers, caches, h_params)
+    for (layer, h_param, cache) in zip(neural_net.layers, h_params, caches)
         # fix: allocating
-        input = layer(h_param.activ_func, cache, input)
+        input = layer(input, h_param.activ_func, cache)
     end
 
     return nothing
 end
 
 # given a model, calculate and cache the gradient for a batch of inputs
-function backpropagate!(model, cost_func, h_params, caches, inputs, labels)
-    model(inputs, h_params, caches)
-
+function backpropagate(layers, cost_func, h_params, caches, inputs, labels)
     # fix: allocating
     δl_δa = deriv(cost_func, caches[end].activations, labels)
     prev_activations = pushfirst!(map(cache -> cache.activations, caches[begin:end - 1]), inputs)
-    activ_funcs = map(h_param -> h_param.activ_func, h_params)
     
     # iterate end to begin to calculate each layer's gradient
-    for (layer, cache, activ_func, prev_activation) in zip(reverse(model.layers), reverse(caches), reverse(activ_funcs), reverse(prev_activations))
-        δl_δz = δl_δa .* deriv(activ_func, cache.Zs)
+    for (layer, cache, prev_activation, h_param) in zip(reverse(layers), reverse(caches), reverse(prev_activations), reverse(h_params))
+        δl_δz = δl_δa .* deriv(h_param.activ_func, cache.Zs)
 
         # cache gradients
         # gradients are averaged (divided by 'batch_size') in 'apply_gradient!' for efficiency
@@ -45,7 +42,7 @@ function backpropagate!(model, cost_func, h_params, caches, inputs, labels)
         end
 
         # if first layer, this calculation is not needed
-        layer === model.layers[begin] && break
+        layer === layers[begin] && break
         δl_δa = transpose(layer.weights) * δl_δz
     end
 
@@ -59,9 +56,9 @@ function apply_gradient!(layers, learn_rates, caches, batch_size)
 
     # update each layer's weights and biases, then reset its cache
     for (layer, cache, scale) in zip(layers, caches, scales)
-        layer.weights += cache.δl_δw * scale 
+        layer.weights .+= cache.δl_δw * scale 
         if layer.biases !== nothing
-            layer.biases += cache.δl_δb * scale
+            layer.biases .+= cache.δl_δb * scale
         end
     end
 
@@ -69,15 +66,13 @@ function apply_gradient!(layers, learn_rates, caches, batch_size)
 end
 
 # given a model and data, test the model and return its accuracy and loss
-function assess!(model, cost_func, h_params, caches, inputs, labels)
-    model(inputs, h_params, caches)
-
+function assess(cost_func, inputs, output, labels)
     # TODO: parameterize decision criteria
-    criteria = z -> argmax(first(z)) == argmax(last(z))
-    accuracy = count(criteria, zip(eachcol(caches[end].activations), eachcol(labels))) / size(inputs, 2)
+    criteria = pair -> argmax(first(pair)) == argmax(last(pair))
+    accuracy = count(criteria, zip(eachcol(output), eachcol(labels))) / size(inputs, 2)
 
-    loss = z -> mean(cost_func(z[1], z[2]))
-    cost = mean(map(loss, zip(eachcol(caches[end].activations), eachcol(labels))))
+    loss = pair -> mean(cost_func(first(pair), last(pair)))
+    cost = mean(map(loss, zip(eachcol(output), eachcol(labels))))
 
     return accuracy, cost
 end
@@ -93,7 +88,9 @@ function (epoch::Epoch)(model, h_params, caches, inputs, labels)
     # train model for each batch
     for first in 1:epoch.batch_size:size(inputs, 2)
         last = min(size(inputs, 2), first + epoch.batch_size - 1)
-        backpropagate!(model, epoch.cost_func, h_params, caches, view(inputs, :, first:last), view(labels, :, first:last))
+        model(view(inputs, :, first:last), h_params, caches)
+        backpropagate(model.layers, epoch.cost_func, h_params, caches, view(inputs, :, first:last), view(labels, :, first:last))
+        
         apply_gradient!(model.layers, map(h_params -> h_params.learn_rate, h_params), caches, epoch.batch_size)
     end
 
