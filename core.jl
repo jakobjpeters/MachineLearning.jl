@@ -27,12 +27,15 @@ end
 # given a model, calculate and cache the gradient for a batch of inputs
 # TODO: Vectorize
 function backpropagate!(model, cost_func, h_params, caches, inputs, labels)
-    for (input, label) in zip(inputs, labels)
+    # Unvectorize, since future code can't handle it yet
+    # TODO: Vectorize future code
+    for (input, label) in zip(eachcol(inputs), eachcol(labels))
         # evaluate model with each input and cache results
         model(input, h_params, caches)
 
         # fix: allocating
         δl_δa = deriv(cost_func, caches[end].activations, label)
+        # TODO: remove splatting
         prev_activations = input, map(cache -> cache.activations, caches[begin:end - 1])...
         activ_funcs = map(h_param -> h_param.activ_func, h_params)
         
@@ -93,17 +96,28 @@ function assess!(model, cost_func, h_params, caches, inputs, labels)
     return correct / length(labels), error / length(labels)
 end
 
+function assess!(model, cost_func, h_params, caches, inputs, labels::AbstractArray{T, 2}) where T
+    # Unvectorize, since future code can't handle it yet
+    # TODO: Vectorize future code
+    inputs = collect(eachcol(inputs))
+    labels = collect(eachcol(labels))
+    
+    return assess!(model, cost_func, h_params, caches, inputs, labels)
+end
+
 # 'Epoch' functor
 # given a model and data, coordinate model training
 function (epoch::Epoch)(model, h_params, caches, inputs, labels)
-    if epoch.shuffle && epoch.batch_size < length(inputs)
-        inputs, labels = shuffle_data(inputs, labels)
+
+    if epoch.shuffle && epoch.batch_size < size(inputs, 1)
+        # inputs, labels = shuffle_data(inputs, labels)
+        inputs, labels = shuffle_pair(inputs, labels)
     end
 
     # train model for each batch
-    for first in 1:epoch.batch_size:length(inputs)
-        last = min(length(inputs), first + epoch.batch_size - 1)
-        backpropagate!(model, epoch.cost_func, h_params, caches, view(inputs, first:last), view(labels, first:last))
+    for first in 1:epoch.batch_size:size(inputs, 2)
+        last = min(size(inputs, 2), first + epoch.batch_size - 1)
+        backpropagate!(model, epoch.cost_func, h_params, caches, view(inputs, :, first:last), view(labels, :, first:last))
         apply_gradient!(model.layers, map(h_params -> h_params.learn_rate, h_params), caches, epoch.batch_size)
     end
 

@@ -23,9 +23,9 @@ function load_dataset(name, preprocess, splits)
     return split_data(prep_inputs, dataset.labels, splits)
 end
 
-# TODO: make shuffle in place
-function shuffle_data(inputs, labels)
-    data = collect(zip(inputs, labels))
-    shuffle!(data)
-    return getindex.(data, 1), getindex.(data, 2)
+# TODO: make this faster
+function shuffle_pair(inputs, labels)
+    data = shuffle!(collect(zip(eachcol(inputs), labels)))
+    data = getindex.(data, 1), getindex.(data, 2)
+    return reduce(hcat, data[1]), reduce(hcat, data[2])
 end

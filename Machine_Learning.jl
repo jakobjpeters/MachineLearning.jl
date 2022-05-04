@@ -76,12 +76,6 @@ function main()
     # seed is random if not specified
     ismissing(seed) || seed!(seed)
 
-    # Unvectorize, since future code can't handle it yet
-    # TODO: Vectorize future code
-    inputs = [[col for col in eachcol(data.inputs)] for data in dataset]
-    labels = [[col for col in eachcol(data.labels)] for data in dataset]
-    dataset = [Data(input, label) for (input, label) in zip(inputs, labels)]
-
     # print configuration info
     display(config)
     # print pre-trained model assessment
