@@ -16,7 +16,7 @@ function identity(x)
 end
 
 function deriv(f::typeof(identity), x)
-    return ones(size(x))
+    return ones(typeof(x), size(x))
 end
 
 # Activation And Derivative
@@ -73,8 +73,16 @@ function z_score(xs)
     return (xs .- mean(xs)) / std(xs)
 end
 
+function z_score(xs::Matrix)
+    return mapslices(z_score, xs, dims = 1)
+end
+
 function demean(xs)
     return xs .- mean(xs)
+end
+
+function demean(xs::Matrix)
+    return mapslices(demean, xs, dims = 1)
 end
 
 # Initialization

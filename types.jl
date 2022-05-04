@@ -3,7 +3,7 @@ struct Data
     inputs
     labels
 
-    Data(inputs, labels) = length(inputs) == length(labels) ? new(inputs, labels) : error("Inputs and labels must be the same length")
+    Data(inputs, labels) = size(inputs, 2) == size(labels, 2) ? new(inputs, labels) : error("Inputs and labels must be the same length")
 end
 
 # functor, see 'core.jl'

@@ -30,12 +30,12 @@ end
 
 function read_images(f_name, offset)
     data = read_uint8(f_name, offset)
-    images = reshape(data, (28 ^ 2, :))
-    return [images[:, i] for i in 1:size(images)[end]]
+    return reshape(data, (28 ^ 2, :))
 end
 
 function read_labels(f_name, offset)
-    return [[label + 1] for label in read_uint8(f_name, offset)]
+    labels = read_uint8(f_name, offset) .+ 1
+    return reshape(labels, (1, :))
 end
 
 function mapping(dataset)
@@ -83,9 +83,9 @@ function load_emnist(name)
     dir = pwd() * "/emnist/decompressed/"
 
     inputs = read_images(dir * name * "_train_images.bin", 16)
-    append!(inputs, read_images(dir * name * "_test_images.bin", 16))
+    inputs = hcat(inputs, read_images(dir * name * "_test_images.bin", 16))
     labels = read_labels(dir * name * "_train_labels.bin", 8)
-    append!(labels, read_labels(dir * name * "_test_labels.bin", 8))
+    labels = hcat(labels, read_labels(dir * name * "_test_labels.bin", 8))
 
     return Data(inputs, labels)
 end

@@ -76,6 +76,12 @@ function main()
     # seed is random if not specified
     ismissing(seed) || seed!(seed)
 
+    # Unvectorize, since future code can't handle it yet
+    # TODO: Vectorize future code
+    inputs = [[col for col in eachcol(data.inputs)] for data in dataset]
+    labels = [[col for col in eachcol(data.labels)] for data in dataset]
+    dataset = [Data(input, label) for (input, label) in zip(inputs, labels)]
+
     # print configuration info
     display(config)
     # print pre-trained model assessment
@@ -85,8 +91,8 @@ function main()
     # see 'core.jl' and 'interface.jl'
     for (i, epoch) in enumerate(epochs)
         # train model with data from first split
-        @time epoch(model, h_params, caches, dataset[1].inputs, dataset[1].labels)
-        display(dataset, i, model, epoch.cost_func, h_params, caches)
+        @time epoch(model, h_params, caches, dataset[begin].inputs, dataset[begin].labels)
+        @time display(dataset, i, model, epoch.cost_func, h_params, caches)
     end
 
     return config, model
