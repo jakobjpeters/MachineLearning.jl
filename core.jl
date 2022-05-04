@@ -37,8 +37,7 @@ function backpropagate!(model, cost_func, h_params, caches, inputs, labels)
         activ_funcs = map(h_param -> h_param.activ_func, h_params)
         
         # iterate end to begin to calculate each layer's gradient
-        fields = zip(map(field -> reverse(field), [model.layers, caches, activ_funcs, prev_activations])...)
-        for (layer, cache, activ_func, prev_activation) in fields
+        for (layer, cache, activ_func, prev_activation) in zip(reverse(model.layers), reverse(caches), reverse(activ_funcs), reverse(prev_activations))
             δl_δz = δl_δa .* deriv(activ_func, cache.Zs)
 
             # accumulate gradients
