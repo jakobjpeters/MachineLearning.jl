@@ -1,9 +1,7 @@
 
-struct Data
-    inputs
-    labels
-
-    Data(inputs, labels) = size(inputs, 2) == size(labels, 2) ? new(inputs, labels) : error("Inputs and labels must be the same length")
+struct Data{T1<:Number, T2<:Number}
+    inputs::AbstractArray{T1}
+    labels::AbstractArray{T2}
 end
 
 # functor, see 'core.jl'
@@ -17,8 +15,8 @@ end
 mutable struct Cache{T<:AbstractFloat}
     δl_δw::Matrix{T}
     δl_δb::Union{Vector{T}, Nothing}
-    activations::Vector{T}
-    Zs::Vector{T}
+    activations::Matrix{T}
+    Zs::Matrix{T}
 end
 
 # given a 'Neural_Network', construct a list of 'Cache's to prevent redundant calculations in 'core.jl'
@@ -27,7 +25,8 @@ function make_caches(neural_net)
 
     δl_δw = map(layer -> fill!(deepcopy(layer.weights), 0.0), neural_net.layers)
     δl_δb = map(layer -> deepcopy(layer.biases), neural_net.layers)
-    activations = map(size -> zeros(Float64, size), sizes)
+    # can this be reduced due to changing batch sizes -> changing this size
+    activations = map(size -> zeros(Float64, size, 10), sizes)
     Zs = deepcopy(activations)
     
     # TODO: remove splatting

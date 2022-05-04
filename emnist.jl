@@ -34,8 +34,15 @@ function read_images(f_name, offset)
 end
 
 function read_labels(f_name, offset)
-    labels = read_uint8(f_name, offset) .+ 1
-    return reshape(labels, (1, :))
+    indices = read_uint8(f_name, offset) .+ 1
+
+    # one-hot encoding
+    labels = zeros(10, length(indices))
+    for (col, i) in zip(eachcol(labels), indices)
+        col[i] += 1
+    end
+
+    return labels
 end
 
 function mapping(dataset)

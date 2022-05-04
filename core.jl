@@ -4,7 +4,7 @@
 function (layer::Layer)(activ_func, cache, input)
     cache.Zs = layer.weights * input
     if !isnothing(layer.biases)
-        cache.Zs += layer.biases
+        cache.Zs .+= layer.biases
     end
 
     cache.activations = cache.Zs |> activ_func # |> layer.norm_func
@@ -25,35 +25,28 @@ function (neural_net::Neural_Network)(input, h_params, caches)
 end
 
 # given a model, calculate and cache the gradient for a batch of inputs
-# TODO: Vectorize
 function backpropagate!(model, cost_func, h_params, caches, inputs, labels)
-    # Unvectorize, since future code can't handle it yet
-    # TODO: Vectorize future code
-    for (input, label) in zip(eachcol(inputs), eachcol(labels))
-        # evaluate model with each input and cache results
-        model(input, h_params, caches)
+    model(inputs, h_params, caches)
 
-        # fix: allocating
-        δl_δa = deriv(cost_func, caches[end].activations, label)
-        # TODO: remove splatting
-        prev_activations = input, map(cache -> cache.activations, caches[begin:end - 1])...
-        activ_funcs = map(h_param -> h_param.activ_func, h_params)
-        
-        # iterate end to begin to calculate each layer's gradient
-        for (layer, cache, activ_func, prev_activation) in zip(reverse(model.layers), reverse(caches), reverse(activ_funcs), reverse(prev_activations))
-            δl_δz = δl_δa .* deriv(activ_func, cache.Zs)
+    # fix: allocating
+    δl_δa = deriv(cost_func, caches[end].activations, labels)
+    prev_activations = pushfirst!(map(cache -> cache.activations, caches[begin:end - 1]), inputs)
+    activ_funcs = map(h_param -> h_param.activ_func, h_params)
+    
+    # iterate end to begin to calculate each layer's gradient
+    for (layer, cache, activ_func, prev_activation) in zip(reverse(model.layers), reverse(caches), reverse(activ_funcs), reverse(prev_activations))
+        δl_δz = δl_δa .* deriv(activ_func, cache.Zs)
 
-            # accumulate gradients
-            # gradients are averaged (divided by 'batch_size') in 'apply_gradient!' for efficiency
-            cache.δl_δw += δl_δz * transpose(prev_activation)
-            if layer.biases !== nothing
-                cache.δl_δb += δl_δz
-            end
-
-            # if first layer, this calculation is not needed
-            layer === model.layers[begin] && break
-            δl_δa = transpose(layer.weights) * δl_δz
+        # cache gradients
+        # gradients are averaged (divided by 'batch_size') in 'apply_gradient!' for efficiency
+        cache.δl_δw = δl_δz * transpose(prev_activation)
+        if layer.biases !== nothing
+            cache.δl_δb = dropdims(sum(δl_δz, dims = 2), dims = 2)
         end
+
+        # if first layer, this calculation is not needed
+        layer === model.layers[begin] && break
+        δl_δa = transpose(layer.weights) * δl_δz
     end
 
     return nothing
@@ -67,10 +60,8 @@ function apply_gradient!(layers, learn_rates, caches, batch_size)
     # update each layer's weights and biases, then reset its cache
     for (layer, cache, scale) in zip(layers, caches, scales)
         layer.weights += cache.δl_δw * scale 
-        fill!(cache.δl_δw, 0.0)
         if layer.biases !== nothing
             layer.biases += cache.δl_δb * scale
-            fill!(cache.δl_δb, 0.0)
         end
     end
 
@@ -79,30 +70,16 @@ end
 
 # given a model and data, test the model and return its accuracy and loss
 function assess!(model, cost_func, h_params, caches, inputs, labels)
-    correct = 0
-    error = 0.0
+    model(inputs, h_params, caches)
 
-    for (input, label) in zip(inputs, labels)
-        model(input, h_params, caches)
+    # TODO: parameterize decision criteria
+    criteria = z -> argmax(first(z)) == argmax(last(z))
+    accuracy = count(criteria, zip(eachcol(caches[end].activations), eachcol(labels))) / size(inputs, 2)
 
-        # TODO: parameterize decision criteria
-        if argmax(caches[end].activations) == label[1]
-            correct += 1
-        end
+    loss = z -> mean(cost_func(z[1], z[2]))
+    cost = mean(map(loss, zip(eachcol(caches[end].activations), eachcol(labels))))
 
-        error += mean(cost_func(caches[end].activations, label))
-    end
-
-    return correct / length(labels), error / length(labels)
-end
-
-function assess!(model, cost_func, h_params, caches, inputs, labels::AbstractArray{T, 2}) where T
-    # Unvectorize, since future code can't handle it yet
-    # TODO: Vectorize future code
-    inputs = collect(eachcol(inputs))
-    labels = collect(eachcol(labels))
-    
-    return assess!(model, cost_func, h_params, caches, inputs, labels)
+    return accuracy, cost
 end
 
 # 'Epoch' functor
@@ -110,7 +87,6 @@ end
 function (epoch::Epoch)(model, h_params, caches, inputs, labels)
 
     if epoch.shuffle && epoch.batch_size < size(inputs, 1)
-        # inputs, labels = shuffle_data(inputs, labels)
         inputs, labels = shuffle_pair(inputs, labels)
     end
 

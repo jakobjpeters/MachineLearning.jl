@@ -3,8 +3,6 @@
 
 This project is both my first code in Julia and my first neural network. It is intended for learning purposes; I do not expect it to be a viable package. I intend to improve my skills by developing more models, features, configurations, performance optimizations, documentation, etc.
 
-Note: The neural network's prediction and training is not yet vectorized. Initial implementations indicate that for the default configuration, vectorizing computations will result in a 2-3x speed improvement and a 1000x reduction in memory allocations per epoch.
-
 # Why Julia?
 
 Julia is my favorite programming language for many reasons, but I think that its appeal is best stated by the founders [here](https://julialang.org/blog/2012/02/why-we-created-julia/).
@@ -100,6 +98,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Error and value checking
 - Cached intermediate arrays
 - Easier to customize 'Epoch' and 'Hyperparameters'
+- Hyperparameter optimization
 
 
 # Bugs
@@ -116,7 +115,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Optimize
     - Type stability
     - Time & space complexity
-        - Vectorize feed-forward and backpropagation
     - types.jl
         - Better parametric typing
         - Some lines are too long

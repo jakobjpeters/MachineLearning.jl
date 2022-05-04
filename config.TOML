@@ -27,7 +27,7 @@ split_percentages = [80, 20]
 # ["squared_error"]
 cost_function = "squared_error"
 
-iterations = 100
+iterations = 10
 batch_size = 10
 shuffle_data = "true"
 
@@ -44,7 +44,7 @@ sizes = [28, "missing"]
 # he is untested
 weight_initialization_functions = ["xavier", "xavier"]
 
-use_biases = [true, true]
+use_biases = [true, false]
 
 # ["Float16", "Float32", "Float64"]
 # not implemented yet
@@ -55,9 +55,9 @@ precision = "Float64"
 
 # [tanh, sigmoid, identity]
 # identity is untested
-activation_functions = ["tanh", "tanh"]
+activation_functions = ["sigmoid", "sigmoid"]
 
-learn_rates = [0.01, 0.01]
+learn_rates = [0.01, 0.1]
 
 # [z_score, demean, identity]
 # not currently "plugged in"

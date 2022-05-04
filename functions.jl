@@ -2,13 +2,7 @@
 # General
 
 function _error(prediction, label)
-    error = -1 * prediction
-
-    for i in label
-        error[i] += 1
-    end
-
-    return error
+    return label - prediction
 end
 
 function identity(x)

@@ -25,7 +25,10 @@ end
 
 # TODO: make this faster
 function shuffle_pair(inputs, labels)
-    data = shuffle!(collect(zip(eachcol(inputs), labels)))
+    # pair inputs and labels, then shuffle the pairs
+    data = shuffle!(collect(zip(eachcol(inputs), eachcol(labels))))
+    # unpack the pairs
     data = getindex.(data, 1), getindex.(data, 2)
+    # transform to original structure
     return reduce(hcat, data[1]), reduce(hcat, data[2])
 end
