@@ -1,4 +1,24 @@
 
+# About
+
+This project is both my first code in Julia and my first neural network. It is intended for learning purposes; I do not expect it to be a viable package. I intend to improve my skills by developing more models, features, configurations, performance optimizations, documentation, etc.
+
+Note: The neural network's prediction and training is not yet vectorized. Initial implementations indicate that for the default configuration, vectorizing computations will result in a 2-3x speed improvement and a 1000x reduction in memory allocations per epoch.
+
+# Why Julia?
+
+Julia is my favorite programming language for many reasons, but I think that its appeal is best stated by the founders [here](https://julialang.org/blog/2012/02/why-we-created-julia/).
+
+
+# Instructions
+
+Edit 'config.jl' to your liking. When ready, run 'Machine_Learning.jl'. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
+
+Note: Currently, the program downloads a .zip file, decompresses it to a folder containing .gz files, and the decompresses those to usable .bin files. I will work to improve this by 1) only checking for and/or downloading the dataset specified in 'config.jl' and 2) deleting the intermediate .gz files.
+
+Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile and specialized code for those types. In this project, compilation will be complete after the 1st epoch.
+
+
 # Configurable Features
 
 - Seed
