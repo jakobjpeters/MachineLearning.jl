@@ -7,10 +7,10 @@ struct Data
 end
 
 # functor, see 'core.jl'
-struct Epoch{T<:Integer, S<:Function}
+struct Epoch{T<:Integer, F<:Function}
     batch_size::T
     shuffle::Bool
-    cost_func::S
+    cost_func::F
 end
 
 # corresponds to a layer in a 'Neural_Network'
@@ -30,14 +30,15 @@ function make_caches(neural_net)
     activations = map(size -> zeros(Float64, size), sizes)
     Zs = deepcopy(activations)
     
+    # TODO: remove splatting
     return map(args -> Cache(args...), zip(δl_δw, δl_δb, activations, Zs))
 end
 
 # corresponds to a layer in a 'Neural_Network'
-struct Hyperparameters{T<:Function, S<:Function, R<:AbstractFloat}
-    norm_func::T
-    activ_func::S
-    learn_rate::R
+struct Hyperparameters{F1<:Function, F2<:Function, T<:AbstractFloat}
+    norm_func::F1
+    activ_func::F2
+    learn_rate::T
 end
 
 # functor, see 'core.jl'
@@ -62,12 +63,13 @@ function Neural_Network(input_size, precision, weight_init_funcs, sizes, use_bia
             for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
     biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
+    # TODO: remove splatting
     layers = map(args -> Layer(args...), zip(weights, biases))
     return Neural_Network(layers)
 end
 
 # not implemented yet
-struct GAN{T<:Model, S<:Model} <: Model
-    generator::T
-    discriminator::S
+struct GAN{T1<:Model, T2<:Model} <: Model
+    generator::T1
+    discriminator::T2
 end
