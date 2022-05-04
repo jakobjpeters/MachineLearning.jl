@@ -57,7 +57,7 @@ function deriv(::typeof(softmax), xs)
 
 end
 
-# Error And Derivative
+# Cost And Derivative
 
 function squared_error(prediction, label)
     return _error(prediction, label) .^ 2
