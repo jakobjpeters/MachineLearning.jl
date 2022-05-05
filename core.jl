@@ -36,7 +36,7 @@ function backpropagate(layers, cost_func, h_params, caches, inputs, labels)
 
         # cache gradients
         # gradients are averaged (divided by 'batch_size') in 'apply_gradient!' for efficiency
-        cache.δl_δw = δl_δz * transpose(prev_activation)
+        mul!(cache.δl_δw, δl_δz, transpose(prev_activation))
         if layer.biases !== nothing
             cache.δl_δb = dropdims(sum(δl_δz, dims = 2), dims = 2)
         end
@@ -56,9 +56,10 @@ function apply_gradient!(layers, learn_rates, caches, batch_size)
 
     # update each layer's weights and biases, then reset its cache
     for (layer, cache, scale) in zip(layers, caches, scales)
-        layer.weights .+= cache.δl_δw * scale 
+        # in-place a * X + Y, stored in Y
+        axpy!(scale, cache.δl_δw, layer.weights)
         if layer.biases !== nothing
-            layer.biases .+= cache.δl_δb * scale
+            axpy!(scale, cache.δl_δb, layer.biases)
         end
     end
 

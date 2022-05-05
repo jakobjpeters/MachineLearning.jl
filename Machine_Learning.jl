@@ -13,9 +13,10 @@ import TOML
 
 # Math
 import Distributions: Normal
-import Statistics: mean, std
+import Statistics: stdm
 import Random: shuffle!, seed!
 import Printf: @printf
+import LinearAlgebra: mul!, axpy!
 
 # GUI
 

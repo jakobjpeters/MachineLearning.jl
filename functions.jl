@@ -13,6 +13,10 @@ function deriv(f::typeof(identity), x)
     return ones(typeof(x), size(x))
 end
 
+function mean(xs)
+    return sum(xs) / length(xs)
+end
+
 # Activation And Derivative
 
 function sigmoid(xs)
@@ -64,7 +68,8 @@ end
 # Normalization
 
 function z_score(xs)
-    return (xs .- mean(xs)) / std(xs)
+    m = mean(xs)
+    return (xs .- m) / stdm(xs, m)
 end
 
 function z_score(xs::Matrix)
