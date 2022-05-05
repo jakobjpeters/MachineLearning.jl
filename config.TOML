@@ -12,7 +12,7 @@ display = "terminal"
 # EMNIST
 # ["mnist", "balanced", "digits", "bymerge", "byclass", "letters"]
 # "letters" is broken
-name = "mnist"
+dataset = "mnist"
 
 # ["z_score", "demean", "identity"]
 preprocessing_function = "z_score"
@@ -35,7 +35,7 @@ shuffle_data = "true"
 [model]
 
 # ["Neural_Network"]
-name = "Neural_Network"
+type = "Neural_Network"
 
 # the last layer size ("missing") is determined by the dataset
 sizes = [28, "missing"]

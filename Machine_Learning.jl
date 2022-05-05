@@ -49,15 +49,14 @@ function load_config()
         strings_to_funcs(h_params["activation_functions"]),
         h_params["learn_rates"]
     )
-
     # transform configuration 
     # see 'types.jl'
-    sizes = model["sizes"][begin:end - 1]..., length(mapping(data["name"]))
     seed = seed == "missing" ? missing : seed
     display = string_to_func(display)
-    dataset = load_dataset(data["name"], string_to_func(data["preprocessing_function"]), data["split_percentages"])
+    dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"])
+    sizes = model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))
     epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"]), string_to_func(epochs["cost_function"])), 1:epochs["iterations"])
-    model = string_to_func(model["name"])(
+    model = string_to_func(model["type"])(
         784, # input size, TODO: make dynamic
         float[model["precision"]],
         strings_to_funcs(model["weight_initialization_functions"]),
