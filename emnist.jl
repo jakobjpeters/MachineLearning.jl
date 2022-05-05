@@ -57,7 +57,7 @@ function read_string(f_name)
 end
 
 function mapping(dataset)
-    mapping = read_string(dir * "decompressed/" * dataset * "_mapping.txt")
+    mapping = read_string(dir * "gzip/" * file_names[dataset]["mapping"])
     map::Dict{UInt8, Char} = Dict()
 
     for line in mapping
@@ -68,7 +68,7 @@ function mapping(dataset)
 end
 
 function read_uint8(f_name, offset)
-    f = open(f_name)
+    f = GZip.open(f_name)
     data::Array{UInt8, 1} = deleteat!(read(f), 1:offset)
     close(f)
 
@@ -121,53 +121,40 @@ end
 #     return nothing
 # end
 
-function decompress(in_name, out_name)
-    f = GZip.open(in_name)
-    write(out_name, read(f))
-    close(f)
-
-    return nothing
-end
-
-function assert_files(dataset)
-    groups = ["mapping", "train_images", "test_images", "train_labels", "test_labels"]
-    extension = group -> group == "mapping" ? ".txt" : ".bin"
-    missing_decompressed = filter(group -> !isfile(dir * "decompressed/" * dataset * "_" * group * extension(group)), groups)
-
-    if !isempty(missing_decompressed)
-        mkpath(dir * "decompressed")
-        if !all(group -> isfile(dir * "gzip/" * file_names[dataset][group]), missing_decompressed)
-            rm(dir * "gzip", force = true)
-            mkpath(dir * "gzip")
-            emnist = "http://www.itl.nist.gov/iaui/vip/cs_links/EMNIST/gzip.zip"
-            if !isfile("emnist.zip")
-                println("Downloading 'emnist.zip' from '" * emnist * "'.")
-                download(emnist, "emnist/emnist.zip")
-            end
-            zip = ZipFile.Reader(dir * "emnist.zip")
-            for f in zip.files
-                touch(dir * f.name)
-                out = open(dir * f.name, "w")
-                write(out, read(f, String))
-                close(out)
-            end
-            close(zip)
-            rm(dir * "emnist.zip", force = true)
-
-            # dataset == "letters" && fix_letters!()
-        end
-        println("Decompressing missing files.")
-        map(group -> decompress(dir * "gzip/" * file_names[dataset][group], dir * "decompressed/" * dataset * "_" * group * extension(group)), missing_decompressed)
-    end
-end
-
+# function assert_files(dataset)
 function load_emnist(dataset)
-    assert_files(dataset)
+    groups = ["mapping", "train_images", "test_images", "train_labels", "test_labels"]
 
-    inputs = read_images(dir * "decompressed/" * dataset * "_train_images.bin", 16)
-    inputs = hcat(inputs, read_images(dir * "decompressed/" * dataset * "_test_images.bin", 16))
-    labels = read_labels(dir * "decompressed/" * dataset * "_train_labels.bin", 8, dataset)
-    labels = hcat(labels, read_labels(dir * "decompressed/" * dataset * "_test_labels.bin", 8, dataset))
+    if !all(group -> isfile(dir * "gzip/" * file_names[dataset][group]), groups)
+        rm(dir * "gzip", force = true)
+        mkpath(dir * "gzip")
+        emnist = "http://www.itl.nist.gov/iaui/vip/cs_links/EMNIST/gzip.zip"
+
+        if !isfile("emnist.zip")
+            println("Downloading 'emnist.zip' from '" * emnist * "'.")
+            download(emnist, "emnist/emnist.zip")
+        end
+
+        zip = ZipFile.Reader(dir * "emnist.zip")
+
+        for f in zip.files
+            touch(dir * f.name)
+
+            open(dir * f.name, "w") do io
+                write(io, read(f, String))
+            end
+        end
+
+        close(zip)
+        rm(dir * "emnist.zip", force = true)
+
+        # dataset == "letters" && fix_letters!()
+    end
+
+    inputs = read_images(dir * "gzip/" * file_names[dataset]["train_images"], 16)
+    inputs = hcat(inputs, read_images(dir * "gzip/" * file_names[dataset]["test_images"], 16))
+    labels = read_labels(dir * "gzip/" * file_names[dataset]["train_labels"], 8, dataset)
+    labels = hcat(labels, read_labels(dir * "gzip/" * file_names[dataset]["test_labels"], 8, dataset))
 
     return Data(inputs, labels)
 end
