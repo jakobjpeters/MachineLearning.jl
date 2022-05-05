@@ -1,7 +1,7 @@
 
-struct Data{T1<:Number, T2<:Number}
-    inputs::AbstractArray{T1}
-    labels::AbstractArray{T2}
+struct Data{A1<:AbstractArray, A2<:AbstractArray}
+    inputs::A1
+    labels::A2
 end
 
 # functor, see 'core.jl'
@@ -12,11 +12,11 @@ struct Epoch{T<:Integer, F<:Function}
 end
 
 # corresponds to a layer in a 'Neural_Network'
-mutable struct Cache{T<:AbstractFloat}
-    δl_δw::Matrix{T}
-    δl_δb::Union{Vector{T}, Nothing}
-    activations::Matrix{T}
-    Zs::Matrix{T}
+mutable struct Cache{M<:AbstractMatrix, VN<:Union{AbstractVector, Nothing}}
+    δl_δw::M
+    δl_δb::VN
+    activations::M
+    Zs::M
 end
 
 # given a 'Neural_Network', construct a list of 'Cache's to prevent redundant calculations in 'core.jl'
@@ -40,10 +40,12 @@ struct Hyperparameters{F1<:Function, F2<:Function, T<:AbstractFloat}
     learn_rate::T
 end
 
+abstract type Layer end
+
 # functor, see 'core.jl'
-mutable struct Layer{T<:AbstractFloat}
-    weights::Matrix{T}
-    biases::Union{Vector{T}, Nothing}
+mutable struct Dense{M<:AbstractMatrix, VN<:Union{AbstractVector, Nothing}} <: Layer
+    weights::M
+    biases::VN
 end
 
 abstract type Model end
@@ -63,7 +65,8 @@ function Neural_Network(input_size, precision, weight_init_funcs, sizes, use_bia
     biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
 
     # TODO: remove splatting
-    layers = map(args -> Layer(args...), zip(weights, biases))
+    # TODO: parameterize layer type
+    layers = map(args -> Dense(args...), zip(weights, biases))
     return Neural_Network(layers)
 end
 

@@ -1,10 +1,10 @@
 
 # 'Layer' functor
 # given input, calculate and cache 'Zs' and 'activations'
-function (layer::Layer)(input, activ_func, cache)
-    cache.Zs = layer.weights * input
-    if !isnothing(layer.biases)
-        cache.Zs .+= layer.biases
+function (dense::Dense)(input, activ_func, cache)
+    cache.Zs = dense.weights * input
+    if !isnothing(dense.biases)
+        cache.Zs .+= dense.biases
     end
 
     cache.activations = cache.Zs |> activ_func # |> layer.norm_func
