@@ -1,7 +1,7 @@
 
 # About
 
-This project is both my first code in Julia and my first neural network. It is intended for learning purposes; I do not expect it to be a viable package. I intend to improve my skills by developing more models, features, configurations, performance optimizations, documentation, etc.
+This project contains machine learning algorithms (currently only a neural network, but with more to come) written from scratch. It is intended for learning purposes; I do not expect it to be a viable package. I intend to learn by developing more models, features, configurations, performance optimizations, documentation, etc.
 
 # Why Julia?
 
