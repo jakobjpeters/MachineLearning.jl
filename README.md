@@ -12,9 +12,7 @@ Julia is my favorite programming language for many reasons, but I think that its
 
 Edit 'config.jl' to your liking. When ready, run 'Machine_Learning.jl'. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
 
-Note: Currently, the program downloads a .zip file, decompresses it to a folder containing .gz files, and the decompresses those to usable .bin files. I will work to improve this by 1) only checking for and/or downloading the dataset specified in 'config.jl' and 2) deleting the intermediate .gz files.
-
-Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile and specialized code for those types. In this project, compilation will be complete after the 1st epoch.
+Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile specialized code for those types. In this project, compilation will be complete after the 1st epoch.
 
 
 # Configurable Features
@@ -104,7 +102,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 # Bugs
 
 - EMNIST 'letters' dataset labels are incorrect
-- print_data' doesn't work
+- 'print_data' doesn't work
 
 
 # To Do
@@ -118,10 +116,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
     - types.jl
         - Better parametric typing
         - Some lines are too long
-    - emnist.jl
-        - My first Julia code -> needs overhaul
-        - Eliminate redundant data
-            - Delete zip and gzip or delete zip and load gzip dataset on the fly
 
 # References
 
