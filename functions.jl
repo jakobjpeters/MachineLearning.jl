@@ -2,7 +2,7 @@
 # General
 
 function _error(prediction, label)
-    return label - prediction
+    return label .- prediction
 end
 
 function identity(x)

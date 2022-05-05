@@ -67,13 +67,12 @@ function apply_gradient!(layers, learn_rates, caches, batch_size)
 end
 
 # given a model and data, test the model and return its accuracy and loss
-function assess(cost_func, inputs, output, labels)
+function assess(cost_func, outputs, labels)
     # TODO: parameterize decision criteria
     criteria = pair -> argmax(first(pair)) == argmax(last(pair))
-    accuracy = count(criteria, zip(eachcol(output), eachcol(labels))) / size(inputs, 2)
 
-    loss = pair -> mean(cost_func(first(pair), last(pair)))
-    cost = mean(map(loss, zip(eachcol(output), eachcol(labels))))
+    accuracy = count(criteria, zip(eachcol(outputs), eachcol(labels))) / size(outputs, 2)
+    cost = mean(cost_func(outputs, labels))
 
     return accuracy, cost
 end
