@@ -2,8 +2,8 @@
 # TODO: clean up
 # TODO: improve memory usage for datasets
 
-const datasets = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
 const dir = pwd() * "/emnist/"
+const datasets = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
 const file_names = Dict(
     "balanced" => Dict(
         "mapping" => "emnist-balanced-mapping.txt",
@@ -57,14 +57,14 @@ function read_string(f_name)
 end
 
 function mapping(dataset)
-    mapping = read_string(dir * "gzip/" * file_names[dataset]["mapping"])
-    map::Dict{UInt8, Char} = Dict()
+    mapping::Dict{UInt8, Char} = Dict()
 
-    for line in mapping
-        map[parse(UInt8, split(line, " ")[1]) + 1] = Char(parse(UInt8, split(line, " ")[2]))
+    for line in read_string(dir * "gzip/" * file_names[dataset]["mapping"])
+        map = split(line, " ")
+        mapping[parse(UInt8, first(map)) + 1] = Char(parse(UInt8, last(map)))
     end
 
-    return map
+    return mapping
 end
 
 function read_uint8(f_name, offset)
@@ -121,10 +121,11 @@ end
 #     return nothing
 # end
 
-# function assert_files(dataset)
 function load_emnist(dataset)
     groups = ["mapping", "train_images", "test_images", "train_labels", "test_labels"]
 
+    # check that the needed files are stored
+    # if not, download and decompress them
     if !all(group -> isfile(dir * "gzip/" * file_names[dataset][group]), groups)
         rm(dir * "gzip", force = true)
         mkpath(dir * "gzip")
@@ -148,6 +149,7 @@ function load_emnist(dataset)
         close(zip)
         rm(dir * "emnist.zip", force = true)
 
+        # TODO: fix this function
         # dataset == "letters" && fix_letters!()
     end
 
