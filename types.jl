@@ -25,8 +25,7 @@ function make_caches(neural_net)
 
     δl_δw = map(layer -> fill!(deepcopy(layer.weights), 0.0), neural_net.layers)
     δl_δb = map(layer -> deepcopy(layer.biases), neural_net.layers)
-    # can this be reduced due to changing batch sizes -> changing this size
-    activations = map(size -> zeros(Float64, size, 10), sizes)
+    activations = map(i -> Matrix{Float64}(undef, 0, 0), sizes)
     Zs = deepcopy(activations)
     
     # TODO: remove splatting
