@@ -22,41 +22,33 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
     - Set
 - Data
     - Datasets
-         - EMNIST
-            - mnist
-            - balanced
-            - digits
-            - bymerge
-            - byclass
-            - letters (broken)
+        - EMNIST
+            - ["mnist", "balanced", "digits", "bymerge", "byclass", "letters"]
+                - Note: "letters" is broken
     - Preprocessing
-        - z_score
-        - demean
-        - identity
-    - Splitting by percentage
+        - ["z_score", "demean", "identity"]
+        - Splitting by percentage
 - Epochs
     - Data shuffle boolean
     - Number of epochs
     - Cost function
-        - squared_error
+        - ["squared_error"]
     - Batch size
         - stochastic = 1
-        - mini-batch = 1 < x < length(inputs)
-        - batch = length(inputs)
+        - mini-batch = 1 < x < size(inputs, 2)
+        - batch = size(inputs, 2)
 - Model
     - Feed-forward multilayer perceptron with backpropagation
         - Weight initialization functions
-            - xavier
-            - he (untested)
+            - ["xavier", "he"]
+                - Note: "he" is untested
         - Sizes
         - Use biases boolean
         - Hyperparameters
             - Learning rates
             - Activation functions
-                - sigmoid
-                - tanh
-                - relu
-                - identity (untested)
+                - ["sigmoid", "tanh", "relu", identity"]
+                    - Note: "identity" is untested
 
 
 # Planned Features
@@ -66,10 +58,10 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
     - Display inputs
     - User created inputs
 - Models
-    - Generative adversarial network
+    - Neural networks
+        - ["generative_adversarial_network", "convolutional_neural_network"]
     - Regression
     - Decision tree
-    - Convolutional neural network
     - K-nearest neighbors
 - Datasets
 - Functions
@@ -99,10 +91,9 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Hyperparameter optimization
 
 
-# Bugs
+# Known Bugs
 
 - EMNIST 'letters' dataset labels are incorrect
-- 'print_data' doesn't work
 
 
 # To Do
