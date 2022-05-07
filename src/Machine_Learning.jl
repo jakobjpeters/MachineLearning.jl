@@ -31,7 +31,7 @@ include("interface.jl")
 
 # parse 'config.TOML' and return useful data and datatypes
 function load_config()
-    config = TOML.parsefile("config.TOML")
+    config = TOML.parsefile(dirname(pwd()) * "/config.TOML")
 
     # extract dictionaries for readability
     seed = config["seed"]

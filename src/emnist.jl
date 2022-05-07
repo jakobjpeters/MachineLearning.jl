@@ -2,7 +2,7 @@
 # TODO: clean up
 # TODO: improve memory usage for datasets
 
-const dir = pwd() * "/emnist/"
+const dir = dirname(pwd()) * "/emnist/"
 const datasets = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
 const file_names = Dict(
     "balanced" => Dict(
@@ -133,7 +133,7 @@ function load_emnist(dataset)
 
         if !isfile("emnist.zip")
             println("Downloading 'emnist.zip' from '" * emnist * "'.")
-            download(emnist, "emnist/emnist.zip")
+            download(emnist, dir * "emnist.zip")
         end
 
         zip = ZipFile.Reader(dir * "emnist.zip")
