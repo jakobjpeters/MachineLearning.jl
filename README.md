@@ -1,21 +1,21 @@
 
-# About
+## About
 
 This project contains machine learning algorithms (currently only a neural network, but with more to come) written from scratch. It is intended for learning purposes; I do not expect it to be a viable package. I intend to learn by developing more models, features, configurations, performance optimizations, documentation, etc.
 
-# Why Julia?
+## Why Julia?
 
 Julia is my favorite programming language for many reasons, but I think that its appeal is best stated by the founders [here](https://julialang.org/blog/2012/02/why-we-created-julia/).
 
 
-# Instructions
+## Instructions
 
 Edit 'config.jl' to your liking. When ready, run 'Machine_Learning.jl'. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
 
 Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile specialized code for those types. In this project, compilation will be complete after the 1st epoch.
 
 
-# Configurable Features
+## Configurable Features
 
 - Seed
     - Random
@@ -51,7 +51,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
                     - Note: "identity" is untested
 
 
-# Planned Features
+## Planned Features
 
 - Graphical user interface
     - Use plotting library
@@ -91,12 +91,12 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Hyperparameter optimization
 
 
-# Known Bugs
+## Known Bugs
 
 - EMNIST 'letters' dataset labels are incorrect
 
 
-# To Do
+## To Do
 
 - More
     - Functional style
@@ -108,7 +108,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
         - Better parametric typing
         - Some lines are too long
 
-# References
+## References
 
 3Blue1Brown. (2017, November 3). Backpropagation calculus | Chapter 4, Deep learning [Video]. Youtube. https://www.youtube.com/watch?v=tIeHLnjs5U8
 
