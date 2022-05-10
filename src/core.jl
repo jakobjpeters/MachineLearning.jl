@@ -32,33 +32,19 @@ function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
     for (layer, cache, prev_activation, h_param) in zip(reverse(layers), reverse(caches), reverse(prev_activations), reverse(h_params))
         δl_δz = δl_δa .* deriv(h_param.activ_func, cache.Zs)
 
-        # cache gradients
-        # gradients are averaged (divided by 'batch_size') in 'apply_gradient!' for efficiency
-        mul!(cache.δl_δw, δl_δz, transpose(prev_activation))
+        # update weights and biases
+        # dividing by batch size turns the gradients from a sum to an average
+        scale = h_param.learn_rate / size(inputs, 2)
+        # mul!(C, A, B, α, β) = A * B * α + C * β -> C
+        mul!(layer.weights, δl_δz, transpose(prev_activation), scale, 1)
         if layer.biases !== nothing
-            cache.δl_δb = dropdims(sum(δl_δz, dims = 2), dims = 2)
+            # axpy!(a, X, Y) = a * X + Y -> Y
+            axpy!(scale, dropdims(sum(δl_δz, dims = 2), dims = 2), layer.biases)
         end
 
         # if first layer, the following calculation is not needed
         layer === first(layers) && break
         δl_δa = transpose(layer.weights) * δl_δz
-    end
-
-    return nothing
-end
-
-# update weights and biases with cached gradient
-function apply_gradient!(layers, learn_rates, caches, batch_size)
-    # dividing by 'batch_size' turns the gradients from a sum to an average
-    scales = learn_rates / batch_size
-
-    # update each layer's weights and biases, then reset its cache
-    for (layer, cache, scale) in zip(layers, caches, scales)
-        # in-place 'a * X + Y', stored in Y
-        axpy!(scale, cache.δl_δw, layer.weights)
-        if layer.biases !== nothing
-            axpy!(scale, cache.δl_δb, layer.biases)
-        end
     end
 
     return nothing
@@ -88,7 +74,6 @@ function (epoch::Epoch)(model, h_params, caches, inputs, labels)
     
         model(view(inputs, :, first:last), h_params, caches)
         backpropagate!(model.layers, epoch.cost_func, h_params, caches, view(inputs, :, first:last), view(labels, :, first:last))    
-        apply_gradient!(model.layers, map(h_params -> h_params.learn_rate, h_params), caches, epoch.batch_size)
     end
 
     return nothing

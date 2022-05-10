@@ -12,9 +12,7 @@ struct Epoch{T<:Integer, F<:Function}
 end
 
 # corresponds to a layer in a 'Neural_Network'
-mutable struct Cache{M<:AbstractMatrix, VN<:Union{AbstractVector, Nothing}}
-    δl_δw::M
-    δl_δb::VN
+mutable struct Cache{M<:AbstractMatrix}
     activations::M
     Zs::M
 end
@@ -23,13 +21,11 @@ end
 function make_caches(neural_net)
     sizes = map(layer -> size(layer.weights, 1), neural_net.layers)
 
-    δl_δw = map(layer -> fill!(deepcopy(layer.weights), 0.0), neural_net.layers)
-    δl_δb = map(layer -> deepcopy(layer.biases), neural_net.layers)
     activations = map(i -> Matrix{Float64}(undef, 0, 0), sizes)
     Zs = deepcopy(activations)
     
     # TODO: remove splatting
-    return map(args -> Cache(args...), zip(δl_δw, δl_δb, activations, Zs))
+    return map(args -> Cache(args...), zip(activations, Zs))
 end
 
 # corresponds to a layer in a 'Neural_Network'
