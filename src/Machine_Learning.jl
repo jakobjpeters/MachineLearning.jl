@@ -52,7 +52,10 @@ function load_config()
     )
     # transform configuration 
     # see 'types.jl'
+    # seed is random if not specified
     seed = seed == "missing" ? missing : seed
+    # needs to be set before other data strcutures are initialized
+    ismissing(seed) || seed!(seed)
     display = string_to_func(display)
     dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"], float[config["precision"]])
     sizes = model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))
@@ -67,14 +70,11 @@ function load_config()
     caches = make_caches(sizes, float[config["precision"]])
     h_params = map(args -> Hyperparameters(args...), h_params_args)
 
-    return config, seed, display, dataset, epochs, model, caches, h_params
+    return config, display, dataset, epochs, model, caches, h_params
 end
 
 function main()
-    config, seed, display, dataset, epochs, model, caches, h_params = load_config()
-
-    # seed is random if not specified
-    ismissing(seed) || seed!(seed)
+    config, display, dataset, epochs, model, caches, h_params = load_config()
 
     # print configuration info
     display(config)
