@@ -23,13 +23,13 @@ function (neural_net::Neural_Network)(inputs, h_params, caches)
 end
 
 # given a model, calculate and cache the gradient for a batch of inputs
-function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
+@inline function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
     num_layers = length(layers)
     caches[num_layers].δl_δa = deriv(cost_func, labels, last(caches).outputs)
     
     # iterate end to begin to calculate each layer's gradient
     for i in reverse(1:num_layers)
-        caches[i].δl_δz = caches[i].δl_δa .* deriv(h_params[i].activ_func, caches[i].Zs)
+        caches[i].δl_δz = caches[i].δl_δa .* deriv.(h_params[i].activ_func, caches[i].Zs)
         if i != 1
             caches[i - 1].δl_δa = transpose(layers[i].weights) * caches[i].δl_δz
         end
