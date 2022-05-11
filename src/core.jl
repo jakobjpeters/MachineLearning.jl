@@ -1,15 +1,15 @@
 
-# given input, calculate and cache 'Zs' and 'activations'
+# given input, calculate and cache 'Zs' and 'outputs'
 function (dense::Dense)(inputs, activ_func, cache)
     cache.Zs = dense.weights * inputs
     if !isnothing(dense.biases)
         cache.Zs .+= dense.biases
     end
 
-    cache.activations = cache.Zs |> activ_func # |> layer.norm_func
+    cache.outputs = cache.Zs |> activ_func # |> layer.norm_func
 
     # TODO: should 'return nothing'
-    return cache.activations
+    return cache.outputs
 end
 
 # call each layer with its correct parameters
@@ -25,8 +25,8 @@ end
 # given a model, calculate and cache the gradient for a batch of inputs
 function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
     # TODO: improve
-    δl_δa = deriv(cost_func, caches[end].activations, labels)
-    prev_activations = pushfirst!(map(cache -> cache.activations, caches[begin:end - 1]), inputs)
+    δl_δa = deriv(cost_func, labels, caches[end].outputs)
+    prev_activations = pushfirst!(map(cache -> cache.outputs, caches[begin:end - 1]), inputs)
     
     # iterate end to begin to calculate each layer's gradient
     for (layer, cache, prev_activation, h_param) in zip(reverse(layers), reverse(caches), reverse(prev_activations), reverse(h_params))
@@ -56,7 +56,7 @@ function assess(cost_func, outputs, labels)
     criteria = pair -> argmax(first(pair)) == argmax(last(pair))
 
     accuracy = count(criteria, zip(eachcol(outputs), eachcol(labels))) / size(outputs, 2)
-    cost = mean(cost_func(outputs, labels))
+    cost = mean(cost_func(labels, outputs))
 
     return accuracy, cost
 end

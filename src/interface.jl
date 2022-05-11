@@ -16,7 +16,7 @@ function terminal(dataset, epoch, model, cost_func, h_params, caches)
     # mse not type stable
     for (i, data) in enumerate(dataset)
         model(data.inputs, h_params, caches)
-        accuracy, cost = assess(cost_func, caches[end].activations, data.labels)
+        accuracy, cost = assess(cost_func, caches[end].outputs, data.labels)
         @printf("\tSplit: %s\tAccuracy: %.4f\tCost: %.4f\n", i, accuracy, cost)
     end
     println()

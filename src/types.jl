@@ -13,7 +13,7 @@ end
 
 # corresponds to a layer in a 'Neural_Network'
 mutable struct Cache{M<:AbstractMatrix}
-    activations::M
+    outputs::M
     Zs::M
 end
 
@@ -21,11 +21,11 @@ end
 function make_caches(neural_net)
     sizes = map(layer -> size(layer.weights, 1), neural_net.layers)
 
-    activations = map(i -> Matrix{Float64}(undef, 0, 0), sizes)
-    Zs = deepcopy(activations)
+    outputs = map(i -> Matrix{Float64}(undef, 0, 0), sizes)
+    Zs = deepcopy(outputs)
     
     # TODO: remove splatting
-    return map(args -> Cache(args...), zip(activations, Zs))
+    return map(args -> Cache(args...), zip(outputs, Zs))
 end
 
 # corresponds to a layer in a 'Neural_Network'

@@ -1,10 +1,6 @@
 
 # General
 
-function _error(prediction, label)
-    return label .- prediction
-end
-
 function identity(x)
     return deepcopy(x)
 end
@@ -13,75 +9,75 @@ function deriv(f::typeof(identity), x)
     return ones(typeof(x), size(x))
 end
 
-function mean(xs)
-    return sum(xs) / length(xs)
+function mean(xᵢ)
+    return sum(xᵢ) / length(xᵢ)
 end
 
 # Activation And Derivative
 
-function sigmoid(xs)
-    return 1 ./ (1 .+ exp.(-xs))
+function sigmoid(xᵢ)
+    return 1 ./ (1 .+ exp.(-xᵢ))
 end
 
-function deriv(f::typeof(sigmoid), xs)
-    fxs = f(xs)
-    return fxs .* (1 .- fxs)
+function deriv(f::typeof(sigmoid), xᵢ)
+    f_xᵢ = f(xᵢ)
+    return f_xᵢ .* (1 .- f_xᵢ)
 end
 
-function relu(xs)
-    return max.(0, xs)
+function relu(xᵢ)
+    return max.(0, xᵢ)
 end
 
-function deriv(::typeof(relu), xs)
-    return map(x -> x > 0 ? 1 : 0, xs)
+function deriv(::typeof(relu), xᵢ)
+    return map(x -> x > 0 ? 1 : 0, xᵢ)
 end
 
-function tanh(xs)
-    exs = exp.(xs)
-    e_xs = inv.(exs)
-    return (exs .- e_xs) ./ (exs .+ e_xs)
+function tanh(xᵢ)
+    eˣᵢ = exp.(xᵢ)
+    e⁻ˣᵢ = inv.(eˣᵢ)
+    return (eˣᵢ .- e⁻ˣᵢ) ./ (eˣᵢ .+ e⁻ˣᵢ)
 end
 
-function deriv(f::typeof(tanh), xs)
-    return 1 .- f(xs) .^ 2
+function deriv(f::typeof(tanh), xᵢ)
+    return 1 .- f(xᵢ) .^ 2
 end
 
-function softmax(xs)
-    # esp_xs = exp.(xs)
-    # return esp_xs ./ sum(esp_xs)
+function softmax(xᵢ)
+    # esp_xᵢ = exp.(xᵢ)
+    # return esp_xᵢ ./ sum(esp_xᵢ)
 end
 
-function deriv(::typeof(softmax), xs)
+function deriv(::typeof(softmax), xᵢ)
 
 end
 
 # Cost And Derivative
 
-function squared_error(prediction, label)
-    return _error(prediction, label) .^ 2
+function squared_error(Y, Ŷ)
+    return (Y .- Ŷ) .^ 2
 end
 
-function deriv(f::typeof(squared_error), prediction, label)
-    return 2 * _error(prediction, label)
+function deriv(f::typeof(squared_error), Y, Ŷ)
+    return 2 * (Y .- Ŷ)
 end
 
 # Normalization
 
-function z_score(xs)
-    m = mean(xs)
-    return (xs .- m) / stdm(xs, m)
+function z_score(xᵢ)
+    m = mean(xᵢ)
+    return (xᵢ .- m) / stdm(xᵢ, m)
 end
 
-function z_score(xs::Matrix)
-    return mapslices(z_score, xs, dims = 1)
+function z_score(xᵢ::Matrix)
+    return mapslices(z_score, xᵢ, dims = 1)
 end
 
-function demean(xs)
-    return xs .- mean(xs)
+function demean(xᵢ)
+    return xᵢ .- mean(xᵢ)
 end
 
-function demean(xs::Matrix)
-    return mapslices(demean, xs, dims = 1)
+function demean(xᵢ::Matrix)
+    return mapslices(demean, xᵢ, dims = 1)
 end
 
 # Initialization
