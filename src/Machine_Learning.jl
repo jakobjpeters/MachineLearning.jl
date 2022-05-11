@@ -42,6 +42,7 @@ function load_config()
     h_params = config["hyperparameters"]
 
     # helpers
+    config["sizes"] = model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))
     string_to_func = string -> getfield(@__MODULE__, Symbol(string))
     strings_to_funcs = strings -> map(string_to_func, strings)
     float = Dict("Float32" => Float32, "Float64" => Float64)
@@ -58,13 +59,12 @@ function load_config()
     ismissing(seed) || seed!(seed)
     display = string_to_func(display)
     dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"], float[config["precision"]])
-    sizes = model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))
     epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"]), string_to_func(epochs["cost_function"])), 1:epochs["num_epochs"])
     model = string_to_func(model["type"])(
         784, # input size, TODO: make dynamic
         float[config["precision"]],
         strings_to_funcs(model["weight_initialization_functions"]),
-        sizes,
+        config["sizes"],
         model["use_biases"]
     )
     caches = map(_ -> Cache(float[config["precision"]]), 1:length(model.layers))

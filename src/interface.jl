@@ -1,13 +1,14 @@
 
-function terminal(config)
-    println()
-    for key in keys(config)
-        println(key, ":")
-        println(config[key])
+function terminal(config, key="config")
+    if config isa Dict
+        for key in keys(config)
+            terminal(config[key], key)
+        end
+    else
         println()
+        println(key)
+        println(config)
     end
-
-    return nothing
 end
 
 # prints model assessment for each data split
