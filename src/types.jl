@@ -13,17 +13,14 @@ end
 
 # corresponds to a layer in a 'Neural_Network'
 mutable struct Cache{M<:AbstractMatrix}
+    δl_δz::M
+    δl_δa::M
     outputs::M
     Zs::M
 end
 
-# given a 'Neural_Network', construct a list of 'Cache's to prevent redundant calculations in 'core.jl'
-function make_caches(sizes, precision)
-    outputs = map(i -> Matrix{precision}(undef, 0, 0), sizes)
-    Zs = deepcopy(outputs)
-    
-    # TODO: remove splatting
-    return map(args -> Cache(args...), zip(outputs, Zs))
+function Cache(precision)
+    return Cache(map(_ -> Matrix{precision}(undef, 0, 0), 1:length(fieldnames(Cache)))...)
 end
 
 # corresponds to a layer in a 'Neural_Network'

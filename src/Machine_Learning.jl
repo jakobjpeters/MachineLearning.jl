@@ -67,7 +67,7 @@ function load_config()
         sizes,
         model["use_biases"]
     )
-    caches = make_caches(sizes, float[config["precision"]])
+    caches = map(_ -> Cache(float[config["precision"]]), 1:length(model.layers))
     h_params = map(args -> Hyperparameters(args...), h_params_args)
 
     return config, display, dataset, epochs, model, caches, h_params

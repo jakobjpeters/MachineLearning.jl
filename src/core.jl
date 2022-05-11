@@ -24,27 +24,24 @@ end
 
 # given a model, calculate and cache the gradient for a batch of inputs
 function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
-    # TODO: improve
-    δl_δa = deriv(cost_func, labels, caches[end].outputs)
-    prev_activations = pushfirst!(map(cache -> cache.outputs, caches[begin:end - 1]), inputs)
+    num_layers = length(layers)
+    caches[num_layers].δl_δa = deriv(cost_func, labels, last(caches).outputs)
     
     # iterate end to begin to calculate each layer's gradient
-    for (layer, cache, prev_activation, h_param) in zip(reverse(layers), reverse(caches), reverse(prev_activations), reverse(h_params))
-        δl_δz = δl_δa .* deriv(h_param.activ_func, cache.Zs)
-
-        # if first layer, the following calculation is not used
-        if layer !== first(layers)
-            δl_δa = transpose(layer.weights) * δl_δz
+    for i in reverse(1:num_layers)
+        caches[i].δl_δz = caches[i].δl_δa .* deriv(h_params[i].activ_func, caches[i].Zs)
+        if i != 1
+            caches[i - 1].δl_δa = transpose(layers[i].weights) * caches[i].δl_δz
         end
 
         # update weights and biases
         # dividing by batch size turns the gradients from a sum to an average
-        scale = h_param.learn_rate / size(inputs, 2)
+        scale = h_params[i].learn_rate / size(inputs, 2)
         # mul!(C, A, B, α, β) = A * B * α + C * β -> C
-        mul!(layer.weights, δl_δz, transpose(prev_activation), scale, 1)
-        if layer.biases !== nothing
+        mul!(layers[i].weights, caches[i].δl_δz, transpose(i == 1 ? inputs : caches[i - 1].outputs), scale, 1)
+        if layers[i].biases !== nothing
             # axpy!(a, X, Y) = a * X + Y -> Y
-            axpy!(scale, dropdims(sum(δl_δz, dims = 2), dims = 2), layer.biases)
+            axpy!(scale, dropdims(sum(caches[i].δl_δz, dims = 2), dims = 2), layers[i].biases)
         end
     end
 
@@ -72,7 +69,7 @@ function (epoch::Epoch)(model, h_params, caches, inputs, labels)
     # train model for each batch
     for first in 1:epoch.batch_size:size(inputs, 2)
         last = min(size(inputs, 2), first + epoch.batch_size - 1)
-    
+
         model(view(inputs, :, first:last), h_params, caches)
         backpropagate!(model.layers, epoch.cost_func, h_params, caches, view(inputs, :, first:last), view(labels, :, first:last))
     end
