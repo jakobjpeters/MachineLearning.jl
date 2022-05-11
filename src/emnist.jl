@@ -72,7 +72,7 @@ function read_uint8(f_name, offset)
     data::Array{UInt8, 1} = deleteat!(read(f), 1:offset)
     close(f)
 
-    return convert.(Int64, data)
+    return convert.(Int32, data)
 end
 
 function read_labels(f_name, offset, dataset)

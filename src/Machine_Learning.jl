@@ -44,27 +44,27 @@ function load_config()
     # helpers
     string_to_func = string -> getfield(@__MODULE__, Symbol(string))
     strings_to_funcs = strings -> map(string_to_func, strings)
-    float = Dict("Float16" => Float16, "Float32" => Float32, "Float64" => Float64)
+    float = Dict("Float32" => Float32, "Float64" => Float64)
     h_params_args = zip(
         strings_to_funcs(h_params["normalization_functions"]),
         strings_to_funcs(h_params["activation_functions"]),
-        h_params["learn_rates"]
+        convert.(float[config["precision"]], h_params["learn_rates"])
     )
     # transform configuration 
     # see 'types.jl'
     seed = seed == "missing" ? missing : seed
     display = string_to_func(display)
-    dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"])
+    dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"], float[config["precision"]])
     sizes = model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))
     epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"]), string_to_func(epochs["cost_function"])), 1:epochs["iterations"])
     model = string_to_func(model["type"])(
         784, # input size, TODO: make dynamic
-        float[model["precision"]],
+        float[config["precision"]],
         strings_to_funcs(model["weight_initialization_functions"]),
         sizes,
         model["use_biases"]
     )
-    caches = make_caches(model)
+    caches = make_caches(sizes, float[config["precision"]])
     h_params = map(args -> Hyperparameters(args...), h_params_args)
 
     return config, seed, display, dataset, epochs, model, caches, h_params
@@ -79,11 +79,11 @@ function main()
     # print configuration info
     display(config)
     # print pre-trained model assessment
-    display(dataset, 0, model, epochs[begin].cost_func, h_params, caches)
+    @time display(dataset, 0, model, epochs[begin].cost_func, h_params, caches)
 
     # main training loop
     # see 'core.jl' and 'interface.jl'
-    for (i, epoch) in enumerate(epochs)
+    @time for (i, epoch) in enumerate(epochs)
         # train model with data from first split
         @time epoch(model, h_params, caches, dataset[begin].inputs, dataset[begin].labels)
         @time display(dataset, i, model, epoch.cost_func, h_params, caches)

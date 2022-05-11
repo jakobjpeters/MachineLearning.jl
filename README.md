@@ -17,6 +17,8 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 
 ## Configurable Features
 
+- Precision
+    - ["Float32", "Float64"]
 - Seed
     - Random
     - Set
@@ -75,7 +77,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
         - Max n values
         - Cutoff values
             - ROC analysis?
-- Floating point precision
 - Visualizations
 - Optimizers
 - Regulizers

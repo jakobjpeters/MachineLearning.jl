@@ -17,10 +17,11 @@ function split_data(inputs, labels, splits)
 end
 
 # load selected dataset, preprocess dataset, and return list of dataset splits
-function load_dataset(name, preprocess, splits)
+function load_dataset(name, preprocess, splits, precision)
     dataset = load_emnist(name)
-    prep_inputs = preprocess(dataset.inputs)
-    return split_data(prep_inputs, dataset.labels, splits)
+    prep_inputs = preprocess(convert.(precision, dataset.inputs))
+    prep_labels = convert.(precision, dataset.labels)
+    return split_data(prep_inputs, prep_labels, splits)
 end
 
 # TODO: make this faster

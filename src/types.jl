@@ -18,10 +18,8 @@ mutable struct Cache{M<:AbstractMatrix}
 end
 
 # given a 'Neural_Network', construct a list of 'Cache's to prevent redundant calculations in 'core.jl'
-function make_caches(neural_net)
-    sizes = map(layer -> size(layer.weights, 1), neural_net.layers)
-
-    outputs = map(i -> Matrix{Float64}(undef, 0, 0), sizes)
+function make_caches(sizes, precision)
+    outputs = map(i -> Matrix{precision}(undef, 0, 0), sizes)
     Zs = deepcopy(outputs)
     
     # TODO: remove splatting

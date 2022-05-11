@@ -1,4 +1,7 @@
 
+# ["Float32", "Float64"]
+precision = "Float32"
+
 # for random seed, use 'missing'
 seed = 1
 
@@ -38,17 +41,13 @@ shuffle_data = "true"
 type = "Neural_Network"
 
 # the last layer size ("missing") is determined by the dataset
-sizes = [28, "missing"]
+sizes = [100, "missing"]
 
 # [xavier, he]
 # he is untested
 weight_initialization_functions = ["xavier", "xavier"]
 
 use_biases = [true, false]
-
-# ["Float16", "Float32", "Float64"]
-# not implemented yet
-precision = "Float64"
 
 
 [hyperparameters]

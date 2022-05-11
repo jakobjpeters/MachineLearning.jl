@@ -73,7 +73,7 @@ function (epoch::Epoch)(model, h_params, caches, inputs, labels)
         last = min(size(inputs, 2), first + epoch.batch_size - 1)
     
         model(view(inputs, :, first:last), h_params, caches)
-        backpropagate!(model.layers, epoch.cost_func, h_params, caches, view(inputs, :, first:last), view(labels, :, first:last))    
+        backpropagate!(model.layers, epoch.cost_func, h_params, caches, view(inputs, :, first:last), view(labels, :, first:last))
     end
 
     return nothing
