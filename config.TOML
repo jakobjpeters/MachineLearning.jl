@@ -30,7 +30,7 @@ split_percentages = [80, 20]
 # ["squared_error"]
 cost_function = "squared_error"
 
-iterations = 10
+num_epochs = 10
 batch_size = 10
 shuffle_data = "true"
 
