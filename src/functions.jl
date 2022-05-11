@@ -82,10 +82,6 @@ end
 
 # Initialization
 
-function zero()
-
-end
-
 function uniform()
 
 end
