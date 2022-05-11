@@ -32,6 +32,11 @@ function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
     for (layer, cache, prev_activation, h_param) in zip(reverse(layers), reverse(caches), reverse(prev_activations), reverse(h_params))
         δl_δz = δl_δa .* deriv(h_param.activ_func, cache.Zs)
 
+        # if first layer, the following calculation is not used
+        if layer !== first(layers)
+            δl_δa = transpose(layer.weights) * δl_δz
+        end
+
         # update weights and biases
         # dividing by batch size turns the gradients from a sum to an average
         scale = h_param.learn_rate / size(inputs, 2)
@@ -41,10 +46,6 @@ function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
             # axpy!(a, X, Y) = a * X + Y -> Y
             axpy!(scale, dropdims(sum(δl_δz, dims = 2), dims = 2), layer.biases)
         end
-
-        # if first layer, the following calculation is not needed
-        layer === first(layers) && break
-        δl_δa = transpose(layer.weights) * δl_δz
     end
 
     return nothing

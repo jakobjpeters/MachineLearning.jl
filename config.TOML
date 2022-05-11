@@ -54,7 +54,7 @@ use_biases = [true, false]
 
 # [tanh, sigmoid, identity]
 # identity is untested
-activation_functions = ["sigmoid", "sigmoid"]
+activation_functions = ["sigmoid", "tanh"]
 
 learn_rates = [0.01, 0.1]
 
