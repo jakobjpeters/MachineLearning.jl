@@ -37,8 +37,8 @@ end
         # update weights and biases
         # dividing by batch size turns the gradients from a sum to an average
         scale = h_params[i].learn_rate / size(inputs, 2)
-        # mul!(C, A, B, α, β) = A * B * α + C * β -> C
-        mul!(layers[i].weights, caches[i].δl_δz, transpose(i == 1 ? inputs : caches[i - 1].outputs), scale, 1)
+        # gemm!(tA, tB, alpha, A, B, beta, C) = alpha * A * B + beta * C -> C where 'T' transposes
+        gemm!('N', 'T', scale, caches[i].δl_δz, i == 1 ? inputs : caches[i - 1].outputs, one(eltype(inputs)), layers[i].weights)
         if layers[i].biases !== nothing
             # axpy!(a, X, Y) = a * X + Y -> Y
             axpy!(scale, dropdims(sum(caches[i].δl_δz, dims = 2), dims = 2), layers[i].biases)

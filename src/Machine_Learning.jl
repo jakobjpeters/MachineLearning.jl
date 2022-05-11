@@ -16,7 +16,7 @@ import Distributions: Normal
 import Statistics: stdm
 import Random: shuffle!, seed!
 import Printf: @printf
-import LinearAlgebra: mul!, axpy!
+import LinearAlgebra: BLAS.gemm!, axpy!
 
 # GUI
 
