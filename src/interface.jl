@@ -1,24 +1,21 @@
 
-function terminal(config, key="config")
-    if config isa Dict
-        for key in keys(config)
-            terminal(config[key], key)
-        end
-    else
-        println()
-        println(key)
-        println(config)
+function terminal(config, key)
+    println()
+    println(key)
+    println(config)
+end
+
+function terminal(config::Dict)
+    for key in keys(config)
+        terminal(config[key], key)
     end
 end
 
 # prints model assessment for each data split
-function terminal(dataset, epoch, model, cost_func, h_params, caches)
-    println("\nEpoch: ", epoch)
-    # mse not type stable
-    for (i, data) in enumerate(dataset)
-        model(data.inputs, h_params, caches)
-        accuracy, cost = assess(cost_func, last(caches).outputs, data.labels)
-        @printf("\tSplit: %s\tAccuracy: %.4f\tCost: %.4f\n", i, accuracy, cost)
+function terminal(assessments)
+    println("\nEpoch: ", length(assessments) - 1)
+    for (i, assessment) in enumerate(zip(last(assessments).accuracies, last(assessments).costs))
+        @printf("\tSplit: %s\tAccuracy: %.4f\tCost: %.4f\n", i, first(assessment), last(assessment))
     end
     println()
 

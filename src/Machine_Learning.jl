@@ -17,6 +17,7 @@ import Statistics: stdm
 import Random: shuffle!, seed!
 import Printf: @printf
 import LinearAlgebra: BLAS.gemm!, axpy!
+using Plots
 
 # GUI
 
@@ -76,17 +77,19 @@ end
 function main()
     config, display, dataset, epochs, model, caches, h_params = load_config()
 
-    # print configuration info
+    assessment = @NamedTuple{accuracies, costs}
+    assessments = [assessment(assess!(dataset, model, first(epochs).cost_func, h_params, caches))]
+
     display(config)
-    # print pre-trained model assessment
-    @time display(dataset, 0, model, epochs[begin].cost_func, h_params, caches)
+    display(assessments)
 
     # main training loop
     # see 'core.jl' and 'interface.jl'
-    @time for (i, epoch) in enumerate(epochs)
+    @time for epoch in epochs
         # train model with data from first split
         @time epoch(model, h_params, caches, dataset[begin].inputs, dataset[begin].labels)
-        @time display(dataset, i, model, epoch.cost_func, h_params, caches)
+        @time push!(assessments, assessment(assess!(dataset, model, first(epochs).cost_func, h_params, caches)))
+        display(assessments)
     end
 
     return config, model

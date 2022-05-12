@@ -49,14 +49,22 @@ end
 end
 
 # given a model and data, test the model and return its accuracy and loss
-function assess(cost_func, outputs, labels)
-    # TODO: parameterize decision criteria
-    criteria = pair -> argmax(first(pair)) == argmax(last(pair))
+function assess!(dataset, model, cost_func, h_params, caches)
+    precision = eltype(first(model.layers).weights)
+    accuracies = Vector{precision}()
+    costs = Vector{precision}()
 
-    accuracy = count(criteria, zip(eachcol(outputs), eachcol(labels))) / size(outputs, 2)
-    cost = mean(cost_func(labels, outputs))
+    for split in dataset
+        model(split.inputs, h_params, caches)
 
-    return accuracy, cost
+        # TODO: parameterize decision criteria
+        criteria = pair -> argmax(first(pair)) == argmax(last(pair))
+
+        push!(accuracies, count(criteria, zip(eachcol(last(caches).outputs), eachcol(split.labels))) / size(last(caches).outputs, 2))
+        push!(costs, mean(cost_func(split.labels, last(caches).outputs)))
+    end
+
+    return accuracies, costs
 end
 
 # given a model and data, coordinate model training
