@@ -25,7 +25,7 @@ end
 # given a model, calculate and cache the gradient for a batch of inputs
 @inline function backpropagate!(layers, cost_func, h_params, caches, inputs, labels)
     num_layers = length(layers)
-    caches[num_layers].δl_δa = deriv(cost_func, labels, last(caches).outputs)
+    caches[num_layers].δl_δa = deriv(cost_func, labels, caches[end].outputs)
     
     # iterate end to begin to calculate each layer's gradient
     for i in reverse(1:num_layers)
@@ -50,21 +50,21 @@ end
 
 # given a model and data, test the model and return its accuracy and loss
 function assess!(dataset, model, cost_func, h_params, caches)
-    precision = eltype(first(model.layers).weights)
-    accuracies = Vector{precision}()
-    costs = Vector{precision}()
+    precision = eltype(model.layers[begin].weights)
+    accuracy = Vector{precision}()
+    cost = Vector{precision}()
 
     for split in dataset
         model(split.inputs, h_params, caches)
 
         # TODO: parameterize decision criteria
-        criteria = pair -> argmax(first(pair)) == argmax(last(pair))
+        criteria = pair -> argmax(pair[begin]) == argmax(pair[end])
 
-        push!(accuracies, count(criteria, zip(eachcol(last(caches).outputs), eachcol(split.labels))) / size(last(caches).outputs, 2))
-        push!(costs, mean(cost_func(split.labels, last(caches).outputs)))
+        push!(accuracy, count(criteria, zip(eachcol(caches[end].outputs), eachcol(split.labels))) / size(caches[end].outputs, 2))
+        push!(cost, mean(cost_func(split.labels, caches[end].outputs)))
     end
 
-    return accuracies, costs
+    return accuracy, cost
 end
 
 # given a model and data, coordinate model training

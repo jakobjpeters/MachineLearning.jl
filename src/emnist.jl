@@ -61,7 +61,7 @@ function mapping(dataset)
 
     for line in read_string(dir * "gzip/" * file_names[dataset]["mapping"])
         map = split(line, " ")
-        mapping[parse(UInt8, first(map)) + 1] = Char(parse(UInt8, last(map)))
+        mapping[parse(UInt8, map[begin]) + 1] = Char(parse(UInt8, map[end]))
     end
 
     return mapping

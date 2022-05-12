@@ -17,7 +17,6 @@ import Statistics: stdm
 import Random: shuffle!, seed!
 import Printf: @printf
 import LinearAlgebra: BLAS.gemm!, axpy!
-using Plots
 
 # GUI
 
@@ -60,7 +59,7 @@ function load_config()
     ismissing(seed) || seed!(seed)
     display = string_to_func(display)
     dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"], float[config["precision"]])
-    epochs = map(i -> Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"]), string_to_func(epochs["cost_function"])), 1:epochs["num_epochs"])
+    epochs = repeat([Epoch(epochs["batch_size"], parse(Bool, epochs["shuffle_data"]), string_to_func(epochs["cost_function"]))], epochs["num_epochs"])
     model = string_to_func(model["type"])(
         784, # input size, TODO: make dynamic
         float[config["precision"]],

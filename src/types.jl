@@ -20,7 +20,7 @@ mutable struct Cache{M<:AbstractMatrix}
 end
 
 function Cache(precision)
-    return Cache(map(_ -> Matrix{precision}(undef, 0, 0), 1:length(fieldnames(Cache)))...)
+    return Cache(repeat([Matrix{precision}(undef, 0, 0)], length(fieldnames(Cache)))...)
 end
 
 # corresponds to a layer in a 'Neural_Network'
