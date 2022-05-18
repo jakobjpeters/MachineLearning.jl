@@ -68,16 +68,8 @@ function z_score(xᵢ)
     return (xᵢ .- m) / stdm(xᵢ, m)
 end
 
-function z_score(xᵢ::Matrix)
-    return mapslices(z_score, xᵢ, dims = 1)
-end
-
 function demean(xᵢ)
     return xᵢ .- mean(xᵢ)
-end
-
-function demean(xᵢ::Matrix)
-    return mapslices(demean, xᵢ, dims = 1)
 end
 
 # Initialization

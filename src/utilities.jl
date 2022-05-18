@@ -19,7 +19,7 @@ end
 # load selected dataset, preprocess dataset, and return list of dataset splits
 function load_dataset(name, preprocess, splits, precision)
     dataset = load_emnist(name)
-    prep_input = preprocess(convert.(precision, dataset.input))
+    prep_input = mapslices(preprocess, convert.(precision, dataset.input), dims = 1)
     prep_label = convert.(precision, dataset.label)
     return split_data(prep_input, prep_label, splits)
 end
