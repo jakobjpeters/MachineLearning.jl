@@ -99,6 +99,8 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 
 ## To Do
 
+- Turn into Julia 'project'
+- Turn into package with example scripts instead of 'config.TOML'
 - More
     - Functional style
     - Generic

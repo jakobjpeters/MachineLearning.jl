@@ -153,10 +153,10 @@ function load_emnist(dataset)
         # dataset == "letters" && fix_letters!()
     end
 
-    inputs = read_images(dir * "gzip/" * file_names[dataset]["train_images"], 16)
-    inputs = hcat(inputs, read_images(dir * "gzip/" * file_names[dataset]["test_images"], 16))
-    labels = read_labels(dir * "gzip/" * file_names[dataset]["train_labels"], 8, dataset)
-    labels = hcat(labels, read_labels(dir * "gzip/" * file_names[dataset]["test_labels"], 8, dataset))
+    input = read_images(dir * "gzip/" * file_names[dataset]["train_images"], 16)
+    input = hcat(input, read_images(dir * "gzip/" * file_names[dataset]["test_images"], 16))
+    label = read_labels(dir * "gzip/" * file_names[dataset]["train_labels"], 8, dataset)
+    label = hcat(label, read_labels(dir * "gzip/" * file_names[dataset]["test_labels"], 8, dataset))
 
-    return Data(inputs, labels)
+    return Data(input, label)
 end

@@ -2,7 +2,7 @@
 # ["Float32", "Float64"]
 precision = "Float32"
 
-# for random seed, use 'missing'
+# for random seed, use "missing"
 seed = 1
 
 # ["terminal", "gui"]
@@ -25,16 +25,6 @@ preprocessing_function = "z_score"
 split_percentages = [80, 20]
 
 
-[epochs]
-
-# ["squared_error"]
-cost_function = "squared_error"
-
-num_epochs = 10
-batch_size = 10
-shuffle_data = "true"
-
-
 [model]
 
 # ["Neural_Network"]
@@ -50,7 +40,17 @@ weight_initialization_functions = ["xavier", "xavier"]
 use_biases = [true, false]
 
 
-[hyperparameters]
+[epoch_parameter]
+
+# ["squared_error"]
+cost_function = "squared_error"
+
+num_epochs = 10
+batch_size = 10
+shuffle_data = "true"
+
+
+[layer_parameter]
 
 # [tanh, sigmoid, identity]
 # identity is untested
