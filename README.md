@@ -39,6 +39,8 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
         - stochastic = 1
         - mini-batch = 1 < x < size(inputs, 2)
         - batch = size(inputs, 2)
+    - Batch normalization
+        - ["z_score", "demean", "identity"]
 - Model
     - Feed-forward multilayer perceptron with backpropagation
         - Weight initialization functions
@@ -85,7 +87,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Automatic differentiation?
 - Documentation
 - Pretty printing
-- Batch normalization
 - Error and value checking
 - Cached intermediate arrays
 - Easier to customize 'Epoch' and 'Hyperparameters'

@@ -40,16 +40,6 @@ weight_initialization_functions = ["xavier", "xavier"]
 use_biases = [true, false]
 
 
-[epoch_parameter]
-
-# ["squared_error"]
-cost_function = "squared_error"
-
-num_epochs = 10
-batch_size = 10
-shuffle_data = "true"
-
-
 [layer_parameter]
 
 # [tanh, sigmoid, identity]
@@ -58,6 +48,19 @@ activation_functions = ["sigmoid", "tanh"]
 
 learn_rates = [0.01, 0.1]
 
-# [z_score, demean, identity]
+# ["z_score", "demean", "identity"]
 # not currently "plugged in"
 normalization_functions = ["identity", "identity"]
+
+
+[epoch_parameter]
+
+# ["squared_error"]
+cost_function = "squared_error"
+
+# ["z_score", "demean", "identity"]
+normalization_function = "z_score"
+
+number_of_epochs = 10
+batch_size = 10
+shuffle_data = "true"

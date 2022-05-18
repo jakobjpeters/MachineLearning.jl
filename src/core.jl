@@ -77,9 +77,10 @@ function (epoch_param::Epoch_Parameter)(model, layer_params, caches, input, labe
     # train model for each batch
     for first in 1:epoch_param.batch_size:size(input, 2)
         last = min(size(input, 2), first + epoch_param.batch_size - 1)
+        norm_input = epoch_param.norm_func(view(input, :, first:last))
 
-        model(view(input, :, first:last), layer_params, caches)
-        backpropagate!(model.layers, epoch_param.cost_func, layer_params, caches, view(input, :, first:last), view(label, :, first:last))
+        model(norm_input, layer_params, caches)
+        backpropagate!(model.layers, epoch_param.cost_func, layer_params, caches, norm_input, view(label, :, first:last))
     end
 
     return nothing

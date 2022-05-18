@@ -57,6 +57,8 @@ function load_config()
         convert.(float[config["precision"]], layer_param["learn_rates"])
     )
     layer_param = map(layer_param_arg -> Layer_Parameter(layer_param_arg...), layer_param_args)
+    num_epochs = epoch_param["number_of_epochs"]
+    epoch_param = [epoch_param["batch_size"], parse(Bool, epoch_param["shuffle_data"]), string_to_func(epoch_param["cost_function"]), string_to_func(epoch_param["normalization_function"]), layer_param]
 
     # seed is random if not specified
     # needs to be set before any random sampling
@@ -66,7 +68,7 @@ function load_config()
     # see 'types.jl'
     display = string_to_func(display)
     dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"], float[config["precision"]])
-    epoch_param = repeat([Epoch_Parameter(epoch_param["batch_size"], parse(Bool, epoch_param["shuffle_data"]), string_to_func(epoch_param["cost_function"]), layer_param)], epoch_param["num_epochs"])
+    epoch_params = repeat([Epoch_Parameter(epoch_param...)], num_epochs)
     model = string_to_func(model["type"])(
         784, # input size, TODO: make dynamic
         float[config["precision"]],
@@ -76,5 +78,5 @@ function load_config()
     )
     caches = map(_ -> Cache(float[config["precision"]]), 1:length(model.layers))
 
-    return config, display, dataset, epoch_param, model, caches
+    return config, display, dataset, epoch_params, model, caches
 end

@@ -12,10 +12,11 @@ struct Layer_Parameter{F1<:Function, F2<:Function, T<:AbstractFloat}
 end
 
 # functor, see 'core.jl'
-struct Epoch_Parameter{T<:Integer, F<:Function, H<:Layer_Parameter}
+struct Epoch_Parameter{T<:Integer, F1<:Function, F2<:Function, H<:Layer_Parameter}
     batch_size::T
     shuffle::Bool
-    cost_func::F
+    cost_func::F1
+    norm_func::F2
     layer_param::Vector{H}
 end
 

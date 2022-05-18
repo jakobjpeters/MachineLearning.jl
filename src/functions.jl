@@ -2,7 +2,7 @@
 # General
 
 function identity(x)
-    return deepcopy(x)
+    return x
 end
 
 function deriv(f::typeof(identity), x)
