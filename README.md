@@ -30,17 +30,22 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
     - Preprocessing
         - ["z_score", "demean", "identity"]
         - Splitting by percentage
-- Epochs
+- Epoch Parameters
     - Data shuffle boolean
     - Number of epochs
     - Cost function
         - ["squared_error"]
     - Batch size
         - stochastic = 1
-        - mini-batch = 1 < x < size(inputs, 2)
-        - batch = size(inputs, 2)
+        - mini-batch = 1 < x < size(input, 2)
+        - batch = size(input, 2)
     - Batch normalization
         - ["z_score", "demean", "identity"]
+- Layer Parameters
+    - Learning rates
+    - Activation functions
+        - ["sigmoid", "tanh", "relu", identity"]
+            - Note: "identity" is untested
 - Model
     - Feed-forward multilayer perceptron with backpropagation
         - Weight initialization functions
@@ -48,11 +53,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
                 - Note: "he" is untested
         - Sizes
         - Use biases boolean
-        - Hyperparameters
-            - Learning rates
-            - Activation functions
-                - ["sigmoid", "tanh", "relu", identity"]
-                    - Note: "identity" is untested
 
 
 ## Planned Features
@@ -88,8 +88,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Documentation
 - Pretty printing
 - Error and value checking
-- Cached intermediate arrays
-- Easier to customize 'Epoch' and 'Hyperparameters'
 - Hyperparameter optimization
 
 
