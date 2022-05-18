@@ -5,8 +5,8 @@ function identity(x)
     return x
 end
 
-function deriv(f::typeof(identity), x)
-    return ones(typeof(x), size(x))
+function deriv(f::typeof(identity), x::T) where T
+    return ones(T, size(x))
 end
 
 function mean(xᵢ)
