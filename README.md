@@ -1,7 +1,7 @@
 
 ## About
 
-This project contains machine learning algorithms (currently only a neural network, but with more to come) written from scratch. It is intended for learning purposes; I do not expect it to be a viable package. I intend to learn by developing more models, features, configurations, performance optimizations, documentation, etc.
+This project contains machine learning algorithms (currently only a neural network, but with more to come) written from scratch. It is intended for learning purposes; I do not expect it to be a viable package.
 
 ## Why Julia?
 
