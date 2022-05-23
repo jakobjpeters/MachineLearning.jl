@@ -48,6 +48,7 @@ activation_functions = ["sigmoid", "tanh"]
 
 learn_rates = [0.01, 0.1]
 
+# layer normalization
 # ["z_score", "demean", "identity"]
 # not currently "plugged in"
 normalization_functions = ["identity", "identity"]
@@ -58,6 +59,7 @@ normalization_functions = ["identity", "identity"]
 # ["squared_error"]
 cost_function = "squared_error"
 
+# batch normalization
 # ["z_score", "demean", "identity"]
 normalization_function = "z_score"
 
