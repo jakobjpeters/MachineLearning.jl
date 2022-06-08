@@ -8,7 +8,14 @@ end
 struct Layer_Parameter{F1<:Function, F2<:Function, T<:AbstractFloat}
     norm_func::F1
     activ_func::F2
-    learn_rate::T
+    scale::T
+end
+
+function Layer_Parameter(norm_func, activ_func, learn_rate, batch_size)
+    # negated to update with the negative gradient
+    # dividing by batch size will average the gradients when updated
+    scale = -learn_rate / batch_size
+    return Layer_Parameter(norm_func, activ_func, scale)
 end
 
 # functor, see 'core.jl'

@@ -54,7 +54,8 @@ function load_config()
     layer_param_args = zip(
         strings_to_funcs(layer_param["normalization_functions"]),
         strings_to_funcs(layer_param["activation_functions"]),
-        convert.(float[config["precision"]], layer_param["learn_rates"])
+        convert.(float[config["precision"]], layer_param["learn_rates"]),
+        repeat([epoch_param["batch_size"]], length(config["sizes"]))
     )
     layer_param = map(layer_param_arg -> Layer_Parameter(layer_param_arg...), layer_param_args)
     num_epochs = epoch_param["number_of_epochs"]
@@ -79,4 +80,8 @@ function load_config()
     caches = map(_ -> Cache(float[config["precision"]]), 1:length(model.layers))
 
     return config, display, dataset, epoch_params, model, caches
+end
+
+function preallocate(x, y)
+    return size(x) == size(y) ? x : zeros(eltype(x), size(y))
 end
