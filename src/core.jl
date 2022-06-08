@@ -6,16 +6,18 @@ function (dense::Dense)(input, activ_func, cache)
         cache.Z .+= dense.bias
     end
 
-    cache.output = cache.Z |> activ_func # |> layer.norm_func
+    cache.output = map(activ_func, cache.Z) # |> layer.norm_func
+    # map!(activ_func, cache.output, cache.Z) # |> layer.norm_func
 
-    # TODO: should 'return nothing'
-    return cache.output
+    return Nothing
 end
 
 # propagate input -> output through each layer
 function (neural_net::Neural_Network)(input, layer_params, caches)
     for (layer, layer_param, cache) in zip(neural_net.layers, layer_params, caches)
-        input = layer(input, layer_param.activ_func, cache)
+        layer(input, layer_param.activ_func, cache)
+        # TODO: remove this line
+        input = cache.output
     end
 
     return nothing
@@ -24,25 +26,29 @@ end
 # calculate the gradient and update the model's parameters for a batched input
 @inline function backpropagate!(layers, cost_func, layer_params, caches, input, label)
     num_layers = length(layers)
-    caches[num_layers].δl_δa = deriv(cost_func, label, caches[end].output)
+    caches[num_layers].δl_δa = derivative(cost_func)(label, caches[end].output)
 
     for i in reverse(1:num_layers)
         # calculate intermediate partial derivatives
-        caches[i].δl_δz = caches[i].δl_δa .* deriv.(layer_params[i].activ_func, caches[i].Z)
+        δa_δz = map(derivative(layer_params[i].activ_func), caches[i].Z)
+        caches[i].δl_δz = caches[i].δl_δa .* δa_δz
         # do not need to calculate δl_δa for first layer, since there are no parameters to update
         if i != 1
             caches[i - 1].δl_δa = transpose(layers[i].weight) * caches[i].δl_δz
         end
 
+        layer_input = i == 1 ? input : caches[i - 1].output
+        # negated to update with the negative gradient
         # dividing by batch size will average the gradients when updated
-        scale = layer_params[i].learn_rate / size(input, 2)
+        scale = -layer_params[i].learn_rate / size(input, 2)
 
         # update weights and biases in-place
         # gemm!(tA, tB, α, A, B, β, C) = α * A * B + β * C -> C where 'T' indicates a transpose
-        gemm!('N', 'T', scale, caches[i].δl_δz, i == 1 ? input : caches[i - 1].output, one(eltype(input)), layers[i].weight)
+        gemm!('N', 'T', scale, caches[i].δl_δz, layer_input, one(eltype(input)), layers[i].weight)
         if layers[i].bias !== nothing
+            δl_δb = dropdims(sum(caches[i].δl_δz, dims = 2), dims = 2)
             # axpy!(α, X, Y) = α * X + Y -> Y
-            axpy!(scale, dropdims(sum(caches[i].δl_δz, dims = 2), dims = 2), layers[i].bias)
+            axpy!(scale, δl_δb, layers[i].bias)
         end
     end
 

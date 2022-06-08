@@ -5,8 +5,10 @@ function identity(x)
     return x
 end
 
-function deriv(f::typeof(identity), x::T) where T
-    return ones(T, size(x))
+function derivative(::typeof(identity))
+    return function (x::T) where T
+        return one(T)
+    end
 end
 
 function mean(xᵢ)
@@ -15,40 +17,48 @@ end
 
 # Activation And Derivative
 
-function sigmoid(xᵢ)
-    return 1 ./ (1 .+ exp.(-xᵢ))
+function sigmoid(x::T) where T
+    return one(T) / (one(T) + exp(-x))
 end
 
-function deriv(f::typeof(sigmoid), xᵢ)
-    f_xᵢ = f(xᵢ)
-    return f_xᵢ .* (1 .- f_xᵢ)
+function derivative(f::typeof(sigmoid))
+    return function (x::T) where T
+        f_x = f(x)
+        return f_x * (one(T) - f_x)
+    end
 end
 
-function relu(xᵢ)
-    return max.(0, xᵢ)
+function relu(x::T) where T
+    return max(zero(T), x)
 end
 
-function deriv(::typeof(relu), xᵢ)
-    return map(x -> x > 0 ? 1 : 0, xᵢ)
+function derivative(::typeof(relu))
+    return function (x::T) where T
+        return x > zero(T) ? one(T) : zero(T)
+    end
 end
 
-function tanh(xᵢ)
-    eˣᵢ = exp.(xᵢ)
-    e⁻ˣᵢ = inv.(eˣᵢ)
-    return (eˣᵢ .- e⁻ˣᵢ) ./ (eˣᵢ .+ e⁻ˣᵢ)
+function tanh(x)
+    eˣ = exp(x)
+    e⁻ˣ = inv(eˣ)
+    return (eˣ - e⁻ˣ) / (eˣ + e⁻ˣ)
 end
 
-function deriv(f::typeof(tanh), xᵢ)
-    return 1 .- f(xᵢ) .^ 2
+function derivative(f::typeof(tanh))
+    return function (x::T) where T
+        return one(T) - f(x) ^ 2
+    end
 end
 
-function softmax(xᵢ)
-    # esp_xᵢ = exp.(xᵢ)
-    # return esp_xᵢ ./ sum(esp_xᵢ)
+function softmax(x)
+    # esp_x = exp(x)
+    # return esp_x / sum(esp_x)
 end
 
-function deriv(::typeof(softmax), xᵢ)
+function derivative(::typeof(softmax))
+    return function (x)
 
+    end
 end
 
 # Cost And Derivative
@@ -57,8 +67,10 @@ function squared_error(Y, Ŷ)
     return (Y .- Ŷ) .^ 2
 end
 
-function deriv(f::typeof(squared_error), Y, Ŷ)
-    return 2 * (Y .- Ŷ)
+function derivative(::typeof(squared_error))
+    return function (Y, Ŷ)
+        return 2 * (Ŷ - Y)
+    end
 end
 
 # Normalization
