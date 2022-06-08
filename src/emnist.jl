@@ -2,9 +2,9 @@
 # TODO: clean up
 # TODO: improve memory usage for datasets
 
-const dir = dirname(pwd()) * "/emnist/"
-const datasets = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
-const file_names = Dict(
+# const DATASETS = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
+const DIR = dirname(pwd()) * "/emnist/"
+const FILE_NAMES = Dict(
     "balanced" => Dict(
         "mapping" => "emnist-balanced-mapping.txt",
         "test_images" => "emnist-balanced-test-images-idx3-ubyte.gz",
@@ -59,7 +59,7 @@ end
 function mapping(dataset)
     mapping::Dict{UInt8, Char} = Dict()
 
-    for line in read_string(dir * "gzip/" * file_names[dataset]["mapping"])
+    for line in read_string(DIR * "gzip/" * FILE_NAMES[dataset]["mapping"])
         map = split(line, " ")
         mapping[parse(UInt8, map[begin]) + 1] = Char(parse(UInt8, map[end]))
     end
@@ -126,37 +126,37 @@ function load_emnist(dataset)
 
     # check that the needed files are stored
     # if not, download and decompress them
-    if !all(group -> isfile(dir * "gzip/" * file_names[dataset][group]), groups)
-        rm(dir * "gzip", force = true)
-        mkpath(dir * "gzip")
+    if !all(group -> isfile(DIR * "gzip/" * FILE_NAMES[dataset][group]), groups)
+        rm(DIR * "gzip", force = true)
+        mkpath(DIR * "gzip")
         emnist = "http://www.itl.nist.gov/iaui/vip/cs_links/EMNIST/gzip.zip"
 
         if !isfile("emnist.zip")
             println("Downloading 'emnist.zip' from '" * emnist * "'.")
-            download(emnist, dir * "emnist.zip")
+            download(emnist, DIR * "emnist.zip")
         end
 
-        zip = ZipFile.Reader(dir * "emnist.zip")
+        zip = ZipFile.Reader(DIR * "emnist.zip")
 
         for f in zip.files
-            touch(dir * f.name)
+            touch(DIR * f.name)
 
-            open(dir * f.name, "w") do io
+            open(DIR * f.name, "w") do io
                 write(io, read(f, String))
             end
         end
 
         close(zip)
-        rm(dir * "emnist.zip", force = true)
+        rm(DIR * "emnist.zip", force = true)
 
         # TODO: fix this function
         # dataset == "letters" && fix_letters!()
     end
 
-    input = read_images(dir * "gzip/" * file_names[dataset]["train_images"], 16)
-    input = hcat(input, read_images(dir * "gzip/" * file_names[dataset]["test_images"], 16))
-    label = read_labels(dir * "gzip/" * file_names[dataset]["train_labels"], 8, dataset)
-    label = hcat(label, read_labels(dir * "gzip/" * file_names[dataset]["test_labels"], 8, dataset))
+    input = read_images(DIR * "gzip/" * FILE_NAMES[dataset]["train_images"], 16)
+    input = hcat(input, read_images(DIR * "gzip/" * FILE_NAMES[dataset]["test_images"], 16))
+    label = read_labels(DIR * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
+    label = hcat(label, read_labels(DIR * "gzip/" * FILE_NAMES[dataset]["test_labels"], 8, dataset))
 
     return Data(input, label)
 end
