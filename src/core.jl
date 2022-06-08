@@ -64,10 +64,10 @@ function assess!(dataset, model, cost_func, layer_params, caches)
     for split in dataset
         model(split.input, layer_params, caches)
 
-        # TODO: parameterize decision criteria
-        criteria = pair -> argmax(pair[begin]) == argmax(pair[end])
+        # TODO: parameterize decision criterion
+        criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
 
-        push!(accuracy, count(criteria, zip(eachcol(caches[end].output), eachcol(split.label))) / size(caches[end].output, 2))
+        push!(accuracy, count(criterion, zip(eachcol(caches[end].output), eachcol(split.label))) / size(caches[end].output, 2))
         push!(cost, mean(cost_func(split.label, caches[end].output)))
     end
 
