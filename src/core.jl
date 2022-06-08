@@ -15,10 +15,9 @@ end
 
 # propagate input -> output through each layer
 function (neural_net::Neural_Network)(input, layer_params, caches)
-    for (layer, layer_param, cache) in zip(neural_net.layers, layer_params, caches)
-        layer(input, layer_param.activ_func, cache)
-        # TODO: remove this line
-        input = cache.output
+    for i in 1:length(neural_net.layers)
+        layer_input = i == 1 ? input : caches[i - 1].output
+        neural_net.layers[i](layer_input, layer_params[i].activ_func, caches[i])
     end
 
     return nothing
