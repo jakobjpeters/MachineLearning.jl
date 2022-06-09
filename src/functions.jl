@@ -100,23 +100,22 @@ end
 
 # Regularization
 
-function weight_decay(xᵢ, λ)
-    return λ * xᵢ
+function weight_decay(x, λ)
+    return λ * x
 end
 
-function l1(xᵢ, λ)
-    return λ * abs.(xᵢ)
-    # return λ * map(abs, xᵢ)
+function l1(x, λ)
+    return λ * abs(x)
 end
 
 function derivative(::typeof(l1))
-    return function (xᵢ, λ)
-        return λ * map(sign, xᵢ)
+    return function (x, λ)
+        return λ * sign(x)
     end
 end
 
-function l2(xᵢ, λ)
-    return λ / 2 * transpose(xᵢ) * xᵢ
+function l2(x, λ)
+    return λ / 2 * x ^ 2
 end
 
 function derivative(::typeof(l2))

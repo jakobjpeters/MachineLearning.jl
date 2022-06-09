@@ -31,7 +31,7 @@ end
 
 function update_weight!(regular_func::typeof(l1), regular_rate, learn_rate, weight, δl_δz, layer_input, batch_size)
     gradient = δl_δz * transpose(layer_input) / batch_size
-    penalty = derivative(regular_func)(weight, regular_rate / learn_rate)
+    penalty = derivative(regular_func).(weight, regular_rate / learn_rate)
     # axpy!(α, X, Y) = α * X + Y -> Y
     axpy!(-learn_rate, gradient + penalty, weight)
 end
@@ -93,7 +93,7 @@ function assess!(dataset, model, cost_func, layer_params, caches)
         n_correct = count(criterion, zip(eachcol(caches[end].output), eachcol(split.label)))
         push!(accuracies, n_correct / n)
 
-        penalty = sum([sum(layer_params[i].regular_func(model.layers[i].weight, layer_params[i].regular_rate)) for i in 1:length(layer_params)])
+        penalty = sum([sum(layer_params[i].regular_func.(model.layers[i].weight, layer_params[i].regular_rate)) for i in 1:length(layer_params)])
         cost = sum(cost_func(split.label, caches[end].output))
         push!(costs, (cost + penalty) / n)
     end
