@@ -10,7 +10,7 @@ function (dense::Dense)(input, activ_func, cache)
     cache.output = preallocate(cache.output, cache.Z)
     map!(activ_func, cache.output, cache.Z) # |> layer.norm_func
 
-    return nothing
+    return
 end
 
 # propagate input -> output through each layer
@@ -20,7 +20,7 @@ function (neural_net::NeuralNetwork)(input, layer_params, caches)
         neural_net.layers[i](layer_input, layer_params[i].activ_func, caches[i])
     end
 
-    return nothing
+    return
 end
 
 # regular_func::typeof(T) where T <: Uniont{weight_decay, l1, l2} when l2 doesn't use an adaptive gradient
@@ -28,7 +28,7 @@ function update_weight!(regular_func, regular_rate, learn_rate, weight, δl_δz,
     # gemm!(tA, tB, α, A, B, β, C) = α * A * B + β * C -> C where 'T' indicates a transpose
     gemm!('N', 'T', -learn_rate / batch_size, δl_δz, layer_input, one(eltype(layer_input)) - regular_rate, weight)
     
-    return nothing
+    return
 end
 
 function update_weight!(regular_func::typeof(l1), regular_rate, learn_rate, weight, δl_δz, layer_input, batch_size)
@@ -37,7 +37,7 @@ function update_weight!(regular_func::typeof(l1), regular_rate, learn_rate, weig
     # axpy!(α, X, Y) = α * X + Y -> Y
     axpy!(-learn_rate, gradient + penalty, weight)
 
-    return nothing
+    return
 end
 
 # needed for 'l2' with adaptive gradient such as ADAM, although ADAM with weight decay is better
@@ -84,7 +84,7 @@ end
         caches[i - 1].δl_δa = δl_δa
     end
 
-    return nothing
+    return
 end
 
 # test the model and return its accuracy and loss for each data split
@@ -125,7 +125,7 @@ function (epoch_param::EpochParameter)(model, layer_params, caches, input, label
         backpropagate!(model.layers, layer_params, caches, norm_input, view(label, :, first:last), epoch_param.cost_func)
     end
 
-    return nothing
+    return
 end
 
 function train_model!(epoch_param, model, caches, dataset, assessments, display = nothing, n_epochs = 1)
@@ -137,7 +137,7 @@ function train_model!(epoch_param, model, caches, dataset, assessments, display 
         display(assessments)
     end
 
-    return nothing
+    return
 end
 
 function train_model!(epochs::Vector, model, caches, dataset, assessments, display = nothing)
@@ -145,6 +145,6 @@ function train_model!(epochs::Vector, model, caches, dataset, assessments, displ
         train_model!(epoch, model, caches, dataset, assessments, display)
     end
 
-    return nothing
+    return
 end
 

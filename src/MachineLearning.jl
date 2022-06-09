@@ -42,7 +42,7 @@ function main()
     # see 'core.jl'
     @time train_model!(epoch_param, model, caches, dataset, assessments, display, num_epochs)
 
-    return config, model
+    return
 end
 
 main()

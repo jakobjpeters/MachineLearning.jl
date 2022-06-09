@@ -20,7 +20,7 @@ function terminal(config, n_indent = 0)
         println()
     end
 
-    return nothing
+    return
 end
 
 # prints model assessment for each data split
@@ -31,7 +31,7 @@ function terminal(assessments::AbstractArray{T}) where T <: NamedTuple
     end
     println()
 
-    return nothing
+    return
 end
 
 function gui(config)
