@@ -78,7 +78,7 @@ function load_config()
         config["sizes"],
         model["use_biases"]
     )
-    caches = map(_ -> Cache(float[config["precision"]]), 1:length(model.layers))
+    caches = map(_ -> Cache(float[config["precision"]]), eachindex(model.layers))
 
     return config, display, dataset, epoch_params, model, caches
 end

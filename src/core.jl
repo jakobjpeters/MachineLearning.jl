@@ -15,7 +15,7 @@ end
 
 # propagate input -> output through each layer
 function (neural_net::NeuralNetwork)(input, layer_params, caches)
-    for i in 1:length(neural_net.layers)
+    for i in eachindex(neural_net.layers)
         layer_input = i == 1 ? input : caches[i - 1].output
         neural_net.layers[i](layer_input, layer_params[i].activ_func, caches[i])
     end
@@ -45,34 +45,39 @@ end
 #     axpy!(-learn_rate, gradient + penalty, weight)
 # end
 
+function train_layer!(i, input, layer, layer_param, cache)
+    # # calculate intermediate partial derivatives
+    δa_δz = map(derivative(layer_param.activ_func), cache.Z)
+    # # reduce allocations by enabling '.='
+    cache.δl_δz = preallocate(cache.δl_δz, cache.Z)
+    cache.δl_δz .= cache.δl_δa .* δa_δz
+
+    # do not need to calculate δl_δa for first layer, since there are no parameters to update
+    δl_δa = i == 1 ? nothing : transpose(layer.weight) * cache.δl_δz
+
+    # update weights and biases in-place
+    batch_size = size(cache.output, 2)
+    update_weight!(layer_param.regular_func, layer_param.regular_rate, layer_param.learn_rate, layer.weight, cache.δl_δz, input, batch_size)
+    if layer.bias !== nothing
+        δl_δb = dropdims(sum(cache.δl_δz, dims = 2), dims = 2)
+        # axpy!(α, X, Y) = α * X + Y -> Y
+        axpy!(-layer_param.learn_rate / batch_size, δl_δb, layer.bias)
+    end
+
+    return δl_δa
+end
+
 # calculate the gradient and update the model's parameters for a batched input
 @inline function backpropagate!(layers, layer_params, caches, input, label, cost_func)
-    n_layers = length(layers)
-    batch_size = size(input, 2)
-    caches[n_layers].δl_δa = derivative(cost_func)(label, caches[end].output)
+    # batch_size = size(input, 2)
+    caches[length(layers)].δl_δa = derivative(cost_func)(label, caches[end].output)
 
-    for i in reverse(1:n_layers)
-        # calculate intermediate partial derivatives
-        δa_δz = map(derivative(layer_params[i].activ_func), caches[i].Z)
-        # reduce allocations by enabling '.='
-        caches[i].δl_δz = preallocate(caches[i].δl_δz, caches[i].Z)
-        caches[i].δl_δz .= caches[i].δl_δa .* δa_δz
-
-        # do not need to calculate δl_δa for first layer, since there are no parameters to update
-        if i != 1
-            caches[i - 1].δl_δa = transpose(layers[i].weight) * caches[i].δl_δz
-        end
-
+    for i in reverse(eachindex(layers))
         layer_input = i == 1 ? input : caches[i - 1].output
+        δl_δa = train_layer!(i, layer_input, layers[i], layer_params[i], caches[i])
 
-        # update weights and biases in-place
-        # update_weight!(layer_params[i].regular_func, layer_params[i].learn_rate, batch_size, caches[i].δl_δz, layer_input, layer_params[i].regular_rate, layers[i].weight)
-        update_weight!(layer_params[i].regular_func, layer_params[i].regular_rate, layer_params[i].learn_rate, layers[i].weight, caches[i].δl_δz, layer_input, batch_size)
-        if layers[i].bias !== nothing
-            δl_δb = dropdims(sum(caches[i].δl_δz, dims = 2), dims = 2)
-            # axpy!(α, X, Y) = α * X + Y -> Y
-            axpy!(-layer_params[i].learn_rate / batch_size, δl_δb, layers[i].bias)
-        end
+        i != 1 || break
+        caches[i - 1].δl_δa = δl_δa
     end
 
     return nothing
@@ -93,7 +98,7 @@ function assess!(dataset, model, cost_func, layer_params, caches)
         n_correct = count(criterion, zip(eachcol(caches[end].output), eachcol(split.label)))
         push!(accuracies, n_correct / n)
 
-        penalty = sum([sum(layer_params[i].regular_func.(model.layers[i].weight, layer_params[i].regular_rate)) for i in 1:length(layer_params)])
+        penalty = sum([sum(layer_params[i].regular_func.(model.layers[i].weight, layer_params[i].regular_rate)) for i in eachindex(layer_params)])
         cost = sum(cost_func(split.label, caches[end].output))
         push!(costs, (cost + penalty) / n)
     end
