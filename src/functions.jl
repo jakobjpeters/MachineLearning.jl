@@ -97,3 +97,28 @@ end
 function he(input_size)
     return 2 ^ 0.5 * xavier(input_size)
 end
+
+# Regularization
+
+function weight_decay(xᵢ, λ)
+    return λ * xᵢ
+end
+
+function l1(xᵢ, λ)
+    return λ * abs.(xᵢ)
+    # return λ * map(abs, xᵢ)
+end
+
+function derivative(::typeof(l1))
+    return function (xᵢ, λ)
+        return λ * map(sign, xᵢ)
+    end
+end
+
+function l2(xᵢ, λ)
+    return λ / 2 * transpose(xᵢ) * xᵢ
+end
+
+function derivative(::typeof(l2))
+    return weight_decay
+end

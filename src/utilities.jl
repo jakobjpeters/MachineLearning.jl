@@ -54,8 +54,9 @@ function load_config()
     layer_param_args = zip(
         strings_to_funcs(layer_param["normalization_functions"]),
         strings_to_funcs(layer_param["activation_functions"]),
-        convert.(float[config["precision"]], layer_param["learn_rates"]),
-        repeat([epoch_param["batch_size"]], length(config["sizes"]))
+        strings_to_funcs(layer_param["regularization_functions"]),
+        convert.(float[config["precision"]], layer_param["regularization_rates"]),
+        convert.(float[config["precision"]], layer_param["learn_rates"])
     )
     layer_param = map(layer_param_arg -> Layer_Parameter(layer_param_arg...), layer_param_args)
     num_epochs = epoch_param["number_of_epochs"]

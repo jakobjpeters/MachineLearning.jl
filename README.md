@@ -41,18 +41,25 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
         - batch = size(input, 2)
     - Batch normalization
         - ["z_score", "demean", "identity"]
-- Layer Parameters
-    - Learning rates
-    - Activation functions
-        - ["sigmoid", "tanh", "relu", identity"]
-            - Note: "identity" is untested
+    - Layer Parameters
+        - Learning rates
+        - Activation functions
+            - ["sigmoid", "tanh", "relu", identity"]
+                - Note: "identity" is untested
+        - Regularization
+            - Note: untested
+            - ["weight_decay", "l1", "l2"]
+                - Note: "l2" is equivalent to "weight_decay" when not using adaptive gradients
+                - https://arxiv.org/pdf/1711.05101v3.pdf
 - Model
-    - Feed-forward multilayer perceptron with backpropagation
+    - Feed-forward multilayer perceptron
         - Weight initialization functions
             - ["xavier", "he"]
                 - Note: "he" is untested
         - Sizes
         - Use biases boolean
+- Optimization
+    - ["backpropagation"]
 
 
 ## Planned Features

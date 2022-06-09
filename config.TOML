@@ -46,6 +46,15 @@ use_biases = [true, false]
 # identity is untested
 activation_functions = ["sigmoid", "tanh"]
 
+# ["weight_decay", "l1", "l2"]
+# default is "weight_decay"
+# untested
+regularization_functions = ["weight_decay", "weight_decay"]
+
+# set to "0.0" for no regularization
+# untested
+regularization_rates = [0.0001, 0.0001]
+
 learn_rates = [0.01, 0.1]
 
 # layer normalization

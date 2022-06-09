@@ -5,17 +5,12 @@ struct Data{A1<:AbstractArray, A2<:AbstractArray}
 end
 
 # corresponds to a layer in a 'Neural_Network'
-struct Layer_Parameter{F1<:Function, F2<:Function, T<:AbstractFloat}
+struct Layer_Parameter{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloat}
     norm_func::F1
     activ_func::F2
-    scale::T
-end
-
-function Layer_Parameter(norm_func, activ_func, learn_rate, batch_size)
-    # negated to update with the negative gradient
-    # dividing by batch size will average the gradients when updated
-    scale = -learn_rate / batch_size
-    return Layer_Parameter(norm_func, activ_func, scale)
+    regular_func::F3
+    regular_rate::T
+    learn_rate::T
 end
 
 # functor, see 'core.jl'
