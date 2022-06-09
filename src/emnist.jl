@@ -3,7 +3,7 @@
 # TODO: improve memory usage for datasets
 
 # const DATASETS = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
-const DIR = dirname(pwd()) * "/emnist/"
+const DIRECTORY = dirname(pwd()) * "/emnist/"
 const FILE_NAMES = Dict(
     "balanced" => Dict(
         "mapping" => "emnist-balanced-mapping.txt",
@@ -49,17 +49,17 @@ const FILE_NAMES = Dict(
     )
 )
 
-function read_string(f_name)
-    f = open(f_name)
-        data::Array{String, 1} = readlines(f)
-    close(f)
+function read_string(file_name)
+    file = open(file_name)
+        data::Array{String, 1} = readlines(file)
+    close(file)
     return data
 end
 
 function mapping(dataset)
     mapping::Dict{UInt8, Char} = Dict()
 
-    for line in read_string(DIR * "gzip/" * FILE_NAMES[dataset]["mapping"])
+    for line in read_string(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["mapping"])
         map = split(line, " ")
         mapping[parse(UInt8, map[begin]) + 1] = Char(parse(UInt8, map[end]))
     end
@@ -67,28 +67,28 @@ function mapping(dataset)
     return mapping
 end
 
-function read_uint8(f_name, offset)
-    f = GZip.open(f_name)
-        data::Array{UInt8, 1} = deleteat!(read(f), 1:offset)
-    close(f)
+function read_uint8(file_name, offset)
+    file = GZip.open(file_name)
+        data::Array{UInt8, 1} = deleteat!(read(file), 1:offset)
+    close(file)
 
     return convert.(Int32, data)
 end
 
-function read_labels(f_name, offset, dataset)
-    indices = read_uint8(f_name, offset) .+ 1
+function read_labels(file_name, offset, dataset)
+    iⱼ = read_uint8(file_name, offset) .+ 1
 
     # one-hot encoding
-    labels = zeros(length(mapping(dataset)), length(indices))
-    for (col, i) in zip(eachcol(labels), indices)
-        col[i] += 1
+    yⱼ = zeros(length(mapping(dataset)), length(iⱼ))
+    for (y, i) in zip(eachcol(yⱼ), iⱼ)
+        y[i] += 1
     end
 
-    return labels
+    return yⱼ
 end
 
-function read_images(f_name, offset)
-    data = read_uint8(f_name, offset)
+function read_images(file_name, offset)
+    data = read_uint8(file_name, offset)
     return reshape(data, (28 ^ 2, :))
 end
 
@@ -126,37 +126,37 @@ function load_emnist(dataset)
 
     # check that the needed files are stored
     # if not, download and decompress them
-    if !all(group -> isfile(DIR * "gzip/" * FILE_NAMES[dataset][group]), groups)
-        rm(DIR * "gzip", force = true)
-        mkpath(DIR * "gzip")
+    if !all(group -> isfile(DIRECTORY * "gzip/" * FILE_NAMES[dataset][group]), groups)
+        rm(DIRECTORY * "gzip", force = true)
+        mkpath(DIRECTORY * "gzip")
         emnist = "http://www.itl.nist.gov/iaui/vip/cs_links/EMNIST/gzip.zip"
 
         if !isfile("emnist.zip")
             println("Downloading 'emnist.zip' from '" * emnist * "'.")
-            download(emnist, DIR * "emnist.zip")
+            download(emnist, DIRECTORY * "emnist.zip")
         end
 
-        zip = ZipFile.Reader(DIR * "emnist.zip")
+        zip = ZipFile.Reader(DIRECTORY * "emnist.zip")
 
-        for f in zip.files
-            touch(DIR * f.name)
+        for file in zip.files
+            touch(DIRECTORY * file.name)
 
-            open(DIR * f.name, "w") do io
-                write(io, read(f, String))
+            open(DIRECTORY * file.name, "w") do io
+                write(io, read(file, String))
             end
         end
 
         close(zip)
-        rm(DIR * "emnist.zip", force = true)
+        rm(DIRECTORY * "emnist.zip", force = true)
 
         # TODO: fix this function
         # dataset == "letters" && fix_letters!()
     end
 
-    input = read_images(DIR * "gzip/" * FILE_NAMES[dataset]["train_images"], 16)
-    input = hcat(input, read_images(DIR * "gzip/" * FILE_NAMES[dataset]["test_images"], 16))
-    label = read_labels(DIR * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
-    label = hcat(label, read_labels(DIR * "gzip/" * FILE_NAMES[dataset]["test_labels"], 8, dataset))
+    x = read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_images"], 16)
+    x = hcat(x, read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_images"], 16))
+    y = read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
+    y = hcat(y, read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_labels"], 8, dataset))
 
-    return Data(input, label)
+    return Data(x, y)
 end

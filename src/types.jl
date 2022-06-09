@@ -1,33 +1,33 @@
 
 struct Data{A1<:AbstractArray, A2<:AbstractArray}
-    input::A1
-    label::A2
+    x::A1
+    y::A2
 end
 
 # corresponds to a layer in a 'Neural_Network'
-struct LayerParameter{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloat}
-    norm_func::F1
-    activ_func::F2
-    regular_func::F3
-    regular_rate::T
-    learn_rate::T
+struct LayerParameters{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloat}
+    normalize::F1
+    activate::F2
+    regularize::F3
+    λ::T # regularizer rate
+    η::T # learning rate
 end
 
 # functor, see 'core.jl'
-struct EpochParameter{T<:Integer, F1<:Function, F2<:Function, H<:LayerParameter}
+struct Epoch{T<:Integer, F1<:Function, F2<:Function, H<:LayerParameters}
     batch_size::T
     shuffle::Bool
-    cost_func::F1
-    norm_func::F2
-    layer_param::Vector{H}
+    loss::F1
+    normalize::F2
+    layers_params::Vector{H}
 end
 
 # corresponds to a layer in a 'Neural_Network'
 mutable struct Cache{M<:AbstractMatrix}
-    δl_δz::M
-    δl_δa::M
-    output::M
-    Z::M
+    δe_δl::M # δ error / δ linear
+    δe_δa::M # δ error / δ activation
+    l::M # linear
+    a::M # activation
 end
 
 function Cache(precision)
@@ -38,8 +38,8 @@ abstract type Layer end
 
 # functor, see 'core.jl'
 mutable struct Dense{M<:AbstractMatrix, VN<:Union{AbstractVector, Nothing}} <: Layer
-    weight::M
-    bias::VN
+    w::M # weight
+    b::VN # bias
 end
 
 abstract type Model end
@@ -49,15 +49,15 @@ struct NeuralNetwork{T<:Layer} <: Model
     layers::Vector{T}
 end
 
-function NeuralNetwork(input_size, precision, weight_init_funcs, sizes, use_biases)
+function NeuralNetwork(x_size, precision, w_inits, sizes, use_biases)
     layers = Vector{Layer}(undef, 0)
-    params = zip(weight_init_funcs, pushfirst!(sizes[begin:end - 1], input_size), sizes, use_biases)
+    params = zip(w_inits, pushfirst!(sizes[begin:end - 1], x_size), sizes, use_biases)
 
-    for (weight_init_func, input_size, output_size, use_bias) in params
-        weight = convert.(precision, rand(weight_init_func(input_size), output_size, input_size))
-        bias = use_bias ? zeros(precision, output_size) : nothing
+    for (init_w, x_size, size, use_bias) in params
+        w = convert.(precision, rand(init_w(x_size), size, x_size))
+        b = use_bias ? zeros(precision, size) : nothing
 
-        push!(layers, Dense(weight, bias))
+        push!(layers, Dense(w, b))
     end
 
     return NeuralNetwork(layers)

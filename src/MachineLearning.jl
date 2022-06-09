@@ -30,17 +30,17 @@ include("core.jl")
 include("interface.jl")
 
 function main()
-    config, display, dataset, epoch_param, num_epochs, model, caches = load_config()
+    config, display, dataset, epoch, n_epochs, model, caches = load_config()
 
     display(config)
 
     # pre-trained
-    assessments = [Assessment(assess!(dataset, model, epoch_param.cost_func, epoch_param.layer_param, caches))]
+    assessments = [Assessment(assess!(dataset, model, epoch.loss, epoch.layers_params, caches))]
     display(assessments)
 
     # main training loop
     # see 'core.jl'
-    @time train_model!(epoch_param, model, caches, dataset, assessments, display, num_epochs)
+    @time train_model!(epoch, model, caches, dataset, assessments, display, n_epochs)
 
     return
 end

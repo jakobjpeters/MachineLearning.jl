@@ -18,7 +18,7 @@ display = "terminal"
 dataset = "mnist"
 
 # ["z_score", "demean", "identity"]
-preprocessing_function = "z_score"
+preprocessor = "z_score"
 
 # must add to 100
 # first split is used for training
@@ -35,42 +35,42 @@ sizes = [100, "missing"]
 
 # [xavier, he]
 # he is untested
-weight_initialization_functions = ["xavier", "xavier"]
+weight_initializers = ["xavier", "xavier"]
 
 use_biases = [true, false]
 
 
-[layer_parameter]
+[layers_parameters]
 
 # [tanh, sigmoid, identity]
 # identity is untested
-activation_functions = ["sigmoid", "tanh"]
+activators = ["sigmoid", "tanh"]
 
 # ["weight_decay", "l1", "l2"]
 # default is "weight_decay"
 # untested
-regularization_functions = ["weight_decay", "weight_decay"]
+regularizers = ["weight_decay", "weight_decay"]
 
 # set to "0.0" for no regularization
 # untested
-regularization_rates = [0.0, 0.0]
+regularize_rates = [0.0, 0.0]
 
 learn_rates = [0.01, 0.1]
 
 # layer normalization
 # ["z_score", "demean", "identity"]
 # not currently "plugged in"
-normalization_functions = ["identity", "identity"]
+normalizers = ["identity", "identity"]
 
 
-[epoch_parameter]
+[epoch]
 
 # ["squared_error"]
-cost_function = "squared_error"
+loss = "squared_error"
 
 # batch normalization
 # ["z_score", "demean", "identity"]
-normalization_function = "z_score"
+normalizer = "z_score"
 
 number_of_epochs = 10
 batch_size = 10

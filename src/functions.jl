@@ -11,8 +11,8 @@ function derivative(::typeof(identity))
     end
 end
 
-function mean(xᵢ)
-    return sum(xᵢ) / length(xᵢ)
+function mean(x)
+    return sum(x) / length(x)
 end
 
 # Activation And Derivative
@@ -63,25 +63,25 @@ end
 
 # Cost And Derivative
 
-function squared_error(Y, Ŷ)
-    return (Y .- Ŷ) .^ 2
+function squared_error(y, ŷ)
+    return (y .- ŷ) .^ 2
 end
 
 function derivative(::typeof(squared_error))
-    return function (Y, Ŷ)
-        return 2 * (Ŷ - Y)
+    return function (y, ŷ)
+        return 2 * (ŷ - y)
     end
 end
 
 # Normalization
 
-function z_score(xᵢ)
-    m = mean(xᵢ)
-    return (xᵢ .- m) / stdm(xᵢ, m)
+function z_score(x)
+    m = mean(x)
+    return (x .- m) / stdm(x, m)
 end
 
-function demean(xᵢ)
-    return xᵢ .- mean(xᵢ)
+function demean(x)
+    return x .- mean(x)
 end
 
 # Initialization
