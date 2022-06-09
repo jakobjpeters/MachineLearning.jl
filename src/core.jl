@@ -10,7 +10,7 @@ function (dense::Dense)(input, activ_func, cache)
     cache.output = preallocate(cache.output, cache.Z)
     map!(activ_func, cache.output, cache.Z) # |> layer.norm_func
 
-    return Nothing
+    return nothing
 end
 
 # propagate input -> output through each layer
@@ -27,6 +27,8 @@ end
 function update_weight!(regular_func, regular_rate, learn_rate, weight, δl_δz, layer_input, batch_size)
     # gemm!(tA, tB, α, A, B, β, C) = α * A * B + β * C -> C where 'T' indicates a transpose
     gemm!('N', 'T', -learn_rate / batch_size, δl_δz, layer_input, one(eltype(layer_input)) - regular_rate, weight)
+    
+    return nothing
 end
 
 function update_weight!(regular_func::typeof(l1), regular_rate, learn_rate, weight, δl_δz, layer_input, batch_size)
@@ -34,6 +36,8 @@ function update_weight!(regular_func::typeof(l1), regular_rate, learn_rate, weig
     penalty = derivative(regular_func).(weight, regular_rate / learn_rate)
     # axpy!(α, X, Y) = α * X + Y -> Y
     axpy!(-learn_rate, gradient + penalty, weight)
+
+    return nothing
 end
 
 # needed for 'l2' with adaptive gradient such as ADAM, although ADAM with weight decay is better
@@ -123,3 +127,24 @@ function (epoch_param::EpochParameter)(model, layer_params, caches, input, label
 
     return nothing
 end
+
+function train_model!(epoch_param, model, caches, dataset, assessments, display = nothing, n_epochs = 1)
+    for i in 1:n_epochs
+        @time epoch_param(model, epoch_param.layer_param, caches, dataset[begin].input, dataset[begin].label)
+        @time push!(assessments, Assessment(assess!(dataset, model, epoch_param.cost_func, epoch_param.layer_param, caches)))
+
+        # see 'interface.jl'
+        display(assessments)
+    end
+
+    return nothing
+end
+
+function train_model!(epochs::Vector, model, caches, dataset, assessments, display = nothing)
+    for epoch in epochs
+        train_model!(epoch, model, caches, dataset, assessments, display)
+    end
+
+    return nothing
+end
+

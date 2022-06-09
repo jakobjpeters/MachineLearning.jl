@@ -51,7 +51,7 @@ const FILE_NAMES = Dict(
 
 function read_string(f_name)
     f = open(f_name)
-    data::Array{String, 1} = readlines(f)
+        data::Array{String, 1} = readlines(f)
     close(f)
     return data
 end
@@ -69,7 +69,7 @@ end
 
 function read_uint8(f_name, offset)
     f = GZip.open(f_name)
-    data::Array{UInt8, 1} = deleteat!(read(f), 1:offset)
+        data::Array{UInt8, 1} = deleteat!(read(f), 1:offset)
     close(f)
 
     return convert.(Int32, data)

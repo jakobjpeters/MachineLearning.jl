@@ -30,22 +30,17 @@ include("core.jl")
 include("interface.jl")
 
 function main()
-    config, display, dataset, epoch_params, model, caches = load_config()
-
-    assessment = @NamedTuple{accuracies, costs}
-    assessments = [assessment(assess!(dataset, model, first(epoch_params).cost_func, first(epoch_params).layer_param, caches))]
+    config, display, dataset, epoch_param, num_epochs, model, caches = load_config()
 
     display(config)
+
     # pre-trained
+    assessments = [Assessment(assess!(dataset, model, epoch_param.cost_func, epoch_param.layer_param, caches))]
     display(assessments)
 
     # main training loop
-    # see 'core.jl' and 'interface.jl'
-    @time for epoch_param in epoch_params
-        @time epoch_param(model, epoch_param.layer_param, caches, dataset[begin].input, dataset[begin].label)
-        @time push!(assessments, assessment(assess!(dataset, model, epoch_param.cost_func, epoch_param.layer_param, caches)))
-        display(assessments)
-    end
+    # see 'core.jl'
+    @time train_model!(epoch_param, model, caches, dataset, assessments, display, num_epochs)
 
     return config, model
 end

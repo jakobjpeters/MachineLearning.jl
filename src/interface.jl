@@ -1,4 +1,6 @@
 
+const Assessment = @NamedTuple{accuracies, costs}
+
 function indent(n)
     for i in 1:n
         print("\t")
@@ -17,6 +19,8 @@ function terminal(config, n_indent = 0)
         println(config)
         println()
     end
+
+    return nothing
 end
 
 # prints model assessment for each data split

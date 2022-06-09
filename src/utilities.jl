@@ -6,10 +6,12 @@ function split_data(input, label, splits)
     # generate indices to split the data by each percentage in 'splits'
     starts = Vector{Int64}()
     i = 0
+
     for split in splits
         append!(starts, div(i * size(input, 2), 100))
         i += split
     end
+
     stops = append!(starts[begin + 1:end], size(input, 2))
     starts .+= 1
 
@@ -19,8 +21,10 @@ end
 # load selected dataset, preprocess dataset, and return list of dataset splits
 function load_dataset(name, preprocess, splits, precision)
     dataset = load_emnist(name)
+    
     prep_input = mapslices(preprocess, convert.(precision, dataset.input), dims = 1)
     prep_label = convert.(precision, dataset.label)
+
     return split_data(prep_input, prep_label, splits)
 end
 
@@ -67,13 +71,16 @@ function load_config()
     # needs to be set before any random sampling
     seed == "missing" || seed!(seed)
 
-    # transform configuration 
-    # see 'types.jl'
+    # transform configuration
+    # see 'interface.jl'
     display = string_to_func(display)
+    # see 'emnist.jl'
     dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"], float[config["precision"]])
-    epoch_params = repeat([EpochParameter(epoch_param...)], num_epochs)
+    # see 'types.jl'
+    epoch_param = EpochParameter(epoch_param...)
     model = string_to_func(model["model"])(
-        784, # input size, TODO: make dynamic
+        # TODO: make input size dynamic
+        784,
         float[config["precision"]],
         strings_to_funcs(model["weight_initialization_functions"]),
         config["sizes"],
@@ -81,7 +88,7 @@ function load_config()
     )
     caches = map(_ -> Cache(float[config["precision"]]), eachindex(model.layers))
 
-    return config, display, dataset, epoch_params, model, caches
+    return config, display, dataset, epoch_param, num_epochs, model, caches
 end
 
 function preallocate(x, y)

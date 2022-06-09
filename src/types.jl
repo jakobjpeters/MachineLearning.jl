@@ -51,10 +51,12 @@ end
 
 function NeuralNetwork(input_size, precision, weight_init_funcs, sizes, use_biases)
     layers = Vector{Layer}(undef, 0)
+    params = zip(weight_init_funcs, pushfirst!(sizes[begin:end - 1], input_size), sizes, use_biases)
 
-    for (weight_init_func, input_size, output_size, use_bias) in zip(weight_init_funcs, pushfirst!(sizes[begin:end - 1], input_size), sizes, use_biases)
+    for (weight_init_func, input_size, output_size, use_bias) in params
         weight = convert.(precision, rand(weight_init_func(input_size), output_size, input_size))
         bias = use_bias ? zeros(precision, output_size) : nothing
+
         push!(layers, Dense(weight, bias))
     end
 
