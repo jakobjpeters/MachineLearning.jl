@@ -10,7 +10,7 @@ Julia is my favorite programming language for many reasons, but I think that its
 
 ## Instructions
 
-Edit 'config.jl' to your liking. When ready, run 'Machine_Learning.jl'. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
+Edit 'config.jl' to your liking. When ready, run 'MachineLearning.jl'. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
 
 Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile specialized code for those types. In this project, compilation will be complete after the 1st epoch.
 
@@ -88,7 +88,10 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
             - ROC analysis?
 - Visualizations
 - Optimizers
+    - ADAM
 - Regulizers
+    - Early stopping
+    - Dropout?
 - Save & load models
 - Parallel processing/threading
 - Automatic differentiation?
@@ -106,6 +109,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 ## To Do
 
 - Turn into Julia 'project'
+- Change repository name to PascalCase
 - Turn into package with example scripts instead of 'config.TOML'
 - More
     - Functional style
