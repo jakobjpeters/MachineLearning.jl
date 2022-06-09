@@ -35,6 +35,7 @@ function shuffle_pair(input, label)
 end
 
 # parse 'config.TOML' and return useful data and datatypes
+# TODO: improve readability
 function load_config()
     config = TOML.parsefile(dirname(pwd()) * "/config.TOML")
 
@@ -47,7 +48,7 @@ function load_config()
     layer_param = config["layer_parameter"]
 
     # helpers
-    config["sizes"] = model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))
+    config["sizes"] = [model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))]
     string_to_func = string -> getfield(@__MODULE__, Symbol(string))
     strings_to_funcs = strings -> map(string_to_func, strings)
     float = Dict("Float32" => Float32, "Float64" => Float64)

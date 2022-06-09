@@ -108,7 +108,6 @@ end
 
 # coordinate an epoch of model training
 function (epoch_param::EpochParameter)(model, layer_params, caches, input, label)
-
     if epoch_param.shuffle && epoch_param.batch_size < size(input, 1)
         input, label = shuffle_pair(input, label)
     end

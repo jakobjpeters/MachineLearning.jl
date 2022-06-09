@@ -50,17 +50,14 @@ struct NeuralNetwork{T<:Layer} <: Model
 end
 
 function NeuralNetwork(input_size, precision, weight_init_funcs, sizes, use_biases)
-    tmp_sizes = input_size, sizes...
+    layers = Vector{Layer}(undef, 0)
 
-    # TODO: improve readability
-    weights = [convert(Matrix{precision},
-        rand(weight_init_func(input_size), output_size, input_size))
-            for (weight_init_func, input_size, output_size) in zip(weight_init_funcs, tmp_sizes[begin:end - 1], tmp_sizes[begin + 1:end])]
-    biases = [use_bias ? zeros(precision, size) : nothing for (use_bias, size) in zip(use_biases, sizes)]
+    for (weight_init_func, input_size, output_size, use_bias) in zip(weight_init_funcs, pushfirst!(sizes[begin:end - 1], input_size), sizes, use_biases)
+        weight = convert.(precision, rand(weight_init_func(input_size), output_size, input_size))
+        bias = use_bias ? zeros(precision, output_size) : nothing
+        push!(layers, Dense(weight, bias))
+    end
 
-    # TODO: remove splatting
-    # TODO: parameterize layer type
-    layers = map(args -> Dense(args...), zip(weights, biases))
     return NeuralNetwork(layers)
 end
 
