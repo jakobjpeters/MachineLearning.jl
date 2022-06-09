@@ -70,7 +70,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
     - User created inputs
 - Models
     - Neural networks
-        - ["generative_adversarial_network", "convolutional_neural_network"]
+        - ["GenerativeAdversarialNetwork", "ConvolutionalNeuralNetwork"]
     - Regression
     - Decision tree
     - K-nearest neighbors

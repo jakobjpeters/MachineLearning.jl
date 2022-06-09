@@ -14,7 +14,7 @@ function (dense::Dense)(input, activ_func, cache)
 end
 
 # propagate input -> output through each layer
-function (neural_net::Neural_Network)(input, layer_params, caches)
+function (neural_net::NeuralNetwork)(input, layer_params, caches)
     for i in 1:length(neural_net.layers)
         layer_input = i == 1 ? input : caches[i - 1].output
         neural_net.layers[i](layer_input, layer_params[i].activ_func, caches[i])
@@ -46,7 +46,7 @@ end
 # end
 
 # calculate the gradient and update the model's parameters for a batched input
-@inline function backpropagate!(layers, cost_func, layer_params, caches, input, label)
+@inline function backpropagate!(layers, layer_params, caches, input, label, cost_func)
     n_layers = length(layers)
     batch_size = size(input, 2)
     caches[n_layers].δl_δa = derivative(cost_func)(label, caches[end].output)
@@ -102,7 +102,7 @@ function assess!(dataset, model, cost_func, layer_params, caches)
 end
 
 # coordinate an epoch of model training
-function (epoch_param::Epoch_Parameter)(model, layer_params, caches, input, label)
+function (epoch_param::EpochParameter)(model, layer_params, caches, input, label)
 
     if epoch_param.shuffle && epoch_param.batch_size < size(input, 1)
         input, label = shuffle_pair(input, label)
@@ -114,7 +114,7 @@ function (epoch_param::Epoch_Parameter)(model, layer_params, caches, input, labe
         norm_input = epoch_param.norm_func(view(input, :, first:last))
 
         model(norm_input, layer_params, caches)
-        backpropagate!(model.layers, epoch_param.cost_func, layer_params, caches, norm_input, view(label, :, first:last))
+        backpropagate!(model.layers, layer_params, caches, norm_input, view(label, :, first:last), epoch_param.cost_func)
     end
 
     return nothing

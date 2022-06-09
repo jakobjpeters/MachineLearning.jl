@@ -27,8 +27,8 @@ split_percentages = [80, 20]
 
 [model]
 
-# ["Neural_Network"]
-type = "Neural_Network"
+# ["NeuralNetwork"]
+model = "NeuralNetwork"
 
 # the last layer size ("missing") is determined by the dataset
 sizes = [100, "missing"]

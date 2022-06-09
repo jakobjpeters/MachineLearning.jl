@@ -5,7 +5,7 @@ struct Data{A1<:AbstractArray, A2<:AbstractArray}
 end
 
 # corresponds to a layer in a 'Neural_Network'
-struct Layer_Parameter{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloat}
+struct LayerParameter{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloat}
     norm_func::F1
     activ_func::F2
     regular_func::F3
@@ -14,7 +14,7 @@ struct Layer_Parameter{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloa
 end
 
 # functor, see 'core.jl'
-struct Epoch_Parameter{T<:Integer, F1<:Function, F2<:Function, H<:Layer_Parameter}
+struct EpochParameter{T<:Integer, F1<:Function, F2<:Function, H<:LayerParameter}
     batch_size::T
     shuffle::Bool
     cost_func::F1
@@ -45,11 +45,11 @@ end
 abstract type Model end
 
 # functor, see 'core.jl'
-struct Neural_Network{T<:Layer} <: Model
+struct NeuralNetwork{T<:Layer} <: Model
     layers::Vector{T}
 end
 
-function Neural_Network(input_size, precision, weight_init_funcs, sizes, use_biases)
+function NeuralNetwork(input_size, precision, weight_init_funcs, sizes, use_biases)
     tmp_sizes = input_size, sizes...
 
     # TODO: improve readability
@@ -61,11 +61,11 @@ function Neural_Network(input_size, precision, weight_init_funcs, sizes, use_bia
     # TODO: remove splatting
     # TODO: parameterize layer type
     layers = map(args -> Dense(args...), zip(weights, biases))
-    return Neural_Network(layers)
+    return NeuralNetwork(layers)
 end
 
 # not implemented yet
-struct GAN{T1<:Model, T2<:Model} <: Model
+struct GenerativeAdversarialNetwork{T1<:Model, T2<:Model} <: Model
     generator::T1
     discriminator::T2
 end

@@ -58,7 +58,7 @@ function load_config()
         convert.(float[config["precision"]], layer_param["regularization_rates"]),
         convert.(float[config["precision"]], layer_param["learn_rates"])
     )
-    layer_param = map(layer_param_arg -> Layer_Parameter(layer_param_arg...), layer_param_args)
+    layer_param = map(layer_param_arg -> LayerParameter(layer_param_arg...), layer_param_args)
     num_epochs = epoch_param["number_of_epochs"]
     epoch_param = [epoch_param["batch_size"], parse(Bool, epoch_param["shuffle_data"]), string_to_func(epoch_param["cost_function"]), string_to_func(epoch_param["normalization_function"]), layer_param]
 
@@ -70,8 +70,8 @@ function load_config()
     # see 'types.jl'
     display = string_to_func(display)
     dataset = load_dataset(data["dataset"], string_to_func(data["preprocessing_function"]), data["split_percentages"], float[config["precision"]])
-    epoch_params = repeat([Epoch_Parameter(epoch_param...)], num_epochs)
-    model = string_to_func(model["type"])(
+    epoch_params = repeat([EpochParameter(epoch_param...)], num_epochs)
+    model = string_to_func(model["model"])(
         784, # input size, TODO: make dynamic
         float[config["precision"]],
         strings_to_funcs(model["weight_initialization_functions"]),
