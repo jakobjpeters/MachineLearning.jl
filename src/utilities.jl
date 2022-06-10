@@ -20,10 +20,10 @@ end
 
 # load selected dataset, preprocess dataset, and return list of dataset splits
 function load_dataset(name, preprocess, splits, precision)
-    dataset = load_emnist(name)
+    x, y = load_emnist(name)
     
-    prep_x = mapslices(preprocess, convert.(precision, dataset.x), dims = 1)
-    prep_y = convert.(precision, dataset.y)
+    prep_x = mapslices(preprocess, convert.(precision, x), dims = 1)
+    prep_y = convert.(precision, y)
 
     return split_data(prep_x, prep_y, splits)
 end
@@ -46,26 +46,25 @@ function load_config()
     # extract dictionaries for readability
     seed = config["seed"]
     display = config["display"]
-    data = config["data"]
-    model = config["model"]
-    epoch = config["epoch"]
-    layers_parameters = config["layers_parameters"]
+    dataset_params = config["dataset_parameters"]
+    epoch_params = config["epoch_parameters"]
+    layers_params = config["layers_parameters"]
+    model_params = config["model_parameters"]
 
     # helpers
-    model["sizes"] = [model["sizes"][begin:end - 1]..., length(mapping(data["dataset"]))]
+    model_params["sizes"] = [model_params["sizes"][begin:end - 1]..., length(mapping(dataset_params["dataset"]))]
     string_to_func = string -> getfield(@__MODULE__, Symbol(string))
     strings_to_funcs = strings -> map(string_to_func, strings)
     float = Dict("Float32" => Float32, "Float64" => Float64)
     layers_parameters = zip(
-        strings_to_funcs(layers_parameters["normalizers"]),
-        strings_to_funcs(layers_parameters["activators"]),
-        strings_to_funcs(layers_parameters["regularizers"]),
-        convert.(float[config["precision"]], layers_parameters["regularize_rates"]),
-        convert.(float[config["precision"]], layers_parameters["learn_rates"])
+        strings_to_funcs(layers_params["normalizers"]),
+        strings_to_funcs(layers_params["activators"]),
+        strings_to_funcs(layers_params["regularizers"]),
+        convert.(float[config["precision"]], layers_params["regularize_rates"]),
+        convert.(float[config["precision"]], layers_params["learn_rates"])
     )
     layers_parameters = map(layer_parameters -> LayerParameters(layer_parameters...), layers_parameters)
-    n_epochs = epoch["number_of_epochs"]
-    epoch = [epoch["batch_size"], parse(Bool, epoch["shuffle_data"]), string_to_func(epoch["loss"]), string_to_func(epoch["normalizer"]), layers_parameters]
+    n_epochs = epoch_params["number_of_epochs"]
 
     # seed is random if not specified
     # needs to be set before any random sampling
@@ -75,22 +74,23 @@ function load_config()
     # see 'interface.jl'
     display = string_to_func(display)
     # see 'emnist.jl'
-    dataset = load_dataset(data["dataset"], string_to_func(data["preprocessor"]), data["split_percentages"], float[config["precision"]])
+    dataset = load_dataset(dataset_params["dataset"], string_to_func(dataset_params["preprocessor"]), dataset_params["split_percentages"], float[config["precision"]])
     # see 'types.jl'
-    epoch = Epoch(epoch...)
-    model = string_to_func(model["model"])(
+    epoch = Epoch(epoch_params["batch_size"], parse(Bool, epoch_params["shuffle_data"]), string_to_func(epoch_params["loss"]), string_to_func(epoch_params["normalizer"]), layers_parameters)
+    model = string_to_func(model_params["model"])(
         # TODO: make input size dynamic
         784,
         float[config["precision"]],
-        strings_to_funcs(model["weight_initializers"]),
-        model["sizes"],
-        model["use_biases"]
+        strings_to_funcs(model_params["weight_initializers"]),
+        model_params["sizes"],
+        model_params["use_biases"]
     )
     caches = map(_ -> Cache(float[config["precision"]]), eachindex(model.layers))
 
     return config, display, dataset, epoch, n_epochs, model, caches
 end
 
-function preallocate(x, y)
-    return size(x) == size(y) ? x : zeros(eltype(x), size(y))
+# TODO: in-place?
+function preallocate(x, dims)
+    return size(x) == dims ? x : zeros(eltype(x), dims)
 end

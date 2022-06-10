@@ -1,11 +1,11 @@
 
-struct Data{A1<:AbstractArray, A2<:AbstractArray}
+struct Data{T, A1<:AbstractArray{T}, A2<:AbstractArray{T}}
     x::A1
     y::A2
 end
 
 # corresponds to a layer in a 'Neural_Network'
-struct LayerParameters{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloat}
+struct LayerParameters{F1, F2, F3, T<:AbstractFloat}
     normalize::F1
     activate::F2
     regularize::F3
@@ -14,7 +14,7 @@ struct LayerParameters{F1<:Function, F2<:Function, F3<:Function, T<:AbstractFloa
 end
 
 # functor, see 'core.jl'
-struct Epoch{T<:Integer, F1<:Function, F2<:Function, H<:LayerParameters}
+struct Epoch{T<:Integer, F1, F2, H<:LayerParameters}
     batch_size::T
     shuffle::Bool
     loss::F1
@@ -23,9 +23,8 @@ struct Epoch{T<:Integer, F1<:Function, F2<:Function, H<:LayerParameters}
 end
 
 # corresponds to a layer in a 'Neural_Network'
-mutable struct Cache{M<:AbstractMatrix}
+mutable struct Cache{T, M<:AbstractMatrix{T}}
     δe_δl::M # δ error / δ linear
-    δe_δa::M # δ error / δ activation
     l::M # linear
     a::M # activation
 end
@@ -37,7 +36,7 @@ end
 abstract type Layer end
 
 # functor, see 'core.jl'
-mutable struct Dense{M<:AbstractMatrix, VN<:Union{AbstractVector, Nothing}} <: Layer
+mutable struct Dense{T, M<:AbstractMatrix{T}, VN<:Union{AbstractVector{T}, Nothing}} <: Layer
     w::M # weight
     b::VN # bias
 end

@@ -1,5 +1,5 @@
 
-# calculate and cache 'linear' and 'activation'
+# calculate and cache linear and activation
 function (dense::Dense)(x, activate, cache)
     cache.l = dense.w * x
     if !isnothing(dense.b)
@@ -7,37 +7,38 @@ function (dense::Dense)(x, activate, cache)
     end
 
     # reduce allocations by enabling 'map!'
-    cache.a = preallocate(cache.a, cache.l)
+    cache.a = preallocate(cache.a, size(cache.l))
     map!(activate, cache.a, cache.l) # |> layer.norm_func
 
-    return
+    return cache.a
 end
 
 # propagate input -> linear -> activation through each layer
 function (neural_net::NeuralNetwork)(x, layers_params, caches)
     for i in eachindex(neural_net.layers)
-        layer_x = i == 1 ? x : caches[i - 1].a
-        neural_net.layers[i](layer_x, layers_params[i].activate, caches[i])
+        x = neural_net.layers[i](x, layers_params[i].activate, caches[i])
     end
 
-    return
+    return caches[end].a
 end
 
-# regular_func::typeof(T) where T <: Uniont{weight_decay, l1, l2} when l2 doesn't use an adaptive gradient
+# regular_func::typeof(T) where T <: Uniont{weight_decay, l1, l2} when 'l2' doesn't use an adaptive gradient
 function update_weight!(regularize, λ, η, w, δe_δl, x)
     # gemm!(tA, tB, α, A, B, β, C) = α * A * B + β * C -> C where 'T' indicates a transpose
     gemm!('N', 'T', -η / size(x, 2), δe_δl, x, one(eltype(x)) - λ, w)
     
-    return
+    return w
 end
 
+# slower, only call if 'λ != 0'
 function update_weight!(regularize::typeof(l1), λ, η, w, δe_δl, x)
+    ∇ = zeros(eltype(x))
     ∇ = δe_δl * transpose(x) / size(x, 2)
     penalty = derivative(regularize).(w, λ / η)
     # axpy!(α, X, Y) = α * X + Y -> Y
     axpy!(-η, ∇ + penalty, w)
 
-    return
+    return w
 end
 
 # needed for 'l2' with adaptive gradient such as ADAM, although ADAM with weight decay is better
@@ -49,12 +50,12 @@ end
 #     axpy!(-α, ∇ + penalty, w)
 # end
 
-function train_layer!(i, x, layer, layer_params, cache)
+function train_layer!(i, x, layer, layer_params, cache, δe_δa)
     # calculate intermediate partial derivatives
     δa_δl = map(derivative(layer_params.activate), cache.l)
     # reduce allocations by enabling '.='
-    cache.δe_δl = preallocate(cache.δe_δl, cache.l)
-    cache.δe_δl .= cache.δe_δa .* δa_δl
+    cache.δe_δl = preallocate(cache.δe_δl, size(cache.l))
+    cache.δe_δl .= δe_δa .* δa_δl
 
     # do not need to calculate δl_δa for first layer, since there are no parameters to update
     δe_δa = i == 1 ? nothing : transpose(layer.w) * cache.δe_δl
@@ -67,33 +68,31 @@ function train_layer!(i, x, layer, layer_params, cache)
         axpy!(-layer_params.η / size(x, 2), δe_δb, layer.b)
     end
 
+    # TODO: makes more sense to return 'layer'
     return δe_δa
 end
 
 # calculate the gradient and update the model's parameters for a batched input
 @inline function backpropagate!(layers, layers_params, caches, x, y, loss)
-    caches[length(layers)].δe_δa = derivative(loss)(y, caches[end].a)
+    δe_δa = derivative(loss)(y, caches[end].a)
 
     for i in reverse(eachindex(layers))
         layer_x = i == 1 ? x : caches[i - 1].a
-        δe_δa = train_layer!(i, layer_x, layers[i], layers_params[i], caches[i])
-
-        i != 1 || break
-        caches[i - 1].δe_δa = δe_δa
+        δe_δa = train_layer!(i, layer_x, layers[i], layers_params[i], caches[i], δe_δa)
     end
 
-    return
+    return layers
 end
 
 # test the model and return its accuracy and cost for each data split
 function assess!(dataset, model, loss, layers_params, caches)
     precision = eltype(model.layers[begin].w)
-    accuracies = Vector{precision}()
-    costs = Vector{precision}()
+    accuracies = Vector{precision}(undef, 0)
+    costs = Vector{precision}(undef, 0)
 
     for split in dataset
         model(split.x, layers_params, caches)
-        n = size(caches[end].a, 2)
+        n = size(split.x, 2)
 
         # TODO: parameterize decision criterion
         criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
@@ -110,20 +109,22 @@ end
 
 # coordinate an epoch of model training
 function (epoch::Epoch)(model, layers_params, caches, x, y)
-    if epoch.shuffle && epoch.batch_size < size(x, 1)
-        x, label = shuffle_pair(x, y)
+    n = size(x, 2)
+
+    if epoch.shuffle && epoch.batch_size < n # TODO: && shufflepair!(x, y)
+        x, y = shuffle_pair(x, y)
     end
 
     # train model for each batch
-    for first in 1:epoch.batch_size:size(x, 2)
-        last = min(size(x, 2), first + epoch.batch_size - 1)
+    for first in 1:epoch.batch_size:n
+        last = min(n, first + epoch.batch_size - 1)
         norm_x = epoch.normalize(view(x, :, first:last))
 
         model(norm_x, layers_params, caches)
-        backpropagate!(model.layers, layers_params, caches, norm_x, view(label, :, first:last), epoch.loss)
+        backpropagate!(model.layers, layers_params, caches, norm_x, view(y, :, first:last), epoch.loss)
     end
 
-    return
+    return model
 end
 
 function train_model!(epoch, model, caches, dataset, assessments, display = nothing, n_epochs = 1)
@@ -135,7 +136,7 @@ function train_model!(epoch, model, caches, dataset, assessments, display = noth
         display(assessments)
     end
 
-    return
+    return model
 end
 
 function train_model!(epochs::Vector, model, caches, dataset, assessments, display = nothing)
@@ -143,6 +144,6 @@ function train_model!(epochs::Vector, model, caches, dataset, assessments, displ
         train_model!(epoch, model, caches, dataset, assessments, display)
     end
 
-    return
+    return model
 end
 

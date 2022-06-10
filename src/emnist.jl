@@ -158,5 +158,5 @@ function load_emnist(dataset)
     y = read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
     y = hcat(y, read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_labels"], 8, dataset))
 
-    return Data(x, y)
+    return x, y
 end

@@ -2,9 +2,7 @@
 module Machine_Learning
 
 # Testing
-import InteractiveUtils: @which
-
-# External
+import InteractiveUtils: @which, @code_warntype
 
 # Files
 import GZip
@@ -19,7 +17,6 @@ import Printf: @printf
 import LinearAlgebra: BLAS.gemm!, axpy!
 
 # GUI
-
 
 # Internal
 include("functions.jl")
