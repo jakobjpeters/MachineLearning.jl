@@ -1,9 +1,9 @@
 
 # calculate and cache linear and activation
-function (dense::Dense)(x, activate, cache)
-    cache.l = dense.w * x
-    if !isnothing(dense.b)
-        cache.l .+= dense.b
+function predict!(layer::Dense, x, activate, cache)
+    cache.l = layer.w * x
+    if !isnothing(layer.b)
+        cache.l .+= layer.b
     end
 
     # reduce allocations by enabling 'map!'
@@ -13,13 +13,32 @@ function (dense::Dense)(x, activate, cache)
     return cache.a
 end
 
+function (layer::Dense)(x, activate)
+    a = layer.w * x
+    if !isnothing(layer.b)
+        a .+= layer.b
+    end
+
+    map!(activate, a, a) # |> layer.norm_func
+
+    return a
+end
+
 # propagate input -> linear -> activation through each layer
-function (neural_net::NeuralNetwork)(x, layers_params, caches)
-    for i in eachindex(neural_net.layers)
-        x = neural_net.layers[i](x, layers_params[i].activate, caches[i])
+function predict!(model::NeuralNetwork, x, layers_params, caches)
+    for (layer, layer_params, cache) in zip(model.layers, layers_params, caches)
+        x = predict!(layer, x, layer_params.activate, cache)
     end
 
     return caches[end].a
+end
+
+function (model::NeuralNetwork)(x, layers_params)
+    for (layer, layer_params) in zip(model.layers, layers_params)
+        x = layer(x, layer_params.activate)
+    end
+
+    return x
 end
 
 # regular_func::typeof(T) where T <: Uniont{weight_decay, l1, l2} when 'l2' doesn't use an adaptive gradient
@@ -85,33 +104,34 @@ end
 end
 
 # test the model and return its accuracy and cost for each data split
-function assess!(dataset, model, loss, layers_params, caches)
+function assess(dataset, model, loss, layers_params)
     precision = eltype(model.layers[begin].w)
     accuracies = Vector{precision}(undef, 0)
     costs = Vector{precision}(undef, 0)
 
+    # TODO: parameterize decision criterion
+    criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
+
     for split in dataset
-        model(split.x, layers_params, caches)
+        ŷ = model(split.x, layers_params)
         n = size(split.x, 2)
 
-        # TODO: parameterize decision criterion
-        criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
-        n_correct = count(criterion, zip(eachcol(caches[end].a), eachcol(split.y)))
+        n_correct = count(criterion, zip(eachcol(ŷ), eachcol(split.y)))
         push!(accuracies, n_correct / n)
 
         penalty = sum([sum(layers_params[i].regularize.(model.layers[i].w, layers_params[i].λ)) for i in eachindex(layers_params)])
-        cost = sum(loss(split.y, caches[end].a))
+        cost = sum(loss(split.y, ŷ))
         push!(costs, (cost + penalty) / n)
     end
 
-    return accuracies, costs
+    return Assessment((accuracies, costs))
 end
 
 # coordinate an epoch of model training
-function (epoch::Epoch)(model, layers_params, caches, x, y)
+function train!(epoch, model, caches, x, y)
     n = size(x, 2)
 
-    if epoch.shuffle && epoch.batch_size < n # TODO: && shufflepair!(x, y)
+    if epoch.shuffle && epoch.batch_size < n # TODO: && shuffle_pair!(x, y)
         x, y = shuffle_pair(x, y)
     end
 
@@ -120,30 +140,9 @@ function (epoch::Epoch)(model, layers_params, caches, x, y)
         last = min(n, first + epoch.batch_size - 1)
         norm_x = epoch.normalize(view(x, :, first:last))
 
-        model(norm_x, layers_params, caches)
-        backpropagate!(model.layers, layers_params, caches, norm_x, view(y, :, first:last), epoch.loss)
+        predict!(model, norm_x, epoch.layers_params, caches)
+        backpropagate!(model.layers, epoch.layers_params, caches, norm_x, view(y, :, first:last), epoch.loss)
     end
 
     return model
 end
-
-function train_model!(epoch, model, caches, dataset, assessments, display = nothing, n_epochs = 1)
-    for i in 1:n_epochs
-        @time epoch(model, epoch.layers_params, caches, dataset[begin].x, dataset[begin].y)
-        @time push!(assessments, Assessment(assess!(dataset, model, epoch.loss, epoch.layers_params, caches)))
-
-        # see 'interface.jl'
-        display(assessments)
-    end
-
-    return model
-end
-
-function train_model!(epochs::Vector, model, caches, dataset, assessments, display = nothing)
-    for epoch in epochs
-        train_model!(epoch, model, caches, dataset, assessments, display)
-    end
-
-    return model
-end
-

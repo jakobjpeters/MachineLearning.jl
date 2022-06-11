@@ -1,18 +1,23 @@
 
+function percent_to_index(x, percent)
+    return div(percent * size(x, 2), 100)
+end
+
 # given lists of inputs and labels, return a list of 'Data' split by percentages in 'splits'
 function split_data(x, y, splits)
     sum(splits) != 100 && error("Splits must add to 100 (percent)")
 
     # generate indices to split the data by each percentage in 'splits'
-    starts = Vector{Int64}()
-    i = 0
+    starts = Vector{Int64}(undef, 0)
+    percent = 0
 
     for split in splits
-        append!(starts, div(i * size(x, 2), 100))
-        i += split
+        # append!(starts, div(percent * size(x, 2), 100))
+        append!(starts, percent_to_index(x, percent))
+        percent += split
     end
 
-    stops = append!(starts[begin + 1:end], size(x, 2))
+    stops = vcat(starts[begin + 1:end], size(x, 2))
     starts .+= 1
 
     return [Data(view(x, :, start:stop), view(y, :, start:stop)) for (start, stop) in zip(starts, stops)]
@@ -76,7 +81,7 @@ function load_config()
     # see 'emnist.jl'
     dataset = load_dataset(dataset_params["dataset"], string_to_func(dataset_params["preprocessor"]), dataset_params["split_percentages"], float[config["precision"]])
     # see 'types.jl'
-    epoch = Epoch(epoch_params["batch_size"], parse(Bool, epoch_params["shuffle_data"]), string_to_func(epoch_params["loss"]), string_to_func(epoch_params["normalizer"]), layers_parameters)
+    epoch_params = EpochParameters(epoch_params["batch_size"], parse(Bool, epoch_params["shuffle_data"]), string_to_func(epoch_params["loss"]), string_to_func(epoch_params["normalizer"]), layers_parameters)
     model = string_to_func(model_params["model"])(
         # TODO: make input size dynamic
         784,
@@ -87,7 +92,7 @@ function load_config()
     )
     caches = map(_ -> Cache(float[config["precision"]]), eachindex(model.layers))
 
-    return config, display, dataset, epoch, n_epochs, model, caches
+    return config, display, dataset, epoch_params, n_epochs, model, caches
 end
 
 # TODO: in-place?
