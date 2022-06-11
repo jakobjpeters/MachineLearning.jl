@@ -112,15 +112,15 @@ function assess(dataset, model, loss, layers_params)
     # TODO: parameterize decision criterion
     criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
 
-    for split in dataset
-        ŷ = model(split.x, layers_params)
-        n = size(split.x, 2)
+    for data in dataset
+        ŷ = model(data.x, layers_params)
+        n = size(data.x, 2)
 
-        n_correct = count(criterion, zip(eachcol(ŷ), eachcol(split.y)))
+        n_correct = count(criterion, zip(eachcol(data.y), eachcol(ŷ)))
         push!(accuracies, n_correct / n)
 
         penalty = sum([sum(layers_params[i].regularize.(model.layers[i].w, layers_params[i].λ)) for i in eachindex(layers_params)])
-        cost = sum(loss(split.y, ŷ))
+        cost = sum(loss(data.y, ŷ))
         push!(costs, (cost + penalty) / n)
     end
 

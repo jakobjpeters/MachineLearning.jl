@@ -1,8 +1,4 @@
 
-function percent_to_index(x, percent)
-    return div(percent * size(x, 2), 100)
-end
-
 # given lists of inputs and labels, return a list of 'Data' split by percentages in 'splits'
 function split_data(x, y, splits)
     sum(splits) != 100 && error("Splits must add to 100 (percent)")
@@ -12,8 +8,7 @@ function split_data(x, y, splits)
     percent = 0
 
     for split in splits
-        # append!(starts, div(percent * size(x, 2), 100))
-        append!(starts, percent_to_index(x, percent))
+        append!(starts, div(percent * size(x, 2), 100))
         percent += split
     end
 

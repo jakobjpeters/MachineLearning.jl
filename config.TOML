@@ -1,5 +1,6 @@
 
 # ["Float32", "Float64"]
+# default is "Float32"
 precision = "Float32"
 
 # for random seed, use "missing"

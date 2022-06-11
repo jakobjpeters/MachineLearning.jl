@@ -1,5 +1,5 @@
 
-struct Data{T, A1<:AbstractArray{T}, A2<:AbstractArray{T}}
+struct Data{T<:AbstractFloat, A1<:AbstractArray{T}, A2<:AbstractArray{T}}
     x::A1
     y::A2
 end
@@ -13,17 +13,16 @@ struct LayerParameters{F1, F2, F3, T<:AbstractFloat}
     η::T # learning rate
 end
 
-# functor, see 'core.jl'
-struct Epoch{T<:Integer, F1, F2, H<:LayerParameters}
+struct EpochParameters{T<:Integer, F1, F2, L<:LayerParameters}
     batch_size::T
     shuffle::Bool
     loss::F1
     normalize::F2
-    layers_params::Vector{H}
+    layers_params::Vector{L}
 end
 
 # corresponds to a layer in a 'Neural_Network'
-mutable struct Cache{T, M<:AbstractMatrix{T}}
+mutable struct Cache{T<:AbstractFloat, M<:AbstractMatrix{T}}
     δe_δl::M # δ error / δ linear
     l::M # linear
     a::M # activation
@@ -36,7 +35,7 @@ end
 abstract type Layer end
 
 # functor, see 'core.jl'
-mutable struct Dense{T, M<:AbstractMatrix{T}, VN<:Union{AbstractVector{T}, Nothing}} <: Layer
+mutable struct Dense{T<:AbstractFloat, M<:AbstractMatrix{T}, VN<:Union{AbstractVector{T}, Nothing}} <: Layer
     w::M # weight
     b::VN # bias
 end
@@ -56,6 +55,7 @@ function NeuralNetwork(x_size, precision, w_inits, sizes, use_biases)
         w = convert.(precision, rand(init_w(x_size), size, x_size))
         b = use_bias ? zeros(precision, size) : nothing
 
+        # TODO: parameterize layer type
         push!(layers, Dense(w, b))
     end
 
