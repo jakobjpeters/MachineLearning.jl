@@ -1,5 +1,5 @@
     
-module Machine_Learning
+module MachineLearning
 
 import InteractiveUtils: @which, @code_warntype
 
@@ -9,29 +9,28 @@ include("utilities.jl")
 include("interface.jl")
 include("core.jl")
 
-function main()
-    config, display, dataset, epoch, n_epochs, model, caches = load_config()
+export
+    # math.jl
+    identity, derivative, mean, # general
+    sigmoid, relu, tanh, # activation
+    softmax, squared_error, # cost
+    z_score, demean, # standardization
+    xavier, he, # weight initialization
+    weight_decay, l1, l2, # regularization
 
-    display(config)
+    # interface.jl
+    terminal,
 
-    # pre-trained
-    assessments = [assess(dataset, model, epoch.loss, epoch.layers_params)]
-    display(assessments)
+    # core.jl
+    train!,
+    assess
 
-    # main training loop
-    # see 'core.jl'
-    @time for i in 1:n_epochs
-        @time train!(epoch, model, caches, dataset[begin].x, dataset[begin].y)
+    # types.jl
+    Assessment, Data # 
+    LayerParameters, EpochParameters, Cache,
+    NeuralNetwork, Dense, SimpleLinearRegression, # models
 
-        @time assessment = assess(dataset, model, epoch.loss, epoch.layers_params)
-        push!(assessments, assessment)
-        # see 'interface.jl'
-        display(assessments)
-    end
+    # utilities.jl
+    load_dataset
 
-    return
-end
-
-main()
-
-end
+end # module
