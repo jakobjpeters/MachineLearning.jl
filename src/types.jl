@@ -62,6 +62,11 @@ function NeuralNetwork(x_size, precision, w_inits, sizes, use_biases)
     return NeuralNetwork(layers)
 end
 
+struct SimpleLinearRegression{T<:AbstractFloat, S<:Union{T, Nothing}} <: Model
+    w::T
+    b::S
+end
+
 # not implemented yet
 struct GenerativeAdversarialNetwork{T1<:Model, T2<:Model} <: Model
     generator::T1
