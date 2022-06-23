@@ -46,7 +46,7 @@ end
 # parse 'config.TOML' and return useful data and datatypes
 # TODO: improve readability
 function load_config()
-    config = TOML.parsefile(dirname(pwd()) * "/config.TOML")
+    config = parsefile(dirname(pwd()) * "/config.toml")
 
     # extract dictionaries for readability
     seed = config["seed"]

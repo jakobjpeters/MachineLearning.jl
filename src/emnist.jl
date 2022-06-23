@@ -139,7 +139,7 @@ function load_emnist(dataset)
             download(emnist, DIRECTORY * "emnist.zip")
         end
 
-        zip = ZipFile.Reader(DIRECTORY * "emnist.zip")
+        zip = Reader(DIRECTORY * "emnist.zip")
 
         for file in zip.files
             touch(DIRECTORY * file.name)

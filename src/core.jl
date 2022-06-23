@@ -15,17 +15,6 @@ function predict!(layer::Dense, x, activate, cache)
     return cache.a
 end
 
-function (layer::Dense)(x, activate)
-    a = layer.w * x
-    if !isnothing(layer.b)
-        a .+= layer.b
-    end
-
-    map!(activate, a, a) # |> layer.norm_func
-
-    return a
-end
-
 # propagate input -> linear -> activation through each layer
 function predict!(model::NeuralNetwork, x, layers_params, caches)
     for (layer, layer_params, cache) in zip(model.layers, layers_params, caches)
@@ -35,15 +24,7 @@ function predict!(model::NeuralNetwork, x, layers_params, caches)
     return caches[end].a
 end
 
-function (model::NeuralNetwork)(x, layers_params)
-    for (layer, layer_params) in zip(model.layers, layers_params)
-        x = layer(x, layer_params.activate)
-    end
-
-    return x
-end
-
-# regular_func::typeof(T) where T <: Uniont{weight_decay, l1, l2} when 'l2' doesn't use an adaptive gradient
+# regularize::typeof(T) where T <: Uniont{weight_decay, l1, l2} when 'l2' doesn't use an adaptive gradient
 function update_weight!(regularize, λ, η, w, δe_δl, x)
     # gemm!(tA, tB, α, A, B, β, C) = α * A * B + β * C -> C where 'T' indicates a transpose
     gemm!('N', 'T', -η / size(x, 2), δe_δl, x, one(eltype(x)) - λ, w)
