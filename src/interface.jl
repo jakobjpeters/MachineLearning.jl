@@ -1,5 +1,5 @@
 
-const Assessment = @NamedTuple{accuracies, costs}
+import Printf: @printf
 
 function indent(n)
     for i in 1:n
@@ -24,7 +24,7 @@ function terminal(config, n_indent = 0)
 end
 
 # prints model assessment for each data split
-function terminal(assessments::AbstractArray{T}) where T <: NamedTuple
+function terminal(assessments::AbstractArray{Assessment})
     println("\nEpoch: ", length(assessments) - 1)
     for (epoch_n, assessment) in enumerate(zip(last(assessments).accuracies, last(assessments).costs))
         @printf("\tSplit: %s\tAccuracy: %.4f\tCost: %.4f\n", epoch_n, assessment[begin], assessment[end])

@@ -1,4 +1,6 @@
 
+const Assessment = @NamedTuple{accuracies, costs}
+
 struct Data{T<:AbstractFloat, A1<:AbstractArray{T}, A2<:AbstractArray{T}}
     x::A1
     y::A2

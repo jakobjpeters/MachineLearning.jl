@@ -1,4 +1,7 @@
 
+import Distributions: Normal
+import Statistics: stdm
+
 # General
 
 function identity(x)

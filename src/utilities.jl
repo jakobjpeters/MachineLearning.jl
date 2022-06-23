@@ -1,4 +1,9 @@
 
+import TOML: parsefile
+import Random: seed!, shuffle!
+
+include("emnist.jl")
+
 # given lists of inputs and labels, return a list of 'Data' split by percentages in 'splits'
 function split_data(x, y, splits)
     sum(splits) != 100 && error("Splits must add to 100 (percent)")

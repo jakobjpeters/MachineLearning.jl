@@ -2,6 +2,9 @@
 # TODO: clean up
 # TODO: improve memory usage for datasets
 
+import GZip
+import ZipFile: Reader
+
 # const DATASETS = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
 const DIRECTORY = dirname(pwd()) * "/emnist/"
 const FILE_NAMES = Dict(

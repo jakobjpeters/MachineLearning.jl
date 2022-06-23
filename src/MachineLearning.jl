@@ -1,26 +1,9 @@
     
 module Machine_Learning
 
-# Testing
 import InteractiveUtils: @which, @code_warntype
 
-# Files
-import GZip
-import ZipFile
-import TOML
-
-# Math
-import Distributions: Normal
-import Statistics: stdm
-import Random: shuffle!, seed!
-import Printf: @printf
-import LinearAlgebra: BLAS.gemm!, axpy!
-
-# GUI
-
-# Internal
-include("functions.jl")
-include("emnist.jl")
+include("math.jl")
 include("types.jl")
 include("utilities.jl")
 include("interface.jl")
