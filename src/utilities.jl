@@ -1,6 +1,6 @@
 
-import TOML: parsefile
-import Random: seed!, shuffle!
+using TOML: parsefile
+using Random: seed!, shuffle!
 
 include("emnist.jl")
 

@@ -1,7 +1,7 @@
     
 module MachineLearning
 
-import InteractiveUtils: @which, @code_warntype
+using InteractiveUtils: @which, @code_warntype
 
 include("math.jl")
 include("types.jl")

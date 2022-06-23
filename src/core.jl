@@ -1,5 +1,5 @@
 
-import LinearAlgebra: BLAS.gemm!, axpy!
+using LinearAlgebra: BLAS.gemm!, axpy!
 
 # calculate and cache linear and activation
 function predict!(layer::Dense, x, activate, cache)

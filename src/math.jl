@@ -1,6 +1,6 @@
 
-import Distributions: Normal
-import Statistics: stdm
+using Distributions: Normal
+using Statistics: stdm
 
 # General
 

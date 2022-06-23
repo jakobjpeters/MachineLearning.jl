@@ -1,5 +1,5 @@
 
-import Printf: @printf
+using Printf: @printf
 
 function indent(n)
     for i in 1:n
