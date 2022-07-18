@@ -10,7 +10,7 @@ Julia is my favorite programming language for many reasons, but I think that its
 
 ## Instructions
 
-Edit 'config.jl' to your liking. When ready, run 'MachineLearning.jl'. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
+Run an example script directly or create your own script using this project as a package. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
 
 Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile specialized code for those types. In this project, compilation will be complete after the 1st epoch.
 
@@ -20,46 +20,45 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Precision
     - ["Float32", "Float64"]
 - Seed
-    - Random
-    - Set
+    - [random, set]
 - Data
     - Datasets
         - EMNIST
             - ["mnist", "balanced", "digits", "bymerge", "byclass", "letters"]
                 - Note: "letters" is broken
     - Preprocessing
-        - ["z_score", "demean", "identity"]
+        - [z_score, demean, identity]
         - Splitting by percentage
 - Epoch Parameters
     - Data shuffle boolean
     - Number of epochs
     - Cost function
-        - ["squared_error"]
+        - [squared_error]
     - Batch size
         - stochastic = 1
         - mini-batch = 1 < x < size(input, 2)
         - batch = size(input, 2)
     - Batch normalization
-        - ["z_score", "demean", "identity"]
+        - [z_score, demean, identity]
     - Layer Parameters
         - Learning rates
         - Activation functions
-            - ["sigmoid", "tanh", "relu", identity"]
-                - Note: "identity" is untested
+            - [sigmoid, tanh, relu, identity]
+                - Note: 'identity' is untested
         - Regularization
             - Note: untested
-            - ["weight_decay", "l1", "l2"]
-                - Note: "l2" is equivalent to "weight_decay" when not using adaptive gradients
+            - [weight_decay, l1, l2]
+                - Note: 'weight_decay' is equivalent to 'l2' when not using adaptive gradients
                 - https://arxiv.org/pdf/1711.05101v3.pdf
 - Model
     - Feed-forward multilayer perceptron
         - Weight initialization functions
-            - ["xavier", "he"]
-                - Note: "he" is untested
+            - [xavier, he]
+                - Note: 'he' is untested
         - Sizes
         - Use biases boolean
 - Optimization
-    - ["backpropagation"]
+    - [backpropagation]
 
 
 ## Planned Features
@@ -70,7 +69,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
     - User created inputs
 - Models
     - Neural networks
-        - ["GenerativeAdversarialNetwork", "ConvolutionalNeuralNetwork"]
+        - [GenerativeAdversarialNetwork, ConvolutionalNeuralNetwork]
     - Regression
     - Decision tree
     - K-nearest neighbors
@@ -108,9 +107,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 
 ## To Do
 
-- Turn into Julia 'project'
-- Change repository name to PascalCase
-- Turn into package with example scripts instead of 'config.TOML'
 - More
     - Functional style
     - Generic

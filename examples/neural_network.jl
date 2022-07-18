@@ -25,7 +25,6 @@ function main()
     # [z_score, demean, identity]
     preprocessor = z_score
 
-    # must add to 100
     split_percentages = [80, 20]
 
     # dataset = load_dataset(dataset_name, preprocessor, split_percentages, precision)
