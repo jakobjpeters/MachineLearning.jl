@@ -124,7 +124,16 @@ end
 #     return nothing
 # end
 
-function load_emnist(dataset)
+function load_dataset(dataset)
+    x = read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_images"], 16)
+    x = hcat(x, read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_images"], 16))
+    y = read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
+    y = hcat(y, read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_labels"], 8, dataset))
+
+    return x, y
+end
+
+function init_dataset(dataset)
     groups = ["mapping", "train_images", "test_images", "train_labels", "test_labels"]
 
     # check that the needed files are stored
@@ -155,11 +164,4 @@ function load_emnist(dataset)
         # TODO: fix this function
         # dataset == "letters" && fix_letters!()
     end
-
-    x = read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_images"], 16)
-    x = hcat(x, read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_images"], 16))
-    y = read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
-    y = hcat(y, read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_labels"], 8, dataset))
-
-    return x, y
 end

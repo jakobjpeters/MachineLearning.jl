@@ -1,28 +1,6 @@
 
 using Printf: @printf
 
-function indent(n)
-    for i in 1:n
-        print("\t")
-    end
-end
-
-function terminal(config, n_indent = 0)
-    if config isa Dict
-        for key in keys(config)
-            indent(n_indent)
-            println(key)
-            terminal(config[key], n_indent + 1)
-        end
-    else
-        indent(n_indent)
-        println(config)
-        println()
-    end
-
-    return
-end
-
 # prints model assessment for each data split
 function terminal(assessments::AbstractArray{Assessment})
     println("\nEpoch: ", length(assessments) - 1)

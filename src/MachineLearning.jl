@@ -1,18 +1,17 @@
     
 module MachineLearning
 
-using InteractiveUtils: @which, @code_warntype
-
 include("math.jl")
 include("types.jl")
+include("functors.jl")
 include("utilities.jl")
 include("interface.jl")
 include("core.jl")
 
 export
     # math.jl
-    identity, derivative, mean, # general
-    sigmoid, relu, tanh, # activation
+    derivative, mean, # general
+    sigmoid, relu, # activation
     softmax, squared_error, # cost
     z_score, demean, # standardization
     xavier, he, # weight initialization
@@ -23,14 +22,14 @@ export
 
     # core.jl
     train!,
-    assess
+    assess,
 
     # types.jl
-    Assessment, Data # 
+    Assessment, Dataset, # 
     LayerParameters, EpochParameters, Cache,
-    NeuralNetwork, Dense, SimpleLinearRegression, # models
+    NeuralNetwork, Dense, Linear, # models
 
     # utilities.jl
-    load_dataset
+    load_dataset, split_dataset
 
 end # module

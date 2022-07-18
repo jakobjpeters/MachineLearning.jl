@@ -4,9 +4,10 @@ using Statistics: stdm
 
 # General
 
-function identity(x)
-    return x
-end
+# exported by Base
+# function identity(x)
+#     return x
+# end
 
 function derivative(::typeof(identity))
     return function (x)
@@ -43,11 +44,12 @@ function derivative(::typeof(relu))
     end
 end
 
-function tanh(x)
-    eˣ = exp.(x)
-    e⁻ˣ = inv.(eˣ)
-    return (eˣ - e⁻ˣ) / (eˣ + e⁻ˣ)
-end
+# exported by Base
+# function tanh(x)
+#     eˣ = exp.(x)
+#     e⁻ˣ = inv.(eˣ)
+#     return (eˣ - e⁻ˣ) / (eˣ + e⁻ˣ)
+# end
 
 function derivative(f::typeof(tanh))
     return function (x)
