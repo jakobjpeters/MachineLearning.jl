@@ -23,15 +23,15 @@ function split_dataset(x, y, splits)
     return [Dataset(view(x, :, start:stop), view(y, :, start:stop)) for (start, stop) in zip(starts, stops)]
 end
 
-# load selected dataset, preprocess dataset, and return list of dataset splits
+# load and preprocess selected dataset
 function load_dataset(dataset_name, preprocess, precision)
     init_dataset(dataset_name)
     x, y = load_dataset(dataset_name)
 
+    # mapslices is type-unstable
     prep_x = mapslices(preprocess, convert.(precision, x), dims = 1)
     prep_y = convert.(precision, y)
 
-    # return split_data(prep_x, prep_y, splits)
     return Dataset(prep_x, prep_y)
 end
 

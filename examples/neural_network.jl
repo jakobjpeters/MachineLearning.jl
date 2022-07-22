@@ -99,7 +99,6 @@ function main()
 
     epoch_params = EpochParameters(batch_size, shuffle_data, loss, batch_normalizer, layers_params)
 
-
     # pre-trained
     assessments = [assess(dataset, model, epoch_params.loss, epoch_params.layers_params)]
     terminal(assessments)

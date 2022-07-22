@@ -18,9 +18,9 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 ## Configurable Features
 
 - Precision
-    - ["Float32", "Float64"]
+    - [Float32, Float64]
 - Seed
-    - [random, set]
+    - [random, deterministic]
 - Data
     - Datasets
         - EMNIST

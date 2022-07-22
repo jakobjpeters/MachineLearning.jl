@@ -6,10 +6,6 @@ struct Dataset{T<:AbstractFloat, A1<:AbstractArray{T}, A2<:AbstractArray{T}}
     y::A2
 end
 
-function Dataset(x, y, precision = Float32)
-    return Data(convert.(precision, x), convert.(precision, y)) # convert?
-end
-
 # corresponds to a layer in a 'Neural_Network'
 struct LayerParameters{F1, F2, F3, T<:AbstractFloat}
     normalize::F1
@@ -20,7 +16,7 @@ struct LayerParameters{F1, F2, F3, T<:AbstractFloat}
 end
 
 function LayerParameters(normalize, activate, regularize, λ, η, precision = Float32)
-    return LayerParameters(normalize, activate, regularize, convert.(precision, λ), convert.(precision, η)) # convert?
+    return LayerParameters(normalize, activate, regularize, convert.(precision, λ), convert.(precision, η))
 end
 
 struct EpochParameters{T<:Integer, F1, F2, VL<:AbstractVector{<:LayerParameters}}
