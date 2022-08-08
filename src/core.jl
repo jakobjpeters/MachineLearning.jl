@@ -3,13 +3,10 @@ using LinearAlgebra: BLAS.gemm!, axpy!
 
 # calculate and cache linear and activation
 function predict!(layer::Dense, x, activate, cache)
-    cache.l = layer.w * x
-    if !isnothing(layer.b)
-        cache.l .+= layer.b
-    end
-
+    cache.l = linear(layer.w, x, layer.b)
+    
     # reduce allocations by enabling 'map!'
-    cache.a = preallocate(cache.a, size(cache.l))
+    cache.a = preallocate!(cache.a, size(cache.l))
     map!(activate, cache.a, cache.l) # |> layer.norm_func
 
     return cache.a
@@ -56,7 +53,7 @@ function train_layer!(i, x, layer, layer_params, cache, δe_δa)
     # calculate intermediate partial derivatives
     δa_δl = map(derivative(layer_params.activate), cache.l)
     # reduce allocations by enabling '.='
-    cache.δe_δl = preallocate(cache.δe_δl, size(cache.l))
+    cache.δe_δl = preallocate!(cache.δe_δl, size(cache.l))
     cache.δe_δl .= δe_δa .* δa_δl
 
     # do not need to calculate δl_δa for first layer, since there are no parameters to update
@@ -101,8 +98,8 @@ function assess(dataset, model, loss, layers_params)
         n_correct = count(criterion, zip(eachcol(data.y), eachcol(ŷ)))
         push!(accuracies, n_correct / n)
 
-        penalty = sum([sum(layers_params[i].regularize.(model.layers[i].w, layers_params[i].λ)) for i in eachindex(layers_params)])
         cost = sum(loss(data.y, ŷ))
+        penalty = sum([sum(layers_params[i].regularize.(model.layers[i].w, layers_params[i].λ)) for i in eachindex(layers_params)])
         push!(costs, (cost + penalty) / n)
     end
 

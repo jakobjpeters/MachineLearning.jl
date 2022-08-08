@@ -45,6 +45,6 @@ function shuffle_pair(x, y)
 end
 
 # TODO: in-place?
-function preallocate(x, dims)
+function preallocate!(x, dims)
     return size(x) == dims ? x : zeros(eltype(x), dims)
 end
