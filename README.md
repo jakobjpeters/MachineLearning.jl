@@ -17,8 +17,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 
 ## Configurable Features
 
-- Precision
-    - [Float32, Float64]
 - Seed
     - [random, deterministic]
 - Data
@@ -49,7 +47,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
             - Note: untested
             - [weight_decay, l1, l2]
                 - Note: 'weight_decay' is equivalent to 'l2' when not using adaptive gradients
-                - https://arxiv.org/pdf/1711.05101v3.pdf
+                    - https://arxiv.org/pdf/1711.05101v3.pdf
 - Model
     - Feed-forward multilayer perceptron
         - Weight initialization functions

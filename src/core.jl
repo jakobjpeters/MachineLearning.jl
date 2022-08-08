@@ -88,9 +88,8 @@ end
 
 # test the model and return its accuracy and cost for each data split
 function assess(dataset, model, loss, layers_params)
-    precision = eltype(model.layers[begin].w)
-    accuracies = Vector{precision}(undef, 0)
-    costs = Vector{precision}(undef, 0)
+    accuracies = Vector{Float32}(undef, 0)
+    costs = Vector{Float32}(undef, 0)
 
     # TODO: parameterize decision criterion
     criterion = pair -> argmax(pair[begin]) == argmax(pair[end])

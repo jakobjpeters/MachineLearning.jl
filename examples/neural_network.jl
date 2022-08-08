@@ -9,10 +9,6 @@ using Random: seed!
 using InteractiveUtils: @which, @code_warntype
 
 function main()
-    # [Float32, Float64]
-    # default is Float32
-    precision = Float32
-
     # comment out for random seed
     seed!(1)
 
@@ -27,9 +23,7 @@ function main()
 
     split_percentages = [80, 20]
 
-    # dataset = load_dataset(dataset_name, preprocessor, split_percentages, precision)
-
-    dataset = load_dataset(dataset_name, preprocessor, precision)
+    dataset = load_dataset(dataset_name, preprocessor)
     dataset = split_dataset(dataset.x, dataset.y, split_percentages)
 
 
@@ -54,10 +48,9 @@ function main()
         w_inits,
         layer_sizes,
         use_biases,
-        precision
     )
 
-    caches = map(_ -> Cache(precision), eachindex(model.layers))
+    caches = map(_ -> Cache(), eachindex(model.layers))
 
 
     # Layers_Parameters
@@ -82,7 +75,7 @@ function main()
     layer_normalizers = [identity, identity]
 
     layers_params = zip(layer_normalizers, activators, regularizers, regularize_rates, learn_rates)
-    layers_params = map(layer_params -> LayerParameters(layer_params..., precision), layers_params)
+    layers_params = map(layer_params -> LayerParameters(layer_params...), layers_params)
 
 
     # Epoch

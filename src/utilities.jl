@@ -24,15 +24,14 @@ function split_dataset(x, y, splits)
 end
 
 # load and preprocess selected dataset
-function load_dataset(dataset_name, preprocess, precision)
+function load_dataset(dataset_name, preprocess)
     init_dataset(dataset_name)
     x, y = load_dataset(dataset_name)
 
     # mapslices is type-unstable
-    prep_x = mapslices(preprocess, convert.(precision, x), dims = 1)
-    prep_y = convert.(precision, y)
+    prep_x = mapslices(preprocess, x, dims = 1)
 
-    return Dataset(prep_x, prep_y)
+    return Dataset(prep_x, y)
 end
 
 # TODO: make this faster
