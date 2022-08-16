@@ -8,28 +8,56 @@ function Dataset(x, y)
     return Dataset(convert.(Float32, x), convert.(Float32, y))
 end
 
-# corresponds to a layer in a 'Neural_Network'
-struct LayerParameters{F1, F2, F3}
-    normalize::F1
-    activate::F2
-    regularize::F3
-    λ::Float32 # regularizer rate
-    η::Float32 # learning rate
+struct Regularizer{F}
+    regularize::F
+    λ::Float32
 end
 
-function LayerParameters(normalize, activate, regularize, λ, η)
-    λ = convert(Float32, λ)
-    η = convert(Float32, η)
-
-    return LayerParameters(normalize, activate, regularize, λ, η)
+function Regularizer(regularize, λ)
+    return Regularizer(regularize, convert(Float32, λ))
 end
 
-struct EpochParameters{T<:Integer, F1, F2, VL<:AbstractVector{<:LayerParameters}}
+# corresponds to layers in a 'Neural_Network'
+struct LayersParameters{F1<:AbstractArray, F2<:AbstractArray, R<:AbstractArray{<:Regularizer}, T<:AbstractArray{Float32}}
+    normalizers::F1
+    activators::F2
+    regularizers::R
+    η::T # learning rate
+end
+
+function LayersParameters(normalizers::AbstractArray, activators::AbstractArray, regularizers::AbstractArray, η::AbstractArray)
+    return LayersParameters(normalizers, activators, regularizers, convert.(Float32, η))
+end
+
+# TODO: make generated function
+function LayersParameters(normalizers, activators, regularizers, η, n_layers)
+    if !isa(normalizers, AbstractArray)
+        normalizers = repeat([normalizers], n_layers)
+    end
+    if !isa(activators, AbstractArray)
+        activators = repeat([activators], n_layers)
+    end
+    if !isa(regularizers, AbstractArray)
+        regularizers = repeat([regularizers], n_layers)
+    end
+    if !isa(η, AbstractArray)
+        η = repeat([η], n_layers)
+    end
+
+    return LayersParameters(normalizers, activators, regularizers, η)
+end
+
+function LayersParameters(normalizers, activators, η)
+    regularizer = Regularizer(weight_decay, 0.0)
+    return LayersParameters(normalizers, activators, regularizer, η)
+end
+
+struct EpochParameters{T<:Integer, F1, F2, LP<:LayersParameters}
     batch_size::T
     shuffle::Bool
     loss::F1
     normalize::F2
-    layers_params::VL
+    layers_params::LP
 end
 
 # corresponds to a layer in a 'Neural_Network'
@@ -79,6 +107,10 @@ end
 struct Linear{S<:Union{AbstractVector{Float32}, Float32}, R<:Union{Float32, Nothing}} <: Model
     w::S
     b::R
+end
+
+function Linear(w, b)
+    return Linear(convert.(Float32, w), convert(Float32, b))
 end
 
 # not implemented yet

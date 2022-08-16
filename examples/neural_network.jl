@@ -58,14 +58,16 @@ function main()
     # 'identity' is untested
     activators = [sigmoid, sigmoid]
 
-    # [weight_decay, l1, l2]
-    # default is "weight_decay"
-    # untested
-    regularizers = [weight_decay, weight_decay]
+    regularizers = repeat([Regularizer(
+        # [weight_decay, l1, l2]
+        # default is "weight_decay"
+        # untested
+        weight_decay,
 
-    # set to '0.0' for no regularization
-    # untested
-    regularize_rates = [0.0, 0.0]
+        # set to '0.0' for no regularization
+        # untested
+        0.0
+    )], 2)
 
     learn_rates = [0.1, 0.01]
 
@@ -74,8 +76,7 @@ function main()
     # not currently "plugged in"
     layer_normalizers = [identity, identity]
 
-    layers_params = zip(layer_normalizers, activators, regularizers, regularize_rates, learn_rates)
-    layers_params = map(layer_params -> LayerParameters(layer_params...), layers_params)
+    layers_params = LayersParameters(layer_normalizers, activators, regularizers, learn_rates)
 
 
     # Epoch

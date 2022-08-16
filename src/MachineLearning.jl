@@ -25,8 +25,8 @@ export
     assess,
 
     # types.jl
-    Assessment, Dataset, # 
-    LayerParameters, EpochParameters, Cache,
+    Dataset,
+    Regularizer, LayersParameters, EpochParameters, Cache,
     NeuralNetwork, Dense, Linear, # models
 
     # utilities.jl
