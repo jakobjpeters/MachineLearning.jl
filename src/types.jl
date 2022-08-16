@@ -20,7 +20,10 @@ struct LayerParameters{F1, F2, F3}
 end
 
 function LayerParameters(normalize, activate, regularize, λ, η)
-    return LayerParameters(normalize, activate, regularize, convert(Float32, λ), convert(Float32, η))
+    λ = convert(Float32, λ)
+    η = convert(Float32, η)
+
+    return LayerParameters(normalize, activate, regularize, λ, η)
 end
 
 struct EpochParameters{T<:Integer, F1, F2, VL<:AbstractVector{<:LayerParameters}}
@@ -39,7 +42,10 @@ mutable struct Cache{M<:AbstractMatrix{Float32}}
 end
 
 function Cache()
-    return Cache(repeat([Matrix{Float32}(undef, 0, 0)], length(fieldnames(Cache)))...)
+    init = Matrix{Float32}(undef, 0, 0)
+    n_fields = length(fieldnames(Cache))
+
+    return Cache(repeat([init], n_fields)...)
 end
 
 abstract type Layer end
@@ -53,25 +59,21 @@ end
 function Dense(init_w, x_size, size, use_bias)
     w = convert.(Float32, rand(init_w(x_size), size, x_size))
     b = use_bias ? zeros(Float32, size) : nothing
+
     return Dense(w, b)
 end
 
 abstract type Model end
 
 # functor, see 'core.jl'
-struct NeuralNetwork{VL<:AbstractVector{Layer}} <: Model
+struct NeuralNetwork{VL<:AbstractVector{<:Layer}} <: Model
     layers::VL
 end
 
 function NeuralNetwork(x_size, w_inits, sizes, use_biases)
-    layers = Vector{Layer}(undef, 0)
-    params = zip(w_inits, pushfirst!(sizes[begin:end - 1], x_size), sizes, use_biases)
-
-    for (init_w, x_size, size, use_bias) in params
-        # TODO: parameterize layer type
-        layer = Dense(init_w, x_size, size, use_bias)
-        push!(layers, layer)
-    end
+    x_sizes = pushfirst!(sizes[begin:end - 1], x_size)
+    layers_params = zip(w_inits, x_sizes, sizes, use_biases)
+    layers = map(layer_params -> Dense(layer_params...), layers_params)
 
     return NeuralNetwork(layers)
 end

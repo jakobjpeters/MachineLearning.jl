@@ -44,7 +44,8 @@ function shuffle_pair(x, y)
     return reduce(hcat, data[begin]), reduce(hcat, data[end])
 end
 
-# TODO: in-place?
-function preallocate!(x, dims)
-    return size(x) == dims ? x : zeros(eltype(x), dims)
+# reduces allocations if condition is met
+# enables in-place operations for variables that may change size
+function preallocate(x, y)
+    return size(x) == size(y) ? x : similar(y)
 end

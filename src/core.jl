@@ -5,8 +5,7 @@ using LinearAlgebra: BLAS.gemm!, axpy!
 function predict!(layer::Dense, x, activate, cache)
     cache.l = linear(layer.w, x, layer.b)
     
-    # reduce allocations by enabling 'map!'
-    cache.a = preallocate!(cache.a, size(cache.l))
+    cache.a = preallocate(cache.a, cache.l)
     map!(activate, cache.a, cache.l) # |> layer.norm_func
 
     return cache.a
@@ -49,38 +48,46 @@ end
 #     axpy!(-α, ∇ + penalty, w)
 # end
 
+
+@inline function update_params!(regularize, λ, η, w, δe_δl, x, b)
+    update_weight!(regularize, λ, η, w, δe_δl, x)
+
+    if !isnothing(b)
+        δe_δb = dropdims(sum(δe_δl, dims = 2), dims = 2)
+        axpy!(-η / size(x, 2), δe_δb, b)
+    end
+
+    return nothing
+end
+
 function train_layer!(i, x, layer, layer_params, cache, δe_δa)
     # calculate intermediate partial derivatives
     δa_δl = map(derivative(layer_params.activate), cache.l)
-    # reduce allocations by enabling '.='
-    cache.δe_δl = preallocate!(cache.δe_δl, size(cache.l))
+
+    cache.δe_δl = preallocate(cache.δe_δl, cache.l)
     cache.δe_δl .= δe_δa .* δa_δl
 
-    # do not need to calculate δl_δa for first layer, since there are no parameters to update
+    # do not need to calculate δe_δa for first layer, since there are no parameters to update
     δe_δa = i == 1 ? nothing : transpose(layer.w) * cache.δe_δl
 
-    # update weights and biases in-place
-    update_weight!(layer_params.regularize, layer_params.λ, layer_params.η, layer.w, cache.δe_δl, x)
-    if layer.b !== nothing
-        δe_δb = dropdims(sum(cache.δe_δl, dims = 2), dims = 2)
-        # axpy!(α, X, Y) = α * X + Y -> Y
-        axpy!(-layer_params.η / size(x, 2), δe_δb, layer.b)
-    end
+    update_params!(layer_params.regularize, layer_params.λ, layer_params.η, layer.w, cache.δe_δl, x, layer.b)
 
     # TODO: makes more sense to return 'layer'
     return δe_δa
 end
 
 # calculate the gradient and update the model's parameters for a batched input
-@inline function backpropagate!(layers, layers_params, caches, x, y, loss)
+@inline function backpropagate!(model, layers_params, caches, x, y, loss)
+    predict!(model, x, layers_params, caches)
+
     δe_δa = derivative(loss)(y, caches[end].a)
 
-    for i in reverse(eachindex(layers))
+    for i in reverse(eachindex(model.layers))
         layer_x = i == 1 ? x : caches[i - 1].a
-        δe_δa = train_layer!(i, layer_x, layers[i], layers_params[i], caches[i], δe_δa)
+        δe_δa = train_layer!(i, layer_x, model.layers[i], layers_params[i], caches[i], δe_δa)
     end
 
-    return layers
+    return model
 end
 
 # test the model and return its accuracy and cost for each data split
@@ -117,10 +124,10 @@ function train!(epoch, model, caches, x, y)
     # train model for each batch
     for first in 1:epoch.batch_size:n
         last = min(n, first + epoch.batch_size - 1)
-        norm_x = epoch.normalize(view(x, :, first:last))
+        prep_x = epoch.normalize(view(x, :, first:last))
+        prep_y = view(y, :, first:last)
 
-        predict!(model, norm_x, epoch.layers_params, caches)
-        backpropagate!(model.layers, epoch.layers_params, caches, norm_x, view(y, :, first:last), epoch.loss)
+        backpropagate!(model, epoch.layers_params, caches, prep_x, prep_y, epoch.loss)
     end
 
     return model

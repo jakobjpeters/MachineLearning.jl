@@ -1,5 +1,5 @@
 
-function linear(w, x, b)
+function linear(w, x, b = nothing)
     return isnothing(b) ? w * x : muladd(w, x, b)
 end
 
