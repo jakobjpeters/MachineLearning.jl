@@ -1,6 +1,4 @@
 
-const Assessment = @NamedTuple{accuracies, costs}
-
 struct Dataset{A1<:AbstractArray{Float32}, A2<:AbstractArray{Float32}}
     x::A1
     y::A2

@@ -110,7 +110,7 @@ function assess(dataset, model, loss, layers_params)
         push!(costs, (cost + penalty) / n)
     end
 
-    return Assessment((accuracies, costs))
+    return @NamedTuple{accuracies::Vector{Float32}, costs::Vector{Float32}}((accuracies, costs))
 end
 
 # coordinate an epoch of model training
