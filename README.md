@@ -10,9 +10,17 @@ Julia is my favorite programming language for many reasons, but I think that its
 
 ## Instructions
 
-Run an example script directly or create your own script using this project as a package. This will initially download and decompress 'EMNIST' datasets, which may take a few minutes. If you run into problems, delete the 'emnist' folder and start again.
+Run an example script directly or create your own script using this project as a package. Using an 'EMNIST' dataset for the first time will take a few minutes to download. If you run into problems, stop the program, delete the 'emnist' folder, and start again.
 
-Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile specialized code for those types. In this project, compilation will be complete after the 1st epoch.
+Example scripts:
+- neural_network.jl
+    - Feed-forward multilayer perceptron
+    - Run with command line arguments
+        - ["concise", "verbose"]
+- regression.jl
+    - Simple linear regression
+
+Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial compilation of packages will take a few seconds and 2) each method call with new argument types will take time to compile specialized code for those types. After this occurs, Julia will run quite swiftly.
 
 
 ## Configurable Features
@@ -30,12 +38,12 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Epoch Parameters
     - Data shuffle boolean
     - Number of epochs
-    - Cost function
+    - Loss function
         - [squared_error]
     - Batch size
-        - stochastic = 1
-        - mini-batch = 1 < x < size(input, 2)
-        - batch = size(input, 2)
+        - stochastic -> 1
+        - mini-batch -> 1 < x < n
+        - batch -> n
     - Batch normalization
         - [z_score, demean, identity]
     - Layer Parameters
@@ -50,14 +58,17 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
                     - https://arxiv.org/pdf/1711.05101v3.pdf
 - Model
     - Feed-forward multilayer perceptron
+        - Optimization
+            - [backpropagation]
         - Weight initialization functions
             - [xavier, he]
                 - Note: 'he' is untested
         - Sizes
         - Use biases boolean
-- Optimization
-    - [backpropagation]
-
+    - Simple regression
+        - Correlation coefficient
+        - Optimization
+            [analytic]
 
 ## Planned Features
 
