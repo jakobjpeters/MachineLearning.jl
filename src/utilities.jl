@@ -24,9 +24,9 @@ function split_dataset(x, y, splits)
 end
 
 # load and preprocess selected dataset
-function load_dataset(dataset_name, preprocess)
+function load_dataset(dataset_name, preprocess = identity)
     init_dataset(dataset_name)
-    x, y = load_dataset(dataset_name)
+    x, y = load_emnist(dataset_name)
 
     # mapslices is type-unstable
     prep_x = mapslices(preprocess, x, dims = 1)

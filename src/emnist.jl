@@ -124,7 +124,7 @@ end
 #     return nothing
 # end
 
-function load_dataset(dataset)
+function load_emnist(dataset)
     x = read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_images"], 16)
     x = hcat(x, read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_images"], 16))
     y = read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
@@ -146,6 +146,7 @@ function init_dataset(dataset)
         if !isfile("emnist.zip")
             println("Downloading 'emnist.zip' from '" * emnist * "'.")
             download(emnist, DIRECTORY * "emnist.zip")
+            println("Download complete")
         end
 
         zip = Reader(DIRECTORY * "emnist.zip")
