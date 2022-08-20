@@ -5,22 +5,26 @@ using Random: seed!, shuffle!
 include("emnist.jl")
 
 # given lists of inputs and labels, return a list of 'Data' split by percentages in 'splits'
-function split_dataset(x, y, splits)
-    sum(splits) != 100 && error("Splits must add to 100 (percent)")
+function split_dataset(dataset::Dataset{A1, A2}, splits) where {A1, A2}
+    split_i = map(split -> div(split * dataset.n, 100), splits[begin:end - 1])
+    cumsum!(split_i, split_i)
 
-    # generate indices to split the data by each percentage in 'splits'
-    starts = Vector{Int64}(undef, 0)
-    percent = 0
+    starts = prepend!(split_i .+ 1, 1)
+    stops = append!(split_i, dataset.n)
 
-    for split in splits
-        append!(starts, div(percent * size(x, 2), 100))
-        percent += split
+    datasets = Dataset{A1, A2}[]
+    for (start, stop) in zip(starts, stops)
+        x_slice = dataset.x[repeat([:], length(size(dataset.x)) - 1)..., start:stop]
+        y_slice = dataset.y[repeat([:], length(size(dataset.y)) - 1)..., start:stop]
+        push!(datasets, Dataset(x_slice, y_slice))
     end
 
-    stops = vcat(starts[begin + 1:end], size(x, 2))
-    starts .+= 1
+    return datasets
+end
 
-    return [Dataset(view(x, :, start:stop), view(y, :, start:stop)) for (start, stop) in zip(starts, stops)]
+function split_dataset(dataset, splits)
+    sum(splits) != 100 && error("Splits must add to 100 (percent)")
+    return split_dataset(dataset, splits)
 end
 
 # load and preprocess selected dataset

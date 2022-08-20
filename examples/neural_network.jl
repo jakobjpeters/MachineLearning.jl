@@ -24,8 +24,7 @@ function main()
     split_percentages = [80, 20]
 
     dataset = load_dataset(dataset_name, preprocessor)
-    dataset = split_dataset(dataset.x, dataset.y, split_percentages)
-
+    datasets = split_dataset(dataset, split_percentages)
 
     # Model
     # [xavier, he]
