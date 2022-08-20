@@ -44,7 +44,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
             - [sigmoid, tanh, relu, identity]
                 - Note: 'identity' is untested
         - Regularization
-            - Note: untested
+            - Note: not implemented correctly
             - [weight_decay, l1, l2]
                 - Note: 'weight_decay' is equivalent to 'l2' when not using adaptive gradients
                     - https://arxiv.org/pdf/1711.05101v3.pdf
@@ -101,6 +101,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 ## Known Bugs
 
 - EMNIST 'letters' dataset labels are incorrect
+- Regularization not implemented correctly
 
 
 ## To Do

@@ -29,15 +29,15 @@ function update_weight!(regularize, λ, η, w, δe_δl, x)
 end
 
 # slower, only call if 'λ != 0'
-function update_weight!(regularize::typeof(l1), λ, η, w, δe_δl, x)
-    ∇ = zeros(eltype(x))
-    ∇ = δe_δl * transpose(x) / size(x, 2)
-    penalty = derivative(regularize).(w, λ / η)
-    # axpy!(α, X, Y) = α * X + Y -> Y
-    axpy!(-η, ∇ + penalty, w)
+# function update_weight!(regularize::typeof(l1), λ, η, w, δe_δl, x)
+#     ∇ = zeros(eltype(x))
+#     ∇ = δe_δl * transpose(x) / size(x, 2)
+#     penalty = derivative(regularize)(w, λ / η)
+#     # axpy!(α, X, Y) = α * X + Y -> Y
+#     axpy!(-η, ∇ + penalty, w)
 
-    return w
-end
+#     return w
+# end
 
 # needed for 'l2' with adaptive gradient such as ADAM, although ADAM with weight decay is better
 # https://arxiv.org/pdf/1711.05101v3.pdf

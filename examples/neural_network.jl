@@ -57,11 +57,7 @@ function main()
     # 'identity' is untested
     activators = [sigmoid, sigmoid]
 
-    regularizers = repeat([Regularizer(
-        # [weight_decay, l1, l2]
-        # default is "weight_decay"
-        # untested
-        weight_decay,
+    # not implemented correctly
 
         # set to '0.0' for no regularization
         # untested
