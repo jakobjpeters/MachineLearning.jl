@@ -129,3 +129,9 @@ end
 function derivative(::typeof(l2))
     return weight_decay
 end
+
+# Inferential
+
+function correlation_coefficient(x, y, corrected = true)
+    return cov(x, y, corrected = corrected) / (std(x, corrected = corrected) * std(y, corrected = corrected))
+end

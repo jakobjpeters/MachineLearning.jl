@@ -1,5 +1,9 @@
 
 function linear(w, x, b = nothing)
+    return isnothing(b) ? w * x : muladd.(w, x, b)
+end
+
+function linear(w, x, b::AbstractArray)
     return isnothing(b) ? w * x : muladd(w, x, b)
 end
 

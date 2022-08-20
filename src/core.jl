@@ -138,5 +138,20 @@ function train!(epoch, model, caches, x, y)
         backpropagate!(model, epoch.layers_params, caches, prep_x, prep_y, epoch.loss)
     end
 
+function train!(model::Linear{<:AbstractVector}, x, y)
+    throw(ErrorException("Multiple regression not implemented yet"))
+
+    return model
+end
+
+function train!(model::Linear, dataset)
+    x̄ = mean(dataset.x)
+    ȳ = mean(dataset.y)
+
+    model.w = sum((dataset.x .- x̄) .* (dataset.y .- ȳ)) / sum((dataset.x .- x̄) .^ 2)
+    if !isnothing(model.b)
+        model.b = ȳ - x̄ * model.w
+    end
+
     return model
 end

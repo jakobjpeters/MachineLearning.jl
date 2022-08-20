@@ -30,6 +30,7 @@ export
     NeuralNetwork, Dense, Linear, # models
 
     # utilities.jl
-    load_dataset, split_dataset
+    # inferential.jl
+    correlation_coefficient
 
 end # module

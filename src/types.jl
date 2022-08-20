@@ -112,13 +112,19 @@ function NeuralNetwork(x_size, w_inits, sizes, use_biases)
     return NeuralNetwork(layers)
 end
 
-struct Linear{S<:Union{AbstractVector{Float32}, Float32}, R<:Union{Float32, Nothing}} <: Model
+mutable struct Linear{S<:Union{AbstractVector{Float32}, Float32}, R<:Union{Float32, Nothing}} <: Model
     w::S
     b::R
 end
 
-function Linear(w, b)
-    return Linear(convert.(Float32, w), convert(Float32, b))
+function Linear(w, b = nothing)
+    b = isnothing(b) ? nothing : convert(Float32, b)
+    return Linear(convert.(Float32, w), b)
+end
+
+function Linear(use_bias::Bool = true)
+    bias = use_bias ? 0.0 : nothing
+    return Linear(0.0, bias)
 end
 
 # not implemented yet

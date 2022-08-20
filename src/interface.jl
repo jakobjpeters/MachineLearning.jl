@@ -3,16 +3,16 @@ using Printf: @printf
 
 # TODO: improve
 # prints model assessment for each data split
-function terminal(assessments)
-    println("\nEpoch: ", length(assessments) - 1)
+function terminal(assessment, epoch_n = 0)
+    println("\nEpoch: ", epoch_n)
 
     header = "\tSplit\t\tCost"
-    costs = assessments[end].costs
+    costs = assessment.costs
     accuracies = nothing
 
-    if in(:accuracies, keys(assessments[end]))
+    if in(:accuracies, keys(assessment))
         header *= "\t\tAccuracy"
-        accuracies = assessments[end].accuracies
+        accuracies = assessment.accuracies
     end
     println(header)
 
