@@ -1,6 +1,5 @@
 
 using Distributions: Normal
-using Statistics: stdm
 
 # General
 
@@ -18,6 +17,17 @@ end
 function mean(x)
     return sum(x) / length(x)
 end
+
+using Statistics: std, var, cov
+
+# TODO: 'sum' is not type stable
+# function variance(x, corrected = true) where T
+#     return sum((x .- mean(x)) .^ 2) / (length(x) - corrected)
+# end
+
+# function standard_deviation(x, corrected = true)
+#     return variance(x, corrected) ^ 0.5
+# end
 
 # Activation And Derivative
 
@@ -84,8 +94,8 @@ end
 # Normalization
 
 function z_score(x)
-    m = mean(x)
-    return (x .- m) ./ stdm(x, m)
+    # return (x .- mean(x)) ./ standard_deviation(x)
+    return (x .- mean(x)) ./ std(x)
 end
 
 function demean(x)

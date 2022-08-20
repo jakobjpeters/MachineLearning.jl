@@ -4,6 +4,27 @@ using Random: seed!, shuffle!
 
 include("emnist.jl")
 
+function init_caches(n)
+    return map(_ -> Cache(), 1:n)
+end
+
+function init_layers_params(n, η, activate, normalize = identity, regularizer = Regularizer())
+    params = []
+    for param in [η, activate, normalize, regularizer]
+        new_param = param
+        if isa(param, AbstractArray)
+            if length(param) != n
+                throw(ErrorException("Parameters must be a single value or have length(param) == n"))
+            end
+        else
+            new_param = repeat([param], n)
+        end
+        push!(params, new_param)
+    end
+
+    return map(param -> LayerParameters(param...), zip(params...))
+end
+
 # given lists of inputs and labels, return a list of 'Data' split by percentages in 'splits'
 function split_dataset(dataset::Dataset{A1, A2}, splits) where {A1, A2}
     split_i = map(split -> div(split * dataset.n, 100), splits[begin:end - 1])
@@ -39,13 +60,13 @@ function load_dataset(dataset_name, preprocess = identity)
 end
 
 # TODO: make this faster
-function shuffle_pair(x, y)
+function shuffle(dataset)
     # pair inputs and labels, then shuffle the pairs
-    data = shuffle!(collect(zip(eachcol(x), eachcol(y))))
+    xy = shuffle!(collect(zip(eachcol(dataset.x), eachcol(dataset.y))))
     # unpack the pairs
-    data = getindex.(data, 1), getindex.(data, 2)
+    x, y = getindex.(xy, 1), getindex.(xy, 2)
     # transform to original structure
-    return reduce(hcat, data[begin]), reduce(hcat, data[end])
+    return Dataset(reduce(hcat, x), reduce(hcat, y))
 end
 
 # reduces allocations if condition is met

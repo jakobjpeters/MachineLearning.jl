@@ -25,47 +25,20 @@ function Regularizer(regularize, λ)
     return Regularizer(regularize, convert(Float32, λ))
 end
 
+function Regularizer()
+    return Regularizer(weight_decay, 0.0)
+end
+
 # corresponds to layers in a 'Neural_Network'
-struct LayersParameters{F1<:AbstractArray, F2<:AbstractArray, R<:AbstractArray{<:Regularizer}, T<:AbstractArray{Float32}}
-    normalizers::F1
-    activators::F2
-    regularizers::R
-    η::T # learning rate
-end
-
-function LayersParameters(normalizers::AbstractArray, activators::AbstractArray, regularizers::AbstractArray, η::AbstractArray)
-    return LayersParameters(normalizers, activators, regularizers, convert.(Float32, η))
-end
-
-# TODO: make generated function
-function LayersParameters(normalizers, activators, regularizers, η, n_layers)
-    if !isa(normalizers, AbstractArray)
-        normalizers = repeat([normalizers], n_layers)
-    end
-    if !isa(activators, AbstractArray)
-        activators = repeat([activators], n_layers)
-    end
-    if !isa(regularizers, AbstractArray)
-        regularizers = repeat([regularizers], n_layers)
-    end
-    if !isa(η, AbstractArray)
-        η = repeat([η], n_layers)
-    end
-
-    return LayersParameters(normalizers, activators, regularizers, η)
-end
-
-function LayersParameters(normalizers, activators, η)
-    regularizer = Regularizer(weight_decay, 0.0)
-    return LayersParameters(normalizers, activators, regularizer, η)
-end
-
-struct EpochParameters{T<:Integer, F1, F2, LP<:LayersParameters}
-    batch_size::T
-    shuffle::Bool
-    loss::F1
+struct LayerParameters{F1, F2, R<:Regularizer}
+    η::Float32 # learning rate
+    activate::F1
     normalize::F2
-    layers_params::LP
+    regularizer::R
+end
+
+function LayerParameters(η, params...)
+    return LayerParameters(convert(Float32, η), params...)
 end
 
 # corresponds to a layer in a 'Neural_Network'
@@ -75,8 +48,9 @@ mutable struct Cache{M<:AbstractMatrix{Float32}}
     a::M # activation
 end
 
+# TODO: make internal constructor
 function Cache()
-    init = Matrix{Float32}(undef, 0, 0)
+    init = Float32[;;]
     n_fields = length(fieldnames(Cache))
 
     return Cache(repeat([init], n_fields)...)
@@ -104,12 +78,21 @@ struct NeuralNetwork{VL<:AbstractVector{<:Layer}} <: Model
     layers::VL
 end
 
-function NeuralNetwork(x_size, w_inits, sizes, use_biases)
+function NeuralNetwork(x_size, sizes::AbstractArray, w_inits::AbstractArray, use_biases::AbstractArray)
     x_sizes = pushfirst!(sizes[begin:end - 1], x_size)
     layers_params = zip(w_inits, x_sizes, sizes, use_biases)
     layers = map(layer_params -> Dense(layer_params...), layers_params)
 
     return NeuralNetwork(layers)
+end
+
+function NeuralNetwork(x_size, sizes, w_init = xavier, use_bias = true)
+    params = [x_size, sizes]
+    for param in [w_init, use_bias]
+        push!(params, isa(param, AbstractArray) ? param : repeat([param], length(sizes)))
+    end
+
+    return NeuralNetwork(params...)
 end
 
 mutable struct Linear{S<:Union{AbstractVector{Float32}, Float32}, R<:Union{Float32, Nothing}} <: Model

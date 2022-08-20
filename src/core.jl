@@ -12,9 +12,9 @@ function predict!(layer::Dense, x, activate, cache)
 end
 
 # propagate input -> linear -> activation through each layer
-function predict!(model::NeuralNetwork, x, activators, caches)
-    for (layer, activate, cache) in zip(model.layers, activators, caches)
-        x = predict!(layer, x, activate, cache)
+function predict!(model::NeuralNetwork, x, layers_params, caches)
+    for (layer, layer_params, cache) in zip(model.layers, layers_params, caches)
+        x = predict!(layer, x, layer_params.activate, cache)
     end
 
     return caches[end].a
@@ -54,6 +54,7 @@ end
 
     if !isnothing(b)
         δe_δb = dropdims(sum(δe_δl, dims = 2), dims = 2)
+        # axpy!(α, X, Y) = α * X + Y -> Y
         axpy!(-η / size(x, 2), δe_δb, b)
     end
 
@@ -62,7 +63,7 @@ end
 
 # calculate the gradient and update the model's parameters for a batched input
 @inline function backpropagate!(model, layers_params, caches, x, y, loss)
-    predict!(model, x, layers_params.activators, caches)
+    predict!(model, x, layers_params, caches)
 
     δe_δa = derivative(loss)(y, caches[end].a)
 
@@ -70,7 +71,7 @@ end
         layer_x = i == 1 ? x : caches[i - 1].a
         
         # calculate intermediate partial derivatives
-        δa_δl = map(derivative(layers_params.activators[i]), caches[i].l)
+        δa_δl = map(derivative(layers_params[i].activate), caches[i].l)
 
         caches[i].δe_δl = preallocate(caches[i].δe_δl, caches[i].l)
         caches[i].δe_δl .= δe_δa .* δa_δl
@@ -78,65 +79,78 @@ end
         # do not need to calculate δe_δa for first layer, since there are no parameters to update
         δe_δa = i == 1 ? nothing : transpose(model.layers[i].w) * caches[i].δe_δl
 
-        update_params!(layers_params.regularizers[i], layers_params.η[i], model.layers[i].w, caches[i].δe_δl, layer_x, model.layers[i].b)
+        update_params!(
+            layers_params[i].regularizer,
+            layers_params[i].η,
+            model.layers[i].w,
+            caches[i].δe_δl,
+            layer_x,
+            model.layers[i].b
+        )
     end
 
     return model
 end
 
 # test the model and return its accuracy and cost for each data split
-function assess(dataset, model, loss, layers_params)
-    accuracies = Vector{Float32}(undef, 0)
-    costs = Vector{Float32}(undef, 0)
+function assess(datasets, model, loss, layers_params)
+    accuracies = Float32[]
+    costs = Float32[]
 
     # TODO: parameterize decision criterion
     criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
 
-    for data in dataset
-        ŷ = model(data.x, layers_params.activators)
-        n = size(data.x, 2)
+    for dataset in datasets
+        ŷ = model(dataset.x, layers_params)
+        n = size(dataset.x, 2)
 
-        n_correct = count(criterion, zip(eachcol(data.y), eachcol(ŷ)))
+        n_correct = count(criterion, zip(eachcol(dataset.y), eachcol(ŷ)))
         push!(accuracies, n_correct / n)
 
-        cost = sum(loss(data.y, ŷ))
-        penalty = sum([sum(regularizer.regularize(layer.w, regularizer.λ)) for (layer, regularizer) in zip(model.layers, layers_params.regularizers)])
+        cost = sum(loss(dataset.y, ŷ))
+
+        penalty = zero(Float32)
+        for (layer, layer_params) in zip(model.layers, layers_params)
+            penalty += sum(layer_params.regularizer(layer.w))
+        end
+        
         push!(costs, (cost + penalty) / n)
     end
 
     return @NamedTuple{accuracies::Vector{Float32}, costs::Vector{Float32}}((accuracies, costs))
 end
 
-function assess(dataset, model, loss)
+function assess(datasets, model, loss)
     costs = Vector{Float32}(undef, 0)
 
-    for data in dataset
-        ŷ = model(data.x)
-        n = size(data.x, 2)
+    for dataset in datasets
+        ŷ = model(dataset.x)
+        n = size(dataset.x, 2)
 
-        cost = sum(loss(data.y, ŷ))
-        push!(costs, (cost + penalty) / n)
+        cost = mean(loss(dataset.y, ŷ))
+        push!(costs, cost)
     end
 
-    return @NamedTuple{accuracies::Vector{Float32}, costs::Vector{Float32}}((accuracies, costs))
+    return @NamedTuple{costs::Vector{Float32}}((costs,))
 end
 
 # coordinate an epoch of model training
-function train!(epoch, model, caches, x, y)
-    n = size(x, 2)
-
-    if epoch.shuffle && epoch.batch_size < n # TODO: && shuffle_pair!(x, y)
-        x, y = shuffle_pair(x, y)
+function train!(model, dataset, batch_size, layers_params, loss, caches, normalize = z_score, shuffle_data = true)
+    if shuffle_data && batch_size < dataset.n # TODO: && shuffle!(x, y)
+        dataset = shuffle(dataset)
     end
 
     # train model for each batch
-    for first in 1:epoch.batch_size:n
-        last = min(n, first + epoch.batch_size - 1)
-        prep_x = epoch.normalize(view(x, :, first:last))
-        prep_y = view(y, :, first:last)
+    for first in 1:batch_size:dataset.n
+        last = min(dataset.n, first + batch_size - 1)
+        slice_x = normalize(view(dataset.x, :, first:last))
+        slice_y = view(dataset.y, :, first:last)
 
-        backpropagate!(model, epoch.layers_params, caches, prep_x, prep_y, epoch.loss)
+        backpropagate!(model, layers_params, caches, slice_x, slice_y, loss)
     end
+
+    return model
+end
 
 function train!(model::Linear{<:AbstractVector}, x, y)
     throw(ErrorException("Multiple regression not implemented yet"))
