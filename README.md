@@ -10,7 +10,7 @@ Julia is my favorite programming language for many reasons, but I think that its
 
 ## Instructions
 
-Run an example script directly or create your own script using this project as a package. Using an 'EMNIST' dataset for the first time will take a few minutes to download. If you run into problems, stop the program, delete the 'emnist' folder, and start again.
+Run an example script directly or create your own script using this project as a package. Using an 'EMNIST' dataset for the first time will download the datasets into the parent directory, which take several minutes. If you run into problems, stop the program, delete the 'emnist' folder, and start again.
 
 Example scripts:
 - neural_network.jl
