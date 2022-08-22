@@ -18,16 +18,22 @@ function mean(x)
     return sum(x) / length(x)
 end
 
-using Statistics: std, var, cov
+function demean(x)
+    return x .- mean(x)
+end
+
+function covariance(x, y, corrected = true)
+    return sum(demean(x) .* demean(y)) / (length(x) - corrected)
+end
 
 # TODO: 'sum' is not type stable
-# function variance(x, corrected = true) where T
-#     return sum((x .- mean(x)) .^ 2) / (length(x) - corrected)
-# end
+function variance(x, corrected::Bool = true)
+    return sum(demean(x) .^ 2) / (length(x) - corrected)
+end
 
-# function standard_deviation(x, corrected = true)
-#     return variance(x, corrected) ^ 0.5
-# end
+function standard_deviation(x, corrected::Bool = true)
+    return variance(x, corrected) ^ 0.5
+end
 
 # Activation And Derivative
 
@@ -87,19 +93,14 @@ end
 
 function derivative(::typeof(squared_error))
     return function (y, ŷ)
-        return 2 .* (ŷ .- y)
+        return 2 * (ŷ .- y)
     end
 end
 
 # Normalization
 
 function z_score(x)
-    # return (x .- mean(x)) ./ standard_deviation(x)
-    return (x .- mean(x)) ./ std(x)
-end
-
-function demean(x)
-    return x .- mean(x)
+    return demean(x) ./ standard_deviation(x)
 end
 
 # Initialization
@@ -143,5 +144,5 @@ end
 # Inferential
 
 function correlation_coefficient(x, y, corrected = true)
-    return cov(x, y, corrected = corrected) / (std(x, corrected = corrected) * std(y, corrected = corrected))
+    return covariance(x, y, corrected) / (standard_deviation(x) * standard_deviation(y))
 end
