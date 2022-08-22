@@ -27,6 +27,8 @@ end
 
 # given lists of inputs and labels, return a list of 'Data' split by percentages in 'splits'
 function split_dataset(dataset::Dataset{A1, A2}, splits) where {A1, A2}
+    sum(splits) != 100 && error("Splits must add to 100 (percent)")
+
     split_i = map(split -> div(split * dataset.n, 100), splits[begin:end - 1])
     cumsum!(split_i, split_i)
 
@@ -35,17 +37,12 @@ function split_dataset(dataset::Dataset{A1, A2}, splits) where {A1, A2}
 
     datasets = Dataset{A1, A2}[]
     for (start, stop) in zip(starts, stops)
-        x_slice = dataset.x[repeat([:], length(size(dataset.x)) - 1)..., start:stop]
-        y_slice = dataset.y[repeat([:], length(size(dataset.y)) - 1)..., start:stop]
-        push!(datasets, Dataset(x_slice, y_slice))
+        x = dataset.x[repeat([:], length(size(dataset.x)) - 1)..., start:stop]
+        y = dataset.y[repeat([:], length(size(dataset.y)) - 1)..., start:stop]
+        push!(datasets, Dataset(x, y))
     end
 
     return datasets
-end
-
-function split_dataset(dataset, splits)
-    sum(splits) != 100 && error("Splits must add to 100 (percent)")
-    return split_dataset(dataset, splits)
 end
 
 # load and preprocess selected dataset

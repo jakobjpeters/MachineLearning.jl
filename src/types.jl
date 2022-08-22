@@ -6,13 +6,11 @@ struct Dataset{A1<:AbstractArray{Float32}, A2<:AbstractArray{Float32}}
 end
 
 # TODO: make internal constructor
-function Dataset(x::T, y::T) where T<:AbstractArray{Float32}
-    N = length(size(x))
-    size(x, N) == size(y, N) || throw(ErrorException("Arguments are not the same length"))
+function Dataset(x::AbstractArray{Float32, N}, y::AbstractArray{Float32, N}) where N
     return Dataset(x, y, size(x, N))
 end
 
-function Dataset(x, y)
+function Dataset(x::AbstractArray{<:Number, N}, y::AbstractArray{<:Number, N}) where N
     return Dataset(convert.(Float32, x), convert.(Float32, y))
 end
 
