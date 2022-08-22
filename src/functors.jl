@@ -22,9 +22,9 @@ function (layer::Dense)(x, activate)
     return a
 end
 
-function (model::NeuralNetwork)(x, layers_params)
-    for (layer, layer_params) in zip(model.layers, layers_params)
-        x = layer(x, layer_params.activate)
+function (model::NeuralNetwork)(x, activators)
+    for (layer, activate) in zip(model.layers, activators)
+        x = layer(x, activate)
     end
 
     return x

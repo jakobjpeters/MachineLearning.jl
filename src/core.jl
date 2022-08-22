@@ -62,13 +62,13 @@ end
 end
 
 # calculate the gradient and update the model's parameters for a batched input
-@inline function backpropagate!(model, layers_params, caches, x, y, loss)
-    predict!(model, x, layers_params, caches)
+@inline function backpropagate!(model, layers_params, caches, dataset, loss)
+    predict!(model, dataset.x, layers_params, caches)
 
-    δe_δa = derivative(loss)(y, caches[end].a)
+    δe_δa = derivative(loss)(dataset.y, caches[end].a)
 
     for i in reverse(eachindex(model.layers))
-        layer_x = i == 1 ? x : caches[i - 1].a
+        layer_x = i == 1 ? dataset.x : caches[i - 1].a
         
         # calculate intermediate partial derivatives
         δa_δl = map(derivative(layers_params[i].activate), caches[i].l)
@@ -100,8 +100,10 @@ function assess(datasets, model, loss, layers_params)
     # TODO: parameterize decision criterion
     criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
 
+    activators = map(layer_params -> layer_params.activate, layers_params)
+
     for dataset in datasets
-        ŷ = model(dataset.x, layers_params)
+        ŷ = model(dataset.x, activators)
         n = size(dataset.x, 2)
 
         n_correct = count(criterion, zip(eachcol(dataset.y), eachcol(ŷ)))
@@ -125,7 +127,6 @@ function assess(datasets, model, loss)
 
     for dataset in datasets
         ŷ = model(dataset.x)
-        n = size(dataset.x, 2)
 
         cost = mean(loss(dataset.y, ŷ))
         push!(costs, cost)
@@ -143,10 +144,11 @@ function train!(model, dataset, batch_size, layers_params, loss, caches, normali
     # train model for each batch
     for first in 1:batch_size:dataset.n
         last = min(dataset.n, first + batch_size - 1)
-        slice_x = normalize(view(dataset.x, :, first:last))
-        slice_y = view(dataset.y, :, first:last)
+        x = normalize(view(dataset.x, :, first:last))
+        y = view(dataset.y, :, first:last)
+        batch = Dataset(x, y)
 
-        backpropagate!(model, layers_params, caches, slice_x, slice_y, loss)
+        backpropagate!(model, layers_params, caches, batch, loss)
     end
 
     return model
