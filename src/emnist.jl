@@ -5,8 +5,8 @@
 using GZip
 using ZipFile: Reader
 
-# const DATASETS = ["mnist", "balanced", "digits", "letters", "bymerge", "byclass"]
 const DIRECTORY = dirname(pwd()) * "/emnist/"
+# TODO: different data structure?
 const FILE_NAMES = Dict(
     "balanced" => Dict(
         "mapping" => "emnist-balanced-mapping.txt",
@@ -59,16 +59,16 @@ function read_string(file_name)
     return data
 end
 
-function mapping(dataset)
-    mapping::Dict{UInt8, Char} = Dict()
+# function mapping(dataset)
+#     mapping::Dict{UInt8, Char} = Dict()
 
-    for line in read_string(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["mapping"])
-        map = split(line, " ")
-        mapping[parse(UInt8, map[begin]) + 1] = Char(parse(UInt8, map[end]))
-    end
+#     for line in read_string(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["mapping"])
+#         key_val = split(line, " ")
+#         mapping[parse(UInt8, key_val[begin]) + 1] = Char(parse(UInt8, key_val[end]))
+#     end
 
-    return mapping
-end
+#     return mapping
+# end
 
 function read_uint8(file_name, offset)
     file = GZip.open(file_name)
@@ -82,12 +82,12 @@ function read_labels(file_name, offset, dataset)
     iⱼ = read_uint8(file_name, offset) .+ 1
 
     # one-hot encoding
-    yⱼ = zeros(length(mapping(dataset)), length(iⱼ))
+    yⱼ = zeros(length(Set(iⱼ)), length(iⱼ))
     for (y, i) in zip(eachcol(yⱼ), iⱼ)
         y[i] += 1
     end
 
-    return yⱼ
+    return convert.(Int32, yⱼ)
 end
 
 function read_images(file_name, offset)
@@ -95,46 +95,23 @@ function read_images(file_name, offset)
     return reshape(data, (28 ^ 2, :))
 end
 
-# function fix_letters_map!()
-#     path = pwd() * "emnist/decompressed/" * "letters_mapping.txt"
-#     mapping = read_string(path)
-
-#     map::Array{Tuple{Int64, UInt8}, 1} = []
-#     # why is key UInt8 and val Int?
-#     for line in mapping
-#         push!(map, (parse(UInt8, split(line, " ")[1]) - 1, parse(UInt8, split(line, " ")[2])))
-#     end
-
-#     f = open(path, "w")
-#     for key_val in map
-#         write(f, string(key_val[1]) * " " * string(key_val[2]) * "\n")
-#     end
-#     close(f)
-
-#     return nothing
-# end
-
-# function fix_letters_labels!(key)
-#     path = pwd() * "emnist/decompressed/letters_" * key * "_labels.bin"
-#     labels = read_uint8(path, 0)
-#     f = open(path, "w")
-#     write(f, labels .- 1)
-#     close(f)
-
-#     return nothing
-# end
-
 function load_emnist(dataset)
-    x = read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_images"], 16)
-    x = hcat(x, read_images(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_images"], 16))
-    y = read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["train_labels"], 8, dataset)
-    y = hcat(y, read_labels(DIRECTORY * "gzip/" * FILE_NAMES[dataset]["test_labels"], 8, dataset))
+    names = FILE_NAMES[dataset]
+    directory = DIRECTORY * "gzip/"
+    
+    train_images = read_images(directory * names["train_images"], 16)
+    test_images = read_images(directory * names["test_images"], 16)
+    x = hcat(train_images, test_images)
+
+    train_labels = read_labels(directory * names["train_labels"], 8, dataset)
+    test_labels = read_labels(directory * names["test_labels"], 8, dataset)
+    y = hcat(train_labels, test_labels)
 
     return x, y
 end
 
 function init_dataset(dataset)
-    groups = ["mapping", "train_images", "test_images", "train_labels", "test_labels"]
+    groups = keys(FILE_NAMES["mnist"])
 
     # check that the needed files are stored
     # if not, download and decompress them
