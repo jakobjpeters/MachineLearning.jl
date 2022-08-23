@@ -9,18 +9,21 @@ using Random: seed!
 using InteractiveUtils: @which, @code_warntype
 
 function concise()
+    # see 'utilities.jl'
     dataset = load_dataset("mnist", z_score)
     datasets = split_dataset(dataset, [80, 20])
 
-    model = NeuralNetwork(784, [100, 10])
+    # see 'types.jl'
+    model = NeuralNetwork(size(dataset.x, 1), [100, size(dataset.y, 1)])
+    caches = init_caches(length(model.layers))
     layers_params = init_layers_params(length(model.layers), 0.01, tanh)
+
+    # see 'math.jl'
     loss = squared_error
 
     # pre-training
     # see 'interface.jl'
     terminal(assess(datasets, model, loss, layers_params))
-
-    caches = init_caches(length(model.layers))
 
     # main training loop
     @time for i in 1:10
@@ -48,17 +51,15 @@ function verbose()
     dataset = load_dataset(dataset_name, preprocessor)
     datasets = split_dataset(dataset, split_percentages)
 
+    input_size = size(dataset.x, 1)
+    output_size = size(dataset.y, 1)
+
     # Model
     # [xavier, he]
     # 'he' is untested
     w_inits = [xavier, xavier]
 
-    # TODO: make dynamic
-    input_size = 784
-
-    # the last layer size is determined by the number of classes
-    # TODO: make last layer size dynamic
-    layer_sizes = [100, 10]
+    layer_sizes = [100, output_size]
 
     # [true, false]
     use_biases = [true, false]
