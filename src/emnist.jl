@@ -53,9 +53,10 @@ const FILE_NAMES = Dict(
 )
 
 function read_string(file_name)
-    file = open(file_name)
-        data::Array{String, 1} = readlines(file)
-    close(file)
+    io = open(file_name)
+        data::Array{String, 1} = readlines(io)
+    close(io)
+    
     return data
 end
 

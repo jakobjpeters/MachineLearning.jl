@@ -134,7 +134,7 @@ function assess(datasets, model)
 end
 
 # coordinate an epoch of model training
-function train!(model, dataset, batch_size, layers_params, caches, normalize = z_score, shuffle_data = true)
+function train!(model, dataset, layers_params, caches, batch_size = 1, normalize = z_score, shuffle_data = true)
     if shuffle_data && batch_size < dataset.n # TODO: && shuffle!(x, y)
         dataset = shuffle(dataset)
     end

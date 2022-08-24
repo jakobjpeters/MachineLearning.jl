@@ -1,6 +1,7 @@
 
 using TOML: parsefile
 using Random: seed!, shuffle!
+using Serialization: serialize, deserialize
 
 include("emnist.jl")
 
@@ -70,4 +71,19 @@ end
 # enables in-place operations for variables that may change size
 function preallocate(x, y)
     return size(x) == size(y) ? x : similar(y)
+end
+
+function save_model(value, file_name, path = pwd())
+    mkpath(path)
+    open(path * "/" * file_name, append = true) do io
+        serialize(io, value)
+    end
+end
+
+function load_model(file_name, path = pwd())
+    io = open(path * "/" * file_name)
+        model = deserialize(io)
+    close(io)
+
+    return model
 end

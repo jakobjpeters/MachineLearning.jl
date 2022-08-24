@@ -22,9 +22,11 @@ function concise()
     terminal(assess(datasets, model, regularizers))
 
     @time for i in 1:10
-        @time train!(model, datasets[begin], 10, layers_params, caches)
+        @time train!(model, datasets[begin], layers_params, caches)
         @time terminal(assess(datasets, model, regularizers), i)
     end
+
+    return model
 end
 
 function verbose()
@@ -108,10 +110,31 @@ function verbose()
     # main training loop
     @time for i in 1:n_epochs
         # see 'core.jl'
-        @time train!(model, datasets[begin], batch_size, layers_params, caches, batch_normalize, shuffle)
+        @time train!(model, datasets[begin], layers_params, caches, batch_size, batch_normalize, shuffle)
         @time terminal(assess(datasets, model, regularizers), i)
     end
+
+    return model
 end
 
-# enter a command-line argument from ["concise", "verbose"]
+function pretrained()
+    file_name = "trained_neural_network"
+    isfile(file_name) || save_model(concise(), file_name)
+    model = load_model(file_name)
+
+    dataset = load_dataset("mnist", z_score)
+    datasets = split_dataset(dataset, [80, 20])
+    caches = init_caches(length(model.layers))
+    layers_params = init_layers_params(length(model.layers), 0.01)
+    regularizers = map(layer_params -> layer_params.regularizer, layers_params)
+    
+    terminal(assess(datasets, model, regularizers))
+    train!(model, datasets[begin], layers_params, caches)
+    terminal(assess(datasets, model, regularizers), 1)
+
+    rm(file_name)
+    save_model(model, file_name)
+end
+
+# enter a command-line argument from ["concise", "verbose", "pretrained"]
 getfield(Main, Symbol(ARGS[begin]))()

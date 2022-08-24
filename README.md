@@ -16,7 +16,7 @@ Example scripts:
 - neural_network.jl
     - Feed-forward multilayer perceptron
     - Run with command line arguments
-        - ["concise", "verbose"]
+        - ["concise", "verbose", "pretrained"]
 - regression.jl
     - Simple linear regression
 
@@ -50,13 +50,13 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
         - Learning rates
         - Activation functions
             - [sigmoid, tanh, relu, identity]
-                - Note: 'identity' is untested
         - Regularization
             - Note: not implemented correctly
             - [weight_decay, l1, l2]
                 - Note: 'weight_decay' is equivalent to 'l2' when not using adaptive gradients
                     - https://arxiv.org/pdf/1711.05101v3.pdf
 - Model
+    - Saving and loading
     - Feed-forward multilayer perceptron
         - Optimization
             - [backpropagation]
@@ -80,6 +80,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
     - Neural networks
         - [GenerativeAdversarialNetwork, ConvolutionalNeuralNetwork]
     - Regression
+        - Multiple
     - Decision tree
     - K-nearest neighbors
 - Datasets
@@ -100,7 +101,6 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Regulizers
     - Early stopping
     - Dropout?
-- Save & load models
 - Parallel processing/threading
 - Automatic differentiation?
 - Documentation
@@ -123,9 +123,7 @@ Note: Julia is JAOT (just ahead of time) compiled, meaning that 1) the initial c
 - Optimize
     - Type stability
     - Time & space complexity
-    - types.jl
-        - Better parametric typing
-        - Some lines are too long
+
 
 ## References
 

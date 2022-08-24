@@ -30,7 +30,9 @@ export
     NeuralNetwork, Dense, Linear, # models
 
     # utilities.jl
-    load_dataset, split_dataset, init_caches, init_layers_params,
+    load_dataset, split_dataset, # dataset
+    init_caches, init_layers_params, # initialization
+    save_model, load_model, # serialization
 
     # inferential.jl
     correlation_coefficient
