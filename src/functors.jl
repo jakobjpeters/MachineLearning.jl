@@ -15,16 +15,16 @@ function (layer::Linear)(x)
     return linear(layer.w, x, layer.b)
 end
 
-function (layer::Dense)(x, activate)
+function (layer::Dense)(x)
     a = linear(layer.w, x, layer.b)
-    map!(activate, a, a) # |> norm_func
+    map!(layer.activate, a, a) # |> norm_func
 
     return a
 end
 
-function (model::NeuralNetwork)(x, activators)
-    for (layer, activate) in zip(model.layers, activators)
-        x = layer(x, activate)
+function (model::NeuralNetwork)(x)
+    for layer in model.layers
+        x = layer(x)
     end
 
     return x

@@ -1,40 +1,34 @@
 
-# internal
 using MachineLearning
-
-# external
 using Random: seed!
 
 # testing
 using InteractiveUtils: @which, @code_warntype
 
 function concise()
-    # see 'utilities.jl'
     dataset = load_dataset("mnist", z_score)
     datasets = split_dataset(dataset, [80, 20])
 
-    # see 'types.jl'
-    model = NeuralNetwork(size(dataset.x, 1), [100, size(dataset.y, 1)])
+    model = NeuralNetwork(
+        squared_error,
+        size(dataset.x, 1),
+        [100, size(dataset.y, 1)],
+        [sigmoid, tanh]
+    )
     caches = init_caches(length(model.layers))
-    layers_params = init_layers_params(length(model.layers), 0.01, tanh)
+    layers_params = init_layers_params(length(model.layers), 0.01)
 
-    # see 'math.jl'
-    loss = squared_error
+    regularizers = map(layer_params -> layer_params.regularizer, layers_params)
+    terminal(assess(datasets, model, regularizers))
 
-    # pre-training
-    # see 'interface.jl'
-    terminal(assess(datasets, model, loss, layers_params))
-
-    # main training loop
     @time for i in 1:10
-        # see 'core.jl'
-        @time train!(model, datasets[begin], 10, layers_params, loss, caches)
-        @time terminal(assess(datasets, model, loss, layers_params), i)
+        @time train!(model, datasets[begin], 10, layers_params, caches)
+        @time terminal(assess(datasets, model, regularizers), i)
     end
 end
 
 function verbose()
-    # comment out for random seed
+    # remove for random seed
     seed!(1)
 
     # Dataset
@@ -64,40 +58,38 @@ function verbose()
     # [true, false]
     use_biases = [true, false]
 
-    # ["Neural_Network", "Linear"]
-    model = NeuralNetwork(input_size, layer_sizes, w_inits, use_biases)
-
-
-    # Layers_Parameters
     # [tanh, sigmoid, identity]
     # 'identity' is untested
     activators = [sigmoid, tanh]
 
-    # not implemented correctly
-    # regularizers = repeat([Regularizer(
-    #     # [weight_decay, l1, l2]
-    #     # default is "weight_decay"
-    #     # untested
-    #     weight_decay,
+    # [squared_error]
+    loss = squared_error
 
-    #     # set to '0.0' for no regularization
-    #     # untested
-    #     0.0
-    # )], 2)
+    # ["Neural_Network", "Linear"]
+    model = NeuralNetwork(loss, input_size, layer_sizes, activators, w_inits, use_biases)
 
-    learn_rates = [0.1, 0.01]
 
     # layer normalization
     # [z_score, demean, identity]
     # not currently "plugged in"
     # layer_normalizers = [identity, identity]
 
-    layers_params = init_layers_params(length(model.layers), learn_rates, activators)#, layer_normalizers, regularizers)
+    # not implemented correctly
+    regularizers = repeat([Regularizer(
+        # [weight_decay, l1, l2]
+        # default is "weight_decay"
+        # untested
+        weight_decay,
 
+        # set to '0.0' for no regularization
+        # untested
+        0.0
+    )], 2)
 
-    # Epoch
-    # [squared_error]
-    loss = squared_error
+    learn_rates = [0.1, 0.01]
+
+    layers_params = init_layers_params(length(model.layers), learn_rates, regularizers)#, layer_normalizers)
+
 
     # batch normalization
     # [z_score, demean, identity]
@@ -109,15 +101,15 @@ function verbose()
 
     # pre-training
     # see 'interface.jl'
-    terminal(assess(datasets, model, loss, layers_params))
+    terminal(assess(datasets, model, regularizers))
 
     caches = init_caches(length(model.layers))
 
     # main training loop
     @time for i in 1:n_epochs
         # see 'core.jl'
-        @time train!(model, datasets[begin], batch_size, layers_params, loss, caches, batch_normalize, shuffle)
-        @time terminal(assess(datasets, model, loss, layers_params), i)
+        @time train!(model, datasets[begin], batch_size, layers_params, caches, batch_normalize, shuffle)
+        @time terminal(assess(datasets, model, regularizers), i)
     end
 end
 

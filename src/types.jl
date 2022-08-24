@@ -14,6 +14,7 @@ function Dataset(x::AbstractArray{<:Number, N}, y::AbstractArray{<:Number, N}) w
     return Dataset(convert.(Float32, x), convert.(Float32, y))
 end
 
+# functor, see 'functors.jl'
 struct Regularizer{F}
     regularize::F
     λ::Float32
@@ -28,15 +29,14 @@ function Regularizer()
 end
 
 # corresponds to layers in a 'Neural_Network'
-struct LayerParameters{F1, F2, R<:Regularizer}
+struct LayerParameters{F, R<:Regularizer}
     η::Float32 # learning rate
-    activate::F1
-    normalize::F2
+    normalize::F
     regularizer::R
 end
 
-function LayerParameters(η, params...)
-    return LayerParameters(convert(Float32, η), params...)
+function LayerParameters(η, normalize, regularize)
+    return LayerParameters(convert(Float32, η), normalize, regularize)
 end
 
 # corresponds to a layer in a 'Neural_Network'
@@ -56,56 +56,61 @@ end
 
 abstract type Layer end
 
-# functor, see 'core.jl'
-mutable struct Dense{M<:AbstractMatrix{Float32}, VN<:Union{AbstractVector{Float32}, Nothing}} <: Layer
+# functor, see 'functors.jl'
+mutable struct Dense{F, M<:AbstractMatrix{Float32}, VN<:Union{AbstractVector{Float32}, Nothing}} <: Layer
+    activate::F
     w::M # weight
     b::VN # bias
 end
 
-function Dense(init_w, x_size, size, use_bias)
-    w = convert.(Float32, rand(init_w(x_size), size, x_size))
-    b = use_bias ? zeros(Float32, size) : nothing
+function Dense(x_size, y_size, activate, init_w, use_bias)
+    w = convert.(Float32, rand(init_w(x_size), y_size, x_size))
+    b = use_bias ? zeros(Float32, y_size) : nothing
 
-    return Dense(w, b)
+    return Dense(activate, w, b)
 end
 
 abstract type Model end
 
-# functor, see 'core.jl'
-struct NeuralNetwork{VL<:AbstractVector{<:Layer}} <: Model
+# functor, see 'functors.jl'
+struct NeuralNetwork{F, VL<:AbstractVector{<:Layer}} <: Model
+    loss::F
     layers::VL
 end
 
-function NeuralNetwork(x_size, sizes::AbstractArray, w_inits::AbstractArray, use_biases::AbstractArray)
-    x_sizes = pushfirst!(sizes[begin:end - 1], x_size)
-    layers_params = zip(w_inits, x_sizes, sizes, use_biases)
+function NeuralNetwork(loss, x_size, y_sizes::AbstractArray, activators::AbstractArray, inits_w::AbstractArray, use_biases::AbstractArray)
+    x_sizes = pushfirst!(y_sizes[begin:end - 1], x_size)
+    layers_params = zip(x_sizes, y_sizes, activators, inits_w, use_biases)
     layers = map(layer_params -> Dense(layer_params...), layers_params)
 
-    return NeuralNetwork(layers)
+    return NeuralNetwork(loss, layers)
 end
 
-function NeuralNetwork(x_size, sizes, w_init = xavier, use_bias = true)
-    params = [x_size, sizes]
-    for param in [w_init, use_bias]
-        push!(params, isa(param, AbstractArray) ? param : repeat([param], length(sizes)))
+function NeuralNetwork(loss, x_size, y_sizes, activate, w_init = xavier, use_bias = true)
+    params = [x_size, y_sizes]
+    for param in [activate, w_init, use_bias]
+        push!(params, isa(param, AbstractArray) ? param : repeat([param], length(y_sizes)))
     end
 
-    return NeuralNetwork(params...)
+    return NeuralNetwork(loss, params...)
 end
 
-mutable struct Linear{S<:Union{AbstractVector{Float32}, Float32}, R<:Union{Float32, Nothing}} <: Model
+# functor, see 'functors.jl'
+mutable struct Linear{F, S<:Union{AbstractVector{Float32}, Float32}, R<:Union{Float32, Nothing}} <: Model
+    loss::F
     w::S
     b::R
 end
 
-function Linear(w, b = nothing)
+function Linear(loss, w, b = nothing)
+    w = convert.(Float32, w)
     b = isnothing(b) ? nothing : convert(Float32, b)
-    return Linear(convert.(Float32, w), b)
+    return Linear(loss, w, b)
 end
 
-function Linear(use_bias::Bool = true)
-    bias = use_bias ? 0.0 : nothing
-    return Linear(0.0, bias)
+function Linear(loss, use_bias::Bool = true)
+    b = use_bias ? 0.0 : nothing
+    return Linear(loss, 0.0, b)
 end
 
 # not implemented yet

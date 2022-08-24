@@ -9,17 +9,17 @@ function main()
     splits = [80, 20]
     datasets = split_dataset(Dataset(x, y), splits)
 
-    model = Linear()
     loss = squared_error
+    model = Linear(loss)
 
     # pre-trained
-    @time terminal(assess(datasets, model, loss))
+    @time terminal(assess(datasets, model))
 
     # see 'core.jl'
     @time train!(model, datasets[begin])
 
     # see 'interface.jl'
-    @time terminal(assess(datasets, model, loss))
+    @time terminal(assess(datasets, model))
 
     ρ = correlation_coefficient(x, y)
     println("Correlation coefficient: ", ρ)

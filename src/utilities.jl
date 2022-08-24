@@ -8,9 +8,9 @@ function init_caches(n)
     return map(_ -> Cache(), 1:n)
 end
 
-function init_layers_params(n, η, activate, normalize = identity, regularizer = Regularizer())
+function init_layers_params(n, η, regularizer = Regularizer(), normalize = identity)
     params = []
-    for param in [η, activate, normalize, regularizer]
+    for param in [η, normalize, regularizer]
         new_param = param
         if isa(param, AbstractArray)
             if length(param) != n

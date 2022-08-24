@@ -2,19 +2,19 @@
 using LinearAlgebra: BLAS.gemm!, axpy!
 
 # calculate and cache linear and activation
-function predict!(layer::Dense, x, activate, cache)
+function predict!(layer::Dense, x, cache)
     cache.l = linear(layer.w, x, layer.b)
-    
+
     cache.a = preallocate(cache.a, cache.l)
-    map!(activate, cache.a, cache.l) # |> layer.norm_func
+    map!(layer.activate, cache.a, cache.l) # |> layer.norm_func
 
     return cache.a
 end
 
 # propagate input -> linear -> activation through each layer
-function predict!(model::NeuralNetwork, x, layers_params, caches)
-    for (layer, layer_params, cache) in zip(model.layers, layers_params, caches)
-        x = predict!(layer, x, layer_params.activate, cache)
+function predict!(model::NeuralNetwork, x, caches)
+    for (layer, cache) in zip(model.layers, caches)
+        x = predict!(layer, x, cache)
     end
 
     return caches[end].a
@@ -62,16 +62,16 @@ end
 end
 
 # calculate the gradient and update the model's parameters for a batched input
-@inline function backpropagate!(model, layers_params, caches, dataset, loss)
-    predict!(model, dataset.x, layers_params, caches)
+@inline function backpropagate!(model, layers_params, caches, dataset)
+    predict!(model, dataset.x, caches)
 
-    δe_δa = derivative(loss)(dataset.y, caches[end].a)
+    δe_δa = derivative(model.loss)(dataset.y, caches[end].a)
 
     for i in reverse(eachindex(model.layers))
         layer_x = i == 1 ? dataset.x : caches[i - 1].a
         
         # calculate intermediate partial derivatives
-        δa_δl = map(derivative(layers_params[i].activate), caches[i].l)
+        δa_δl = map(derivative(model.layers[i].activate), caches[i].l)
 
         caches[i].δe_δl = preallocate(caches[i].δe_δl, caches[i].l)
         caches[i].δe_δl .= δe_δa .* δa_δl
@@ -93,27 +93,25 @@ end
 end
 
 # test the model and return its accuracy and cost for each data split
-function assess(datasets, model, loss, layers_params)
+function assess(datasets, model, regularizers)
     accuracies = Float32[]
     costs = Float32[]
 
     # TODO: parameterize decision criterion
     criterion = pair -> argmax(pair[begin]) == argmax(pair[end])
 
-    activators = map(layer_params -> layer_params.activate, layers_params)
-
     for dataset in datasets
-        ŷ = model(dataset.x, activators)
+        ŷ = model(dataset.x)
         n = size(dataset.x, 2)
 
         n_correct = count(criterion, zip(eachcol(dataset.y), eachcol(ŷ)))
         push!(accuracies, n_correct / n)
 
-        cost = sum(loss(dataset.y, ŷ))
+        cost = sum(model.loss(dataset.y, ŷ))
 
         penalty = zero(Float32)
-        for (layer, layer_params) in zip(model.layers, layers_params)
-            penalty += sum(layer_params.regularizer(layer.w))
+        for (layer, regularizer) in zip(model.layers, regularizers)
+            penalty += sum(regularizer(layer.w))
         end
         
         push!(costs, (cost + penalty) / n)
@@ -122,13 +120,13 @@ function assess(datasets, model, loss, layers_params)
     return @NamedTuple{accuracies::Vector{Float32}, costs::Vector{Float32}}((accuracies, costs))
 end
 
-function assess(datasets, model, loss)
+function assess(datasets, model)
     costs = Vector{Float32}(undef, 0)
 
     for dataset in datasets
         ŷ = model(dataset.x)
 
-        cost = mean(loss(dataset.y, ŷ))
+        cost = mean(model.loss(dataset.y, ŷ))
         push!(costs, cost)
     end
 
@@ -136,7 +134,7 @@ function assess(datasets, model, loss)
 end
 
 # coordinate an epoch of model training
-function train!(model, dataset, batch_size, layers_params, loss, caches, normalize = z_score, shuffle_data = true)
+function train!(model, dataset, batch_size, layers_params, caches, normalize = z_score, shuffle_data = true)
     if shuffle_data && batch_size < dataset.n # TODO: && shuffle!(x, y)
         dataset = shuffle(dataset)
     end
@@ -148,7 +146,7 @@ function train!(model, dataset, batch_size, layers_params, loss, caches, normali
         y = view(dataset.y, :, first:last)
         batch = Dataset(x, y)
 
-        backpropagate!(model, layers_params, caches, batch, loss)
+        backpropagate!(model, layers_params, caches, batch)
     end
 
     return model
