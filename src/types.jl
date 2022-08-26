@@ -58,7 +58,7 @@ abstract type Layer end
 
 # functor, see 'functors.jl'
 mutable struct Dense{F, M<:AbstractMatrix{Float32}, VN<:Union{AbstractVector{Float32}, Nothing}} <: Layer
-    activate::F
+    const activate::F
     w::M # weight
     b::VN # bias
 end
@@ -97,7 +97,7 @@ end
 
 # functor, see 'functors.jl'
 mutable struct Linear{F, S<:Union{AbstractVector{Float32}, Float32}, R<:Union{Float32, Nothing}} <: Model
-    loss::F
+    const loss::F
     w::S
     b::R
 end
