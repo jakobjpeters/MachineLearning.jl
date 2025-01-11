@@ -5,12 +5,18 @@ version = "0.1.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 GZip = "92fee26a-97fe-5a0c-ad85-20a5f3185b63"
-InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
-Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
+
+[compat]
+Distributions = "0.25.116"
+Downloads = "1.6.0"
+GZip = "0.6.2"
+LinearAlgebra = "1.11.0"
+Luxor = "4.1.0"
+Random = "1.11.0"
+ZipFile = "0.10.1"

@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2022 jakobjpeters
+Copyright (c) 2022-2025 jakobjpeters
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

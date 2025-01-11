@@ -1,148 +1,23 @@
 
-using Distributions: Normal
+const zero, one, two = Float32.(0:2)
 
-# General
+relu(x::Real) = max(zero, x)
 
-# exported by Base
-# function identity(x)
-#     return x
-# end
+sigmoid(x::Real) = one / (one + exp(-x))
 
-function derivative(::typeof(identity))
-    return function (x)
-        return one(x)
-    end
+squared_error(output, labels) = @. (labels - output) ^ two
+
+derivative(::typeof(identity)) = _ -> one
+derivative(::typeof(relu)) = x -> x > zero ? one : zero
+derivative(f::typeof(sigmoid)) = function (x)
+    f_x = f(x)
+    f_x * (one - f_x)
 end
-
-function mean(x)
-    return sum(x) / length(x)
-end
-
-function demean(x)
-    return x .- mean(x)
-end
-
-function covariance(x, y, corrected = true)
-    return sum(demean(x) .* demean(y)) / (length(x) - corrected)
-end
-
-# TODO: 'sum' is not type stable
-function variance(x, corrected::Bool = true)
-    return sum(demean(x) .^ 2) / (length(x) - corrected)
-end
-
-function standard_deviation(x, corrected::Bool = true)
-    return variance(x, corrected) ^ 0.5
-end
-
-# Activation And Derivative
-
-function sigmoid(x)
-    one_x = one(x)
-    return one_x / (one_x + exp(-x))
-end
-
-function derivative(f::typeof(sigmoid))
-    return function (x)
-        f_x = f(x)
-        return f_x * (one(x) - f_x)
-    end
-end
-
-function relu(x)
-    return max(zero(x), x)
-end
-
-function derivative(::typeof(relu))
-    return function (x)
-        zero_x = zero(x)
-        return x > zero_x ? one(x) : zero_x
-    end
-end
-
-# exported by Base
-# function tanh(x)
-#     eˣ = exp.(x)
-#     e⁻ˣ = inv.(eˣ)
-#     return (eˣ - e⁻ˣ) / (eˣ + e⁻ˣ)
-# end
-
-function derivative(f::typeof(tanh))
-    return function (x)
-        return one(x) - f(x) ^ 2
-    end
-end
-
-function softmax(x)
-    eˣ = exp(x - maximum(x, dims = 1))
-    return eˣ / sum(eˣ, dims = 1)
-end
-
-function derivative(f::typeof(softmax))
-    return function (xᵢ)
-        # eˣᵢ = softmax(xᵢ)
-        # return
-    end
-end
-
-# Cost And Derivative
-
-function squared_error(y, ŷ)
-    return (y .- ŷ) .^ 2
-end
-
-function derivative(::typeof(squared_error))
-    return function (y, ŷ)
-        return 2 * (ŷ .- y)
-    end
-end
-
-# Normalization
+derivative(::typeof(squared_error)) = (output, labels) -> two * (output .- labels)
+derivative(f::typeof(tanh)) = x -> one - f(x) ^ two
 
 function z_score(x)
-    return demean(x) ./ standard_deviation(x)
-end
-
-# Initialization
-
-function uniform()
-
-end
-
-function xavier(input_size)
-    return Normal(0, input_size ^ -0.5)
-end
-
-function he(input_size)
-    return 2 ^ 0.5 * xavier(input_size)
-end
-
-# Regularization
-
-function weight_decay(x, λ)
-    return λ * x
-end
-
-function l1(x, λ)
-    return λ * abs(x)
-end
-
-function derivative(::typeof(l1))
-    return function (x, λ)
-        return λ * sign(x)
-    end
-end
-
-function l2(x, λ)
-    return λ / 2 * x ^ 2
-end
-
-function derivative(::typeof(l2))
-    return weight_decay
-end
-
-# Inferential
-
-function correlation_coefficient(x, y, corrected = true)
-    return covariance(x, y, corrected) / (standard_deviation(x) * standard_deviation(y))
+    _length = Float32(length(x))
+    demeaned = x .- Float32(sum(x)) / _length
+    demeaned / √(Float32(sum(demeaned .^ two)) / (_length - one))
 end
