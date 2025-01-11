@@ -83,7 +83,7 @@ function test_emnist(emnist::EMNIST; parameters...)
     is_numeric = emnist != letters
     (train_input, test_input, train_labels, test_labels), n = load_emnist(emnist, is_numeric)
 
-    nn = _train_emnist(train_input, train_labels, n; parameters...)
+    nn = _train_classifier(train_input, train_labels, n; parameters...)
 
     for (image, prediction, label) in zip(
         eachcol(train_input), identify(nn(train_input)), identify(train_labels)
@@ -92,19 +92,4 @@ function test_emnist(emnist::EMNIST; parameters...)
         @show prediction label
         readline()
     end
-end
-
-function _train_emnist(input, labels, n;
-    activation = sigmoid, normalizer = z_score, sizes::NTuple{<:Any, Int} = (), parameters...
-)
-    nn = train!(
-        NeuralNetwork(activation, [size(input, 1), sizes..., n]),
-        normalizer(input),
-        labels;
-    parameters...)
-end
-
-function train_emnist(; emnist::EMNIST = mnist, parameters...)
-    (train_input, test_input, train_labels, test_labels), n = load_emnist(emnist)
-    _train_emnist(train_input, train_labels, n; parameters...)
 end
